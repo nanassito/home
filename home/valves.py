@@ -38,7 +38,9 @@ class Valve(ABC):
 
 
 class BackyardValve(Valve):
-    def __init__(self: "BackyardValve", area: str, line: int, base_duration: timedelta) -> None:
+    def __init__(
+        self: "BackyardValve", area: str, line: int, base_duration: timedelta
+    ) -> None:
         super().__init__(base_duration)
         self._area = area
         self._line = line
