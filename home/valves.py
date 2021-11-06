@@ -1,11 +1,13 @@
-import asyncio
 import json
 import logging
-from abc import ABC, abstractmethod
 from datetime import timedelta
 from enum import Enum
 
+from home.model import Actionable, Entity
 from home.mqtt import mqtt_send
+from home.prometheus import prom_query_one
+from home.time import TimeZone, now, today_at
+from home.utils import n_tries
 
 log = logging.getLogger(__name__)
 
@@ -15,54 +17,71 @@ class State(Enum):
     Off = "OFF"
 
 
-class Valve(ABC):
-    def __init__(self, base_duration: timedelta) -> None:
-        self.base_duration = base_duration
-
-    @abstractmethod
-    async def switch(self: "Valve", state: State) -> None:
-        ...
-
-    async def switch_on(self: "Valve") -> None:
-        await self.switch(State.On)
-
-    async def switch_off(self: "Valve") -> None:
-        await self.switch(State.Off)
-
-    async def run(self: "Valve", duration: timedelta = None) -> None:
-        duration = duration or self.base_duration
-        await self.switch_on()
-        # TODO: Should schedule the shutoff instead of waiting
-        await asyncio.sleep(duration.total_seconds())
-        await self.switch_off()
-
-
-class BackyardValve(Valve):
+class Valve(Actionable):
     def __init__(
-        self: "BackyardValve", area: str, line: int, base_duration: timedelta
+        self: "Valve",
+        area: str,
+        line: int,
+        duration: timedelta,
+        after: "Valve | tuple[int, int, TimeZone]",
     ) -> None:
-        super().__init__(base_duration)
-        self._area = area
-        self._line = line
+        self.entity = Entity("valve_backyard")
+        self.area = area
+        self.line = line
+        self.duration = duration
+        self.after = after
 
-    async def switch(self: "BackyardValve", state: State) -> None:
+    async def already_ran_today(self: "Valve") -> bool:
+        promql = f'max_over_time(mqtt_state_l1{{topic="{self.entity.prom_topic}"}}[12h]) - mqtt_state_l1'
+        return await prom_query_one(promql) == 1
+
+    async def get_desired_state(self: "Valve") -> State:
+        if self.already_ran_today:
+            return State.Off
+        if isinstance(self.after, Valve):
+            if self.after.already_ran_today:
+                return State.On
+            else:
+                return State.Off
+        else:
+            after = today_at(*self.after)
+            if after <= now() <= after + self.duration:
+                return State.On
+            else:
+                return State.Off
+
+    @n_tries(3)
+    async def get_current_state(self: "Valve") -> State:
+        promql = f'mqtt_state_l{self.line}{{topic="{self.entity.prom_topic}"}}'
+        state = await prom_query_one(promql)
+        return {0.0: State.Off, 1.0: State.On}[state]
+
+    async def apply_state(self: "Valve", state: State) -> None:
         await mqtt_send(
-            "zigbee2mqtt/valve_backyard/set",
-            json.dumps({f"state_l{self._line}": state.value}),
+            self.entity.mqtt, json.dumps({f"state_l{self.line}": state.value})
         )
         log.info(
-            f"Backyard valve close to the {self._area} switched {state.value.lower()}."
+            f"Backyard valve near to the {self.area} switched {state.value.lower()}."
         )
 
 
-VALVE_BACKYARD_SIDE = BackyardValve("side", 1, timedelta(minutes=10))
-VALVE_BACKYARD_HOUSE = BackyardValve("house", 2, timedelta(minutes=15))
-VALVE_BACKYARD_SCHOOL = BackyardValve("school", 3, timedelta(minutes=15))
-VALVE_BACKYARD_DECK = BackyardValve("deck", 4, timedelta(minutes=15))
+after: Valve | tuple[int, int, TimeZone] = (21, 00, TimeZone.PT)
+after = VALVE_BACKYARD_SIDE = Valve(
+    "side", line=1, duration=timedelta(minutes=10), after=after
+)
+after = VALVE_BACKYARD_HOUSE = Valve(
+    "house", line=2, duration=timedelta(minutes=15), after=after
+)
+after = VALVE_BACKYARD_SCHOOL = Valve(
+    "school", line=3, duration=timedelta(minutes=15), after=after
+)
+after = VALVE_BACKYARD_DECK = Valve(
+    "deck", line=4, duration=timedelta(minutes=15), after=after
+)
 
 ALL_VALVES = [
     VALVE_BACKYARD_SIDE,
     VALVE_BACKYARD_HOUSE,
     VALVE_BACKYARD_SCHOOL,
-    # VALVE_BACKYARD_DECK,
+    VALVE_BACKYARD_DECK,
 ]
