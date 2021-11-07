@@ -18,6 +18,7 @@ mypy = "^0.910"
 isort = "^5.10.0"
 pytest = "^6.2.5"
 types-pytz = "^2021.3.0"
+pytest-asyncio = "^0.16.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

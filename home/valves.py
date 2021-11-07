@@ -23,7 +23,7 @@ class Valve(Actionable):
         area: str,
         line: int,
         duration: timedelta,
-        after: "Valve | tuple[int, int, TimeZone]",
+        after: "tuple[int, int, TimeZone]",
     ) -> None:
         self.entity = Entity("valve_backyard")
         self.area = area
@@ -38,17 +38,11 @@ class Valve(Actionable):
     async def get_desired_state(self: "Valve") -> State:
         if self.already_ran_today:
             return State.Off
-        if isinstance(self.after, Valve):
-            if self.after.already_ran_today:
-                return State.On
-            else:
-                return State.Off
+        after = today_at(*self.after)
+        if after <= now() <= after + self.duration:
+            return State.On
         else:
-            after = today_at(*self.after)
-            if after <= now() <= after + self.duration:
-                return State.On
-            else:
-                return State.Off
+            return State.Off
 
     @n_tries(3)
     async def get_current_state(self: "Valve") -> State:
@@ -65,18 +59,17 @@ class Valve(Actionable):
         )
 
 
-after: Valve | tuple[int, int, TimeZone] = (21, 00, TimeZone.PT)
-after = VALVE_BACKYARD_SIDE = Valve(
-    "side", line=1, duration=timedelta(minutes=10), after=after
+VALVE_BACKYARD_SIDE = Valve(
+    "side", line=1, duration=timedelta(minutes=10), after=(21, 00, TimeZone.PT)
 )
-after = VALVE_BACKYARD_HOUSE = Valve(
-    "house", line=2, duration=timedelta(minutes=15), after=after
+VALVE_BACKYARD_HOUSE = Valve(
+    "house", line=2, duration=timedelta(minutes=15), after=(21, 10, TimeZone.PT)
 )
-after = VALVE_BACKYARD_SCHOOL = Valve(
-    "school", line=3, duration=timedelta(minutes=15), after=after
+VALVE_BACKYARD_SCHOOL = Valve(
+    "school", line=3, duration=timedelta(minutes=15), after=(21, 25, TimeZone.PT)
 )
-after = VALVE_BACKYARD_DECK = Valve(
-    "deck", line=4, duration=timedelta(minutes=15), after=after
+VALVE_BACKYARD_DECK = Valve(
+    "deck", line=4, duration=timedelta(minutes=15), after=(21, 40, TimeZone.PT)
 )
 
 ALL_VALVES = [
