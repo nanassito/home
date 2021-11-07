@@ -27,3 +27,6 @@ class Valve(_Valve):
 async def test_get_desired_state(after, already_ran_today, expected):
     valve = Valve(already_ran_today, after)
     await valve.get_desired_state() == expected
+
+
+# Somehow we didn't await the `already_ran_today` and the tests passed.

@@ -36,7 +36,7 @@ class Valve(Actionable):
         return await prom_query_one(promql) == 1
 
     async def get_desired_state(self: "Valve") -> State:
-        if self.already_ran_today:
+        if await self.already_ran_today():
             return State.Off
         after = today_at(*self.after)
         if after <= now() <= after + self.duration:
@@ -60,16 +60,16 @@ class Valve(Actionable):
 
 
 VALVE_BACKYARD_SIDE = Valve(
-    "side", line=1, duration=timedelta(minutes=10), after=(21, 00, TimeZone.PT)
+    "side", line=1, duration=timedelta(minutes=10), after=(21, 20, TimeZone.PT)
 )
 VALVE_BACKYARD_HOUSE = Valve(
-    "house", line=2, duration=timedelta(minutes=15), after=(21, 10, TimeZone.PT)
+    "house", line=2, duration=timedelta(minutes=15), after=(21, 30, TimeZone.PT)
 )
 VALVE_BACKYARD_SCHOOL = Valve(
-    "school", line=3, duration=timedelta(minutes=15), after=(21, 25, TimeZone.PT)
+    "school", line=3, duration=timedelta(minutes=15), after=(21, 45, TimeZone.PT)
 )
 VALVE_BACKYARD_DECK = Valve(
-    "deck", line=4, duration=timedelta(minutes=15), after=(21, 40, TimeZone.PT)
+    "deck", line=4, duration=timedelta(minutes=15), after=(22, 0, TimeZone.PT)
 )
 
 ALL_VALVES = [
