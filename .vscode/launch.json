@@ -8,7 +8,10 @@
             "name": "Epa",
             "type": "python",
             "request": "launch",
-            "module": "home"
+            "module": "home",
+            "args": [
+                "--log-level=DEBUG"
+            ]
         }
     ]
 }

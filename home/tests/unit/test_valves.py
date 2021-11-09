@@ -1,32 +1,29 @@
 from datetime import timedelta
+from unittest.mock import patch, AsyncMock
 
 import pytest
-from home.time import now
-from home.valves import State, Valve as _Valve
+import asyncio
 
-
-class Valve(_Valve):
-    def __init__(self, already_ran_today, after):
-        super().__init__("area", 42, timedelta(seconds=5), after)
-        self._already_ran_today = already_ran_today
-
-    async def already_ran_today(self: "Valve") -> bool:
-        return self._already_ran_today
+from home.time import TimeZone
+from home.valves import State, Valve
 
 
 @pytest.mark.parametrize(
-    ("after", "already_ran_today", "expected"),
+    ("net", "run_time", "other_running", "expected"),
     [
-        (now() + timedelta(seconds=5), False, State.Off),  # too soon
-        (now() - timedelta(seconds=1), True, State.Off),  # already ran
-        (now() - timedelta(seconds=1), False, State.On),  # need to run
-        (now() + timedelta(seconds=6), False, State.Off),  # completed
+        ((23, 59, TimeZone.PT), 3, [], State.Off),  # too soon
+        ((00, 00, TimeZone.PT), 0, [], State.On),  # need to run
+        ((00, 00, TimeZone.PT), 3, [], State.On),  # keep running
+        ((00, 00, TimeZone.PT), 5, [], State.Off),  # completed
+        ((00, 00, TimeZone.PT), 3, [{"id": "other"}], State.Off),  # Other running
     ],
 )
 @pytest.mark.asyncio
-async def test_get_desired_state(after, already_ran_today, expected):
-    valve = Valve(already_ran_today, after)
-    await valve.get_desired_state() == expected
-
-
-# Somehow we didn't await the `already_ran_today` and the tests passed.
+async def test_get_desired_state(net, run_time, other_running, expected):
+    valve = Valve("area", 42, timedelta(minutes=5), net)
+    # Can't use py3.10 parenthesized context manager due to https://github.com/psf/black/issues/1948
+    with patch("home.valves.prom_query_one", new_callable=AsyncMock) as prom_query_one:
+        with patch("home.valves.prom_query_labels", new_callable=AsyncMock) as prom_query_labels:
+            prom_query_one.return_value = run_time
+            prom_query_labels.return_value = other_running
+            assert await valve.get_desired_state() == expected

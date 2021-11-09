@@ -19,7 +19,7 @@ async def run():
     while True:
         before = now()
         for actionable in ACTIONABLES:
-            desired_state =  await actionable.get_desired_state()
+            desired_state = await actionable.get_desired_state()
             if desired_state != await actionable.get_current_state():
                 await actionable.apply_state(desired_state)
         after = now()
