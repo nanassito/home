@@ -1,0 +1,20 @@
+[Unit]
+Description=zigbee2mqtt
+After=network.target
+Requires=mosquitto.service
+
+[Service]
+ExecStart=\
+        docker run \
+        --device /dev/ttyUSB0 \
+        --mount source=zigbee2mqtt,target=/app/data \
+        --mount type=bind,source=${ROOT}/systemd/zigbee2mqtt/configuration.yaml,target=/app/data/configuration.yaml \
+        koenkk/zigbee2mqtt:latest
+WorkingDirectory=/home/dorian/zigbee2mqtt
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,26 @@
+homeassistant: false
+permit_join: false
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://${IP}
+serial:
+  port: /dev/ttyUSB0
+devices:
+  '0x00124b0022ee4a71':
+    friendly_name: valve_front_lawn
+  '0x00158d0006f7e96e':
+    friendly_name: air_zaya
+  '0x54ef4410001a07aa':
+    friendly_name: air_livingroom
+  '0x00158d0006fb03c4':
+    friendly_name: leak_bedroom_zaya_hvac
+  '0xa4c1382cfb825490':
+    friendly_name: air_outside
+  '0x00158d0002ab2f3a':
+    friendly_name: power_bedroom_zaya_hvac
+  '0x00158d0007087c1a':
+    friendly_name: air_parent
+  '0x00158d000706885d':
+    friendly_name: air_office
+  '0xa4c1386ed4e4fdfc':
+    friendly_name: 'valve_backyard'

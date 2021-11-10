@@ -1,0 +1,19 @@
+[Unit]
+Description=AlertManager
+After=prometheus.service
+Requires=prometheus.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 9093:9093 \
+        --net-alias alertmanager \
+        --mount type=bind,source=${ROOT}/systemd/alertmanager/alertmanager.yml,target=/etc/alertmanager/alertmanager.yml,readonly \
+        --mount source=alertmanager,target=/alertmanager \
+        prom/alertmanager
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

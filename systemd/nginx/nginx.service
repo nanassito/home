@@ -1,0 +1,19 @@
+[Unit]
+Description=Docker
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 443:443 \
+        --mount type=bind,source=${ROOT}/systemd/nginx/conf.d,target=/etc/nginx/conf.d,readonly \
+        --mount type=bind,source=/home/dorian/letsencrypt/etc,target=/etc/letsencrypt,readonly \
+        --mount type=bind,source=/home/dorian/openssl-ca/ca.crt,target=/etc/nginx/client_certs/ca.crt,readonly \
+        nginx
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

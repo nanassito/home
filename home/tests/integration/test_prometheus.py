@@ -14,9 +14,10 @@ async def test_prom_query_labels():
     promql = '{topic="zigbee2mqtt_valve_backyard", __name__=~"mqtt_state_l[0-9]"}'
     labels = await prom_query_labels(promql)
     assert len(labels) == 4
+    if "instance" in labels:
+        del labels["instance"]
     assert {
         "__name__": "mqtt_state_l4",
-        "instance": "172.17.0.1:9000",
         "job": "zigbee",
         "topic": "zigbee2mqtt_valve_backyard",
     } in labels

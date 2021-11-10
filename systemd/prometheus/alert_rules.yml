@@ -1,0 +1,13 @@
+groups:
+  - name: EPA2617
+    rules:
+      - alert: La climatisation déborde
+        expr: mqtt_water_leak > 0.5
+      - alert: Vérification que le système d'alerte fonctionne
+        expr: day_of_month() == 5 and hour() == 20
+      - alert: Un capteur a planté
+        expr: (rate(mqtt_message_total{topic=~"zigbee2mqtt_air_.+"}[1h])) * on() group_left() absent(6 <= hour() <= 14) == 0
+        for: 1h
+      - alert: L'arrosage automatique fonctionne depuis trop longtemps
+        expr: sum by (topic)({__name__=~"mqtt_state_l[0-9]"}) > 0
+        for: 1h

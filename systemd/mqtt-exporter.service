@@ -1,0 +1,18 @@
+[Unit]
+Description=mqttexporter
+After=network.target
+Requires=mosquitto.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 9000:9000 \
+        -e "MQTT_ADDRESS=${IP}" \
+        kpetrem/mqtt-exporter
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
