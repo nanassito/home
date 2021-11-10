@@ -2,11 +2,13 @@ import logging
 
 import aiohttp
 from urllib_ext.parse import urlparse
+from home.utils import n_tries
 
 log = logging.getLogger(__name__)
 PROMETHEUS_URL = urlparse("http://192.168.1.1:9090/")
 
 
+@n_tries(3)
 async def prom_query_one(query: str) -> float:
     try:
         async with aiohttp.ClientSession() as session:
@@ -25,6 +27,7 @@ async def prom_query_one(query: str) -> float:
         raise
 
 
+@n_tries(3)
 async def prom_query_labels(query: str) -> list[dict[str, str]]:
     try:
         async with aiohttp.ClientSession() as session:
