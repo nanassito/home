@@ -99,10 +99,10 @@ VALVE_BACKYARD_HOUSE = Valve(
     "house", line=2, duration=timedelta(minutes=15), not_earlier_than=_NET
 )
 VALVE_BACKYARD_SCHOOL = Valve(
-    "school", line=3, duration=timedelta(minutes=10), not_earlier_than=_NET
+    "school", line=3, duration=timedelta(minutes=15), not_earlier_than=_NET
 )
 VALVE_BACKYARD_DECK = Valve(
-    "deck", line=4, duration=timedelta(minutes=10), not_earlier_than=_NET
+    "deck", line=4, duration=timedelta(minutes=15), not_earlier_than=_NET
 )
 
 ALL_VALVES = [

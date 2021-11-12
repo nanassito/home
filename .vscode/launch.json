@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "home",
             "args": [
-                "--log-level=DEBUG"
+                // "--log-level=DEBUG"
             ]
         }
     ]

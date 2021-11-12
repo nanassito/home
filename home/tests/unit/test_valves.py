@@ -1,8 +1,8 @@
+import asyncio
 from datetime import timedelta
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
-import asyncio
 
 from home.time import TimeZone
 from home.valves import State, Valve
@@ -23,7 +23,9 @@ async def test_get_desired_state(net, run_time, other_running, expected):
     valve = Valve("area", 42, timedelta(minutes=5), net)
     # Can't use py3.10 parenthesized context manager due to https://github.com/psf/black/issues/1948
     with patch("home.valves.prom_query_one", new_callable=AsyncMock) as prom_query_one:
-        with patch("home.valves.prom_query_labels", new_callable=AsyncMock) as prom_query_labels:
+        with patch(
+            "home.valves.prom_query_labels", new_callable=AsyncMock
+        ) as prom_query_labels:
             prom_query_one.return_value = run_time
             prom_query_labels.return_value = other_running
             assert await valve.get_desired_state() == expected

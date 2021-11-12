@@ -1,0 +1,17 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  simple:
+    format: "%(levelname)-7s | %(name)-25s | %(message)s"
+  colored:
+    "()": "colorlog.ColoredFormatter"
+    format: "%(log_color)s%(levelname)-7s | %(name)-25s | %(message)s"
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: colored
+    stream: ext://sys.stdout
+root:
+  level: DEBUG
+  handlers: [console]
