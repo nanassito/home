@@ -12,7 +12,7 @@ class TimeZone(Enum):
 def today_at(hours: int, minutes: int, tz: BaseTzInfo | TimeZone) -> datetime:
     tz = tz.value if isinstance(tz, TimeZone) else tz
     return datetime(
-        *datetime.now().timetuple()[:3], hour=hours, minute=minutes, tzinfo=tz
+        *datetime.now(tz).timetuple()[:3], hour=hours, minute=minutes, tzinfo=tz
     )
 
 
