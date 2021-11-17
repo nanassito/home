@@ -22,5 +22,5 @@ devices:
     friendly_name: air_parent
   '0x00158d000706885d':
     friendly_name: air_office
-  '0xa4c1386ed4e4fdfc':
+  '0x847127fffe90de4a':
     friendly_name: 'valve_backyard'

@@ -1,12 +1,12 @@
 set -eux
 
-mkdir -p ${ROOT}/letsencrypt
+mkdir -p /github/home/letsencrypt
 sudo docker run \
     -it --rm \
     --name certbot \
     -p 80:80 \
-    --mount type=bind,source=${ROOT}/letsencrypt/etc,target=/etc/letsencrypt \
-    --mount type=bind,source=${ROOT}/letsencrypt/varlib,target=/var/lib/letencrypt \
+    --mount type=bind,source=/github/home/letsencrypt/etc,target=/etc/letsencrypt \
+    --mount type=bind,source=/github/home/letsencrypt/varlib,target=/var/lib/letencrypt \
     certbot/certbot \
     certonly \
     --manual \

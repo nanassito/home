@@ -8,7 +8,7 @@ ExecStart=\
         docker run \
         -p 9093:9093 \
         --net-alias alertmanager \
-        --mount type=bind,source=${ROOT}/systemd/alertmanager/alertmanager.yml,target=/etc/alertmanager/alertmanager.yml,readonly \
+        --mount type=bind,source=/github/home/alertmanager/alertmanager.yml,target=/etc/alertmanager/alertmanager.yml,readonly \
         --mount source=alertmanager,target=/alertmanager \
         prom/alertmanager
 StandardOutput=inherit

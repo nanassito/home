@@ -8,8 +8,8 @@ ExecStart=\
         docker run \
         -p 9090:9090 \
         --net-alias prometheus \
-        --mount type=bind,source=${ROOT}/systemd/prometheus/prometheus.yml,target=/etc/prometheus/prometheus.yml,readonly \
-        --mount type=bind,source=${ROOT}/systemd/prometheus/alert_rules.yml,target=/etc/prometheus/alert_rules.yml,readonly \
+        --mount type=bind,source=/github/home/prometheus/prometheus.yml,target=/etc/prometheus/prometheus.yml,readonly \
+        --mount type=bind,source=/github/home/prometheus/alert_rules.yml,target=/etc/prometheus/alert_rules.yml,readonly \
         --mount source=prometheus,target=/prometheus \
         prom/prometheus \
         --config.file=/etc/prometheus/prometheus.yml \

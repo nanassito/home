@@ -1,5 +1,5 @@
 [Unit]
-Description=Grafana
+Description=Home
 After=docker.service
 Requires=prometheus.service
 
@@ -7,9 +7,7 @@ Requires=prometheus.service
 ExecStart=\
         docker run \
         -p 3000:3000 \
-        --mount type=bind,source=/github/home/grafana/grafana.ini,target=/etc/grafana/grafana.ini,readonly \
-        --mount source=grafana,target=/var/lib/grafana \
-        grafana/grafana
+        $(docker build /github/home/home)
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
