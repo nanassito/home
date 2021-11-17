@@ -8,6 +8,7 @@
             "name": "Epa",
             "type": "python",
             "request": "launch",
+            "cwd": "${workspaceFolder}/home",
             "module": "home",
             "args": [
                 // "--log-level=DEBUG"
