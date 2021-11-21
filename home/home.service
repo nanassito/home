@@ -7,7 +7,7 @@ Requires=prometheus.service
 ExecStart=\
         docker run \
         -p 3000:3000 \
-        $(docker build /github/home/home)
+        home:latest
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
