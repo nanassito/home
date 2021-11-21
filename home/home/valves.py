@@ -10,36 +10,11 @@ from home.mqtt import mqtt_send
 from home.prometheus import prom_query_labels, prom_query_one
 from home.time import TimeZone, now, today_at
 from home.utils import n_tries
+from home import facts
 
 log = logging.getLogger(__name__)
 
 
-class WaterMain:
-    _prom_gauge = Gauge(
-        "water_user_qty", "Number of active users of the water main line."
-    )
-    _lock: Lock = Lock()
-    _users: set[str] = set()
-
-    @classmethod
-    async def start_using(cls: type["WaterMain"], user: str) -> None:
-        async with cls._lock:
-            cls._users.add(user)
-        cls._prom_gauge.set({}, len(cls._users))
-
-    @classmethod
-    async def stop_using(cls: type["WaterMain"], user: str) -> None:
-        async with cls._lock:
-            if user in cls._users:
-                cls._users.remove(user)
-        cls._prom_gauge.set({}, len(cls._users))
-
-    @classmethod
-    async def has_other_users(cls: type["WaterMain"], user: str) -> bool:
-        return cls._users != {user} and cls._users != set()
-
-
-WaterMain._prom_gauge.set({}, 0)  # Ensure gauge is initialized
 
 
 class State(Enum):
@@ -83,7 +58,7 @@ class Valve(Actionable):
             if now() < today_at(*self.not_earlier_than):
                 return State.Off
 
-            if await WaterMain.has_other_users(self.area):
+            if await facts.has_other_water_users(self.area):
                 return State.Off
 
             promql = f'{{ {self.prom_labels}, __name__=~"mqtt_state_l[0-9]", __name__!="{self.prom_metric}" }} == 1'
@@ -111,9 +86,9 @@ class Valve(Actionable):
 
     async def apply_state(self: "Valve", state: State) -> None:
         if state == State.On:
-            await WaterMain.start_using(self.area)
+            await facts.start_using_water(self.area)
         else:
-            await WaterMain.stop_using(self.area)
+            await facts.stop_using_water(self.area)
 
         await mqtt_send(
             self.entity.mqtt, json.dumps({f"state_l{self.line}": state.value})
