@@ -92,7 +92,7 @@ class Valve(Actionable):
                 self.log.warning(f"Found other running valves: {other_running}")
                 return State.Off
 
-            promql = f"sum_over_time({self.prom_metric}{{{self.prom_labels}}}[20h])"
+            promql = f"sum_over_time({self.prom_metric}{{{self.prom_labels}}}[70h])"
             run_time = timedelta(minutes=await prom_query_one(promql))
             return {False: State.Off, True: State.On}[run_time < self.duration]
 
