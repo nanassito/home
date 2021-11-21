@@ -64,4 +64,4 @@ async def root(request: Request):
 #     request.app.state.users_events_counter.inc({"path": request.scope["path"]})
 #     return Response(f"{user_id}")
 
-uvicorn.run(WEB, log_config=logging_cfg)
+uvicorn.run(WEB, port=8000, log_config=logging_cfg)
