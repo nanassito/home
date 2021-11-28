@@ -24,3 +24,5 @@ devices:
     friendly_name: air_office
   '0x847127fffe90de4a':
     friendly_name: 'valve_backyard'
+  '0x00158d0006f101ce':
+    friendly_name: motion_side
