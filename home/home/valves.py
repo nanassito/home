@@ -17,6 +17,7 @@ class ValveSection:
     area: str
     line: int
     base_runtime: timedelta = field(hash=False)
+    window: timedelta = field(hash=False)
 
 
 _PROM_VALVE = Gauge("valve_open", "0 the valve is closed, 1 the valve is opened.")
@@ -24,12 +25,11 @@ _PROM_VALVE = Gauge("valve_open", "0 the valve is closed, 1 the valve is opened.
 
 class BackyardValves(Actionable):
     LOG = log.getChild("Backyard")
-    WATER_N_DAYS: int = 3
     SECTIONS = [
-        ValveSection("side", 1, timedelta(minutes=5)),
-        ValveSection("house", 2, timedelta(minutes=15)),
-        ValveSection("school", 3, timedelta(minutes=15)),
-        ValveSection("deck", 4, timedelta(minutes=15)),
+        ValveSection("side", 1, timedelta(minutes=5), timedelta(days=7)),
+        ValveSection("house", 2, timedelta(minutes=15), timedelta(days=3)),
+        ValveSection("school", 3, timedelta(minutes=15), timedelta(days=3)),
+        ValveSection("deck", 4, timedelta(minutes=15), timedelta(days=3)),
     ]
 
     @property
@@ -41,7 +41,7 @@ class BackyardValves(Actionable):
             return {section: False for section in self.SECTIONS}
         weather_multiplier = 1.0
         for section in self.SECTIONS:
-            promql = f'sum_over_time(mqtt_state_l{section.line}{{topic="zigbee2mqtt_valve_backyard"}}[{self.WATER_N_DAYS}d])'
+            promql = f'sum_over_time(mqtt_state_l{section.line}{{topic="zigbee2mqtt_valve_backyard"}}[{section.window.days}d])'
             runtime = timedelta(minutes=await prom_query_one(promql))
             if runtime < section.base_runtime * weather_multiplier:
                 return {s: (s == section) for s in self.SECTIONS}
