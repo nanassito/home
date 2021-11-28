@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
+from aioprometheus.collectors import Gauge
+
 
 class Entity:
     def __init__(self: "Entity", name: str) -> None:
@@ -24,6 +26,13 @@ class Actionable(ABC, Generic[_State]):
 
     Note the getters are expected to be run approximately once per minute so be
     careful with their run time."""
+
+    RUNTIME_MS_GAUGE = Gauge("last_run_time_ms", "Last run time in milliseconds")
+
+    @property
+    @abstractmethod
+    def prom_label(self: "Actionable") -> str:
+        ...
 
     @abstractmethod
     async def get_desired_state(self: "Actionable") -> _State:

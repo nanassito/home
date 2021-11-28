@@ -5,12 +5,13 @@ from pathlib import Path
 
 import uvicorn
 import yaml
-from aioprometheus import Counter, MetricsMiddleware
+from aioprometheus import MetricsMiddleware
 from aioprometheus.asgi.starlette import metrics
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 
+from home.model import Actionable
 from home.time import now
-from home.valves import ALL_VALVES
+from home.valves import BackyardValves
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
@@ -18,27 +19,33 @@ with (Path(__file__).parent / "logging.yaml").open() as fd:
 log = logging.getLogger(__name__)
 
 
-ACTIONABLES = ALL_VALVES + []
+LOOPERS: list[Actionable] = [
+    BackyardValves(),
+]
 CYCLE = timedelta(minutes=1)
 WEB = FastAPI()
 
 
 @WEB.on_event("startup")
-def controller():
-    async def run_in_background():
+def init_controller():
+    async def controller_main_loop():
         while True:
-            before = now()
-            for actionable in ACTIONABLES:
-                desired_state = await actionable.get_desired_state()
-                if desired_state != await actionable.get_current_state():
-                    await actionable.apply_state(desired_state)
-            after = now()
-            duration = after - before
-            if duration > CYCLE:
-                log.warning(f"Full cycle took {duration - CYCLE} too long")
-            await asyncio.sleep((CYCLE - duration % CYCLE).total_seconds())
+            before_all = now()
+            for looper in LOOPERS:
+                before_one = now()
+                desired_state = await looper.get_desired_state()
+                if desired_state != await looper.get_current_state():
+                    await looper.apply_state(desired_state)
+                after_one = now()
+                duration_one_ms = (after_one - before_one).total_seconds() * 1000
+                looper.RUNTIME_MS_GAUGE.set({"looper": looper.prom_label}, duration_one_ms)
+            after_all = now()
+            duration_all = after_all - before_all
+            if duration_all > CYCLE:
+                log.warning(f"Full cycle took {duration_all - CYCLE} too long.")
+            await asyncio.sleep((CYCLE - duration_all % CYCLE).total_seconds())
 
-    asyncio.create_task(run_in_background())
+    asyncio.create_task(controller_main_loop())
 
 
 # Any custom application metrics are automatically included in the exposed
@@ -49,11 +56,6 @@ def controller():
 
 WEB.add_middleware(MetricsMiddleware)
 WEB.add_route("/metrics", metrics)
-
-
-@WEB.get("/")
-async def root(request: Request):
-    return Response("FastAPI Middleware Example")
 
 
 # @WEB.get("/users/{user_id}")
