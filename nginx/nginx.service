@@ -8,8 +8,8 @@ ExecStart=\
         docker run \
         -p 443:443 \
         --mount type=bind,source=/github/home/nginx/conf.d,target=/etc/nginx/conf.d,readonly \
-        --mount type=bind,source=/github/home/letsencrypt/etc,target=/etc/letsencrypt,readonly \
-        --mount type=bind,source=/github/home/openssl-ca/ca.crt,target=/etc/nginx/client_certs/ca.crt,readonly \
+        --mount type=bind,source=/home/dorian/letsencrypt/etc,target=/etc/letsencrypt,readonly \
+        --mount type=bind,source=/home/dorian/openssl-ca/ca.crt,target=/etc/nginx/client_certs/ca.crt,readonly \
         nginx
 StandardOutput=inherit
 StandardError=inherit
