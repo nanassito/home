@@ -50,7 +50,6 @@ def init_controller():
             if duration_all > CYCLE:
                 log.warning(f"Full cycle took {duration_all - CYCLE} too long.")
             await asyncio.sleep((CYCLE - duration_all % CYCLE).total_seconds())
-            1/0
 
     asyncio.create_task(controller_main_loop())
 
