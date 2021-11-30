@@ -26,8 +26,14 @@ CYCLE = timedelta(minutes=1)
 WEB = FastAPI()
 
 
+def shutdown_on_error(loop, context):
+    loop.default_exception_handler(context)
+    loop.stop()
+
+
 @WEB.on_event("startup")
 def init_controller():
+    asyncio.get_event_loop().set_exception_handler(shutdown_on_error)
     async def controller_main_loop():
         while True:
             before_all = now()
@@ -44,6 +50,7 @@ def init_controller():
             if duration_all > CYCLE:
                 log.warning(f"Full cycle took {duration_all - CYCLE} too long.")
             await asyncio.sleep((CYCLE - duration_all % CYCLE).total_seconds())
+            1/0
 
     asyncio.create_task(controller_main_loop())
 

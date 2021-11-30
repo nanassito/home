@@ -54,7 +54,7 @@ _PROM_MOWER_STATUS_CODE = Gauge("mower_status_code", "home=1, mowing=7, others?"
 async def is_mower_running() -> bool:
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get("http://172.17.0.1:4000/landroid-s/status") as response:
+            async with session.get("http://192.168.1.1:4000/landroid-s/status") as response:
                 rs = await response.json()
                 _PROM_MOWER_STATUS_CODE.set({"city": "east_palo_alto"}, rs["statusCode"])
                 return rs["statusCode"] == 7
