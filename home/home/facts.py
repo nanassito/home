@@ -45,3 +45,19 @@ async def is_day_time() -> bool:
     is_day = lux > 100
     _PROM_IS_DAY_TIME.set({"city": "east_palo_alto"}, is_day)
     return bool(is_day)
+
+
+_PROM_MOWER_STATUS_CODE = Gauge("mower_status_code", "home=1, mowing=7, others?")
+
+
+@n_tries(3)
+async def is_mower_running() -> bool:
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://172.17.0.1/landroid-s/status") as response:
+                rs = await response.json()
+                _PROM_MOWER_STATUS_CODE.set({"city": "east_palo_alto"}, rs["statusCode"])
+                return rs["statusCode"] == 7
+    except Exception as err:
+        log.debug(f"is_mower_running Failed: {err}")
+        raise

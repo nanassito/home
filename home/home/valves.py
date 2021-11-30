@@ -37,7 +37,7 @@ class BackyardValves(Actionable):
         return "backyard_valves"
 
     async def get_desired_state(self: "BackyardValves") -> dict[ValveSection, bool]:
-        if await facts.is_day_time():
+        if any([await facts.is_day_time(), await facts.is_mower_running()]):
             return {section: False for section in self.SECTIONS}
         weather_multiplier = 1.0
         for section in self.SECTIONS:
@@ -66,4 +66,6 @@ class BackyardValves(Actionable):
                 "zigbee2mqtt/valve_backyard/set", {f"state_l{section.line}": value}
             )
             self.LOG.info(f"Switched {section.area} {value.lower()}.")
-            _PROM_VALVE.set({"area": section.area, "line": str(section.line)}, int(activate))
+            _PROM_VALVE.set(
+                {"area": section.area, "line": str(section.line)}, int(activate)
+            )
