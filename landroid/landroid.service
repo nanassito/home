@@ -1,0 +1,21 @@
+
+
+
+[Unit]
+Description=landroid
+After=network.target
+Requires=mosquitto.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 3000:3000 \
+        --mount type=bind,source=/github/home/landroid/config.json,target=/usr/src/app/config.json,readonly \
+        virtualzone/landroid-bridge
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
