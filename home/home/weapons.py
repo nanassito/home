@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from datetime import timedelta
 
 from home import facts
 from home.prometheus import COUNTER_NUM_RUNS
@@ -23,6 +24,7 @@ class Soaker:
         VALVE_BACKYARD_SCHOOL,
         VALVE_BACKYARD_SIDE,
     )
+    DURATION = timedelta(seconds=10)
 
     @classmethod
     async def soak(cls: type["Soaker"], message: str) -> None:
@@ -39,6 +41,6 @@ class Soaker:
             ]
             for valve in cls.VALVES:
                 await valve.switch_on()
-            await asyncio.sleep(10)
+            await asyncio.sleep(cls.DURATION.total_seconds())
             for valve in valves_to_shutoff:
                 await valve.switch_off()

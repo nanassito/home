@@ -1,11 +1,10 @@
-import asyncio
-
 import pytest
 
 from home.utils import n_tries
 
 
-def test_n_tries_enough():
+@pytest.mark.asyncio
+async def test_n_tries_enough():
     iterations = []
 
     @n_tries(3)
@@ -14,11 +13,12 @@ def test_n_tries_enough():
         if len(iterations) < 2:
             raise ValueError()
 
-    asyncio.run(test())
+    await test()
     assert len(iterations) == 2
 
 
-def test_n_tries_fail():
+@pytest.mark.asyncio
+async def test_n_tries_fail():
     iterations = []
 
     class E(Exception):
@@ -30,5 +30,5 @@ def test_n_tries_fail():
         raise E()
 
     with pytest.raises(E):
-        asyncio.run(test())
+        await test()
     assert len(iterations) == 3
