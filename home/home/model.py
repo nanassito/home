@@ -29,11 +29,6 @@ class Actionable(ABC, Generic[_State]):
 
     RUNTIME_MS_GAUGE = Gauge("last_run_time_ms", "Last run time in milliseconds")
 
-    @property
-    @abstractmethod
-    def prom_label(self: "Actionable") -> str:
-        ...
-
     @abstractmethod
     async def get_desired_state(self: "Actionable") -> _State:
         """Get the desired state at the time of call.

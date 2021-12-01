@@ -11,61 +11,44 @@ from home.prometheus import prom_query_one
 
 log = logging.getLogger(__name__)
 
-
-@dataclass(frozen=True)
-class ValveSection:
-    area: str
-    line: int
-    base_runtime: timedelta = field(hash=False)
-    window: timedelta = field(hash=False)
+_PROM_VALVE = Gauge(
+    "valve_should_be_running",
+    "0 the valve should be closed, 1 the valve should be opened.",
+)
 
 
-_PROM_VALVE = Gauge("valve_open", "0 the valve is closed, 1 the valve is opened.")
+class Valve:
+    def __init__(self: "Valve", area: str, line: int) -> None:
+        self.area = area
+        self.line = line
+        self.log = log.getChild("Valve").getChild(area)
+        self.should_be_running = False
 
-
-class BackyardValves(Actionable):
-    LOG = log.getChild("Backyard")
-    SECTIONS = [
-        ValveSection("side", 1, timedelta(minutes=5), timedelta(days=7)),
-        ValveSection("house", 2, timedelta(minutes=15), timedelta(days=3)),
-        ValveSection("school", 3, timedelta(minutes=15), timedelta(days=3)),
-        ValveSection("deck", 4, timedelta(minutes=15), timedelta(days=3)),
-    ]
-
-    @property
-    def prom_label(self):
-        return "backyard_valves"
-
-    async def get_desired_state(self: "BackyardValves") -> dict[ValveSection, bool]:
-        if any([await facts.is_day_time(), await facts.is_mower_running()]):
-            return {section: False for section in self.SECTIONS}
-        weather_multiplier = 1.0
-        for section in self.SECTIONS:
-            promql = f'sum_over_time(mqtt_state_l{section.line}{{topic="zigbee2mqtt_valve_backyard"}}[{section.window.days}d])'
-            runtime = timedelta(minutes=await prom_query_one(promql))
-            if runtime < section.base_runtime * weather_multiplier:
-                return {s: (s == section) for s in self.SECTIONS}
-        return {section: False for section in self.SECTIONS}
-
-    async def get_current_state(self: "BackyardValves") -> dict[ValveSection, bool]:
-        return {
-            section: bool(
-                await prom_query_one(
-                    f'mqtt_state_l{section.line}{{topic="zigbee2mqtt_valve_backyard"}}'
-                )
+    async def is_running(self: "Valve") -> bool:
+        return bool(
+            await prom_query_one(
+                f'mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_backyard"}}'
             )
-            for section in self.SECTIONS
-        }
+        )
 
-    async def apply_state(
-        self: "BackyardValves", state: dict[ValveSection, bool]
-    ) -> None:
-        for section, activate in state.items():
-            value = "ON" if activate else "OFF"
-            await mqtt_send(
-                "zigbee2mqtt/valve_backyard/set", {f"state_l{section.line}": value}
-            )
-            self.LOG.info(f"Switched {section.area} {value.lower()}.")
-            _PROM_VALVE.set(
-                {"area": section.area, "line": str(section.line)}, int(activate)
-            )
+    async def switch_on(self: "Valve") -> None:
+        self.should_be_running = True
+        _PROM_VALVE.set(
+            {"area": self.area, "line": str(self.line)}, self.should_be_running
+        )
+        await mqtt_send("zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": "ON"})
+        self.log.info(f"Switched on.")
+
+    async def switch_off(self: "Valve") -> None:
+        self.should_be_running = False
+        _PROM_VALVE.set(
+            {"area": self.area, "line": str(self.line)}, self.should_be_running
+        )
+        await mqtt_send("zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": "ON"})
+        self.log.info(f"Switched on.")
+
+
+VALVE_BACKYARD_SIDE = Valve("side", 1)
+VALVE_BACKYARD_HOUSE = Valve("house", 2)
+VALVE_BACKYARD_SCHOOL = Valve("school", 3)
+VALVE_BACKYARD_DECK = Valve("deck", 4)

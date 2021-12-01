@@ -1,12 +1,14 @@
 import logging
 
 import aiohttp
+from aioprometheus.collectors import Counter
 from urllib_ext.parse import urlparse
 
 from home.utils import n_tries
 
 log = logging.getLogger(__name__)
 PROMETHEUS_URL = urlparse("http://192.168.1.1:9090/")
+COUNTER_NUM_RUNS = Counter("number_of_runs", "Number of times something is ran.")
 
 
 @n_tries(3)

@@ -9,9 +9,11 @@ from aioprometheus import MetricsMiddleware
 from aioprometheus.asgi.starlette import metrics
 from fastapi import FastAPI
 
+from home.lawn import BackyardIrrigation
 from home.model import Actionable
 from home.time import now
-from home.valves import BackyardValves
+from home.weapons import Soaker
+from home.mqtt import watch_mqtt_topic
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
@@ -19,8 +21,8 @@ with (Path(__file__).parent / "logging.yaml").open() as fd:
 log = logging.getLogger(__name__)
 
 
-LOOPERS: list[Actionable] = [
-    BackyardValves(),
+LOOPERS: list[type[Actionable]] = [
+    BackyardIrrigation,
 ]
 CYCLE = timedelta(minutes=1)
 WEB = FastAPI()
@@ -34,6 +36,7 @@ def shutdown_on_error(loop, context):
 @WEB.on_event("startup")
 def init_controller():
     asyncio.get_event_loop().set_exception_handler(shutdown_on_error)
+
     async def controller_main_loop():
         while True:
             before_all = now()
@@ -44,7 +47,9 @@ def init_controller():
                     await looper.apply_state(desired_state)
                 after_one = now()
                 duration_one_ms = (after_one - before_one).total_seconds() * 1000
-                looper.RUNTIME_MS_GAUGE.set({"looper": looper.prom_label}, duration_one_ms)
+                looper.RUNTIME_MS_GAUGE.set(
+                    {"looper": looper.__name__}, duration_one_ms
+                )
             after_all = now()
             duration_all = after_all - before_all
             if duration_all > CYCLE:
@@ -52,6 +57,7 @@ def init_controller():
             await asyncio.sleep((CYCLE - duration_all % CYCLE).total_seconds())
 
     asyncio.create_task(controller_main_loop())
+    asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_side", Soaker.soak))
 
 
 # Any custom application metrics are automatically included in the exposed
