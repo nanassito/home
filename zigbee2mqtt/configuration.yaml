@@ -26,3 +26,5 @@ devices:
     friendly_name: 'valve_backyard'
   '0x00158d0006f101ce':
     friendly_name: motion_side
+  '0x00158d0006f1316c':
+    friendly_name: motion_back

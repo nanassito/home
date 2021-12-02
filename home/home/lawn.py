@@ -58,6 +58,7 @@ class BackyardIrrigation(Actionable):
         if not cls.ENABLED:
             cls.LOG.warning("BackyardIrrigation is disabled.")
             return
+        cls.LOG.info("Applying changes on the backyard valves.")
         for valve, should_run in state.items():
             if should_run:
                 await valve.switch_on()

@@ -24,6 +24,14 @@ class Valve:
         self.log = log.getChild("Valve").getChild(area)
         self.should_be_running = False
 
+    def __repr__(self: "Valve") -> str:
+        return (
+            f"<{type(self).__module__}.{type(self).__name__} {self.area}|{self.line}>"
+        )
+
+    def __eq__(self, __o: object) -> bool:
+        return isinstance(__o, Valve) and (self.area, self.line) == (__o.area, __o.line)
+
     async def is_running(self: "Valve") -> bool:
         return bool(
             await prom_query_one(

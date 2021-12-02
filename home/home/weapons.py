@@ -19,9 +19,6 @@ class Soaker:
     LOG = log.getChild("Soaker")
     ENABLED = True
     VALVES = (
-        VALVE_BACKYARD_DECK,
-        VALVE_BACKYARD_HOUSE,
-        VALVE_BACKYARD_SCHOOL,
         VALVE_BACKYARD_SIDE,
     )
     DURATION = timedelta(seconds=10)
