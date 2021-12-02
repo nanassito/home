@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from home.lawn import BackyardIrrigation
 from home.model import Actionable
 from home.time import now
-from home.weapons import Soaker
+from home.weapons import SOAKER_BACK, SOAKER_SIDE
 from home.mqtt import watch_mqtt_topic
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
@@ -57,7 +57,8 @@ def init_controller():
             await asyncio.sleep((CYCLE - duration_all % CYCLE).total_seconds())
 
     asyncio.create_task(controller_main_loop())
-    asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_side", Soaker.soak))
+    asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak))
+    asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_BACK.soak))
 
 
 # Any custom application metrics are automatically included in the exposed

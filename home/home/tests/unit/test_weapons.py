@@ -36,7 +36,7 @@ class MockValve(Valve):
 async def test_soaker_reverts_valves(message, change_history, was_running):
     valve = MockValve(was_running)
     soaker = Soaker(valve)
-    soaker.duration = timedelta(seconds=0)
+    Soaker.DURATION = timedelta(seconds=0)
     await soaker.soak('{"occupancy": true}')
     assert valve.change_history == change_history, message
 
@@ -54,8 +54,26 @@ async def test_soaker_reverts_valves(message, change_history, was_running):
 async def test_soaker_runs(message, runs, occupancy, mower_running):
     valve = MockValve(False)
     soaker = Soaker(valve)
-    soaker.duration = timedelta(seconds=0)
+    Soaker.DURATION = timedelta(seconds=0)
     with patch("home.weapons.facts.is_mower_running", new_callable=AsyncMock) as is_mower_running:
         is_mower_running.return_value = mower_running
         await soaker.soak(json.dumps({"occupancy": occupancy}))
     assert bool(valve.change_history) == runs, message
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("message", "runs", "anti_rebound"),
+    [
+        ("Should run once", 1, timedelta(seconds=1)),
+        ("Should run everytime", 3, timedelta(seconds=0)),
+    ]
+)
+async def test_soaker_anti_rebound(message, runs, anti_rebound):
+    valve = MockValve(True)
+    soaker = Soaker(valve)
+    Soaker.DURATION = timedelta(seconds=0)
+    Soaker.ANTI_REBOUND = anti_rebound
+    for _ in range(3):
+        await soaker.soak('{"occupancy": true}')
+    assert len(valve.change_history) == runs, message
