@@ -13,6 +13,13 @@
             "args": [
                 // "--log-level=DEBUG"
             ]
+        },
+        {
+            "name": "STOP",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/home",
+            "module": "home.emergency",
         }
     ]
 }

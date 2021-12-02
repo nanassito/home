@@ -9,7 +9,7 @@ from aioprometheus import MetricsMiddleware
 from aioprometheus.asgi.starlette import metrics
 from fastapi import FastAPI
 
-from home.lawn import BackyardIrrigation
+from home.lawn import Irrigation
 from home.model import Actionable
 from home.time import now
 from home.weapons import SOAKER_BACK, SOAKER_SIDE
@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 LOOPERS: list[type[Actionable]] = [
-    BackyardIrrigation,
+    Irrigation,
 ]
 CYCLE = timedelta(minutes=1)
 WEB = FastAPI()

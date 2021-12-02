@@ -22,9 +22,9 @@ class Schedule:
     over: timedelta
 
 
-class BackyardIrrigation(Actionable):
+class Irrigation(Actionable):
     ENABLED = True
-    LOG = log.getChild("BackyardIrrigation")
+    LOG = log.getChild("Irrigation")
     SCHEDULE = {
         VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=7)),
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=15), timedelta(days=3)),
@@ -33,11 +33,11 @@ class BackyardIrrigation(Actionable):
     }
 
     @property
-    def prom_label(self: "BackyardIrrigation") -> str:
+    def prom_label(self: "Irrigation") -> str:
         return "BackyardIrrigation"
 
     @classmethod
-    async def get_desired_state(cls: type["BackyardIrrigation"]) -> dict[Valve, bool]:
+    async def get_desired_state(cls: type["Irrigation"]) -> dict[Valve, bool]:
         if any([await facts.is_day_time(), await facts.is_mower_running()]):
             return {section: False for section in cls.SCHEDULE}
         for valve, schedule in cls.SCHEDULE.items():
@@ -48,15 +48,15 @@ class BackyardIrrigation(Actionable):
         return {v: False for v in cls.SCHEDULE}
 
     @classmethod
-    async def get_current_state(cls: type["BackyardIrrigation"]) -> dict[Valve, bool]:
+    async def get_current_state(cls: type["Irrigation"]) -> dict[Valve, bool]:
         return {valve: await valve.is_running() for valve in cls.SCHEDULE}
 
     @classmethod
     async def apply_state(
-        cls: type["BackyardIrrigation"], state: dict[Valve, bool]
+        cls: type["Irrigation"], state: dict[Valve, bool]
     ) -> None:
         if not cls.ENABLED:
-            cls.LOG.warning("BackyardIrrigation is disabled.")
+            cls.LOG.warning("Irrigation is disabled.")
             return
         cls.LOG.info("Applying changes on the backyard valves.")
         for valve, should_run in state.items():
