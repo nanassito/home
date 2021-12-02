@@ -26,20 +26,19 @@ class MockValve(Valve):
 
 
 @pytest.mark.asyncio
-async def test_soaker_reverts_valves():
-    was_running = MockValve(True)
-    was_not_running = MockValve(False)
-
-    class MockSoaker(Soaker):
-        VALVES = [was_running, was_not_running]
-        DURATION = timedelta(seconds=0)
-
-    await MockSoaker.soak('{"occupancy": true}')
-    assert was_running.change_history == [True], "This valve should remain open"
-    assert was_not_running.change_history == [
-        True,
-        False,
-    ], "This valve should have been closed"
+@pytest.mark.parametrize(
+    ("message", "change_history", "was_running"),
+    [
+        ("Should remain open", [True], True),
+        ("Should be closed", [True, False], False),
+    ]
+)
+async def test_soaker_reverts_valves(message, change_history, was_running):
+    valve = MockValve(was_running)
+    soaker = Soaker(valve)
+    soaker.duration = timedelta(seconds=0)
+    await soaker.soak('{"occupancy": true}')
+    assert valve.change_history == change_history, message
 
 
 @pytest.mark.asyncio
@@ -54,12 +53,9 @@ async def test_soaker_reverts_valves():
 )
 async def test_soaker_runs(message, runs, occupancy, mower_running):
     valve = MockValve(False)
-
-    class MockSoaker(Soaker):
-        VALVES = [valve]
-        DURATION = timedelta(seconds=0)
-
+    soaker = Soaker(valve)
+    soaker.duration = timedelta(seconds=0)
     with patch("home.weapons.facts.is_mower_running", new_callable=AsyncMock) as is_mower_running:
         is_mower_running.return_value = mower_running
-        await MockSoaker.soak(json.dumps({"occupancy": occupancy}))
+        await soaker.soak(json.dumps({"occupancy": occupancy}))
     assert bool(valve.change_history) == runs, message
