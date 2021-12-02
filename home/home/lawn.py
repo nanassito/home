@@ -41,7 +41,7 @@ class Irrigation(Actionable):
         if any([await facts.is_day_time(), await facts.is_mower_running()]):
             return {section: False for section in cls.SCHEDULE}
         for valve, schedule in cls.SCHEDULE.items():
-            promql = f'sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{schedule.over.days}d])'
+            promql = f'sum without(instance) (sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{schedule.over.days}d]))'
             runtime = timedelta(minutes=await prom_query_one(promql))
             if runtime < schedule.water_time:
                 return {v: (v == valve) for v in cls.SCHEDULE}
