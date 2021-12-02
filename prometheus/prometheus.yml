@@ -5,7 +5,7 @@ global:
 alerting:
   alertmanagers:
   - static_configs:
-    - targets: ['172.17.0.1:9093']
+    - targets: ['192.168.1.1:9093']
 
 rule_files:
   - "/etc/prometheus/alert_rules.yml"
@@ -16,8 +16,8 @@ scrape_configs:
       - targets: ['localhost:9090']
   - job_name: 'home'
     static_configs:
-      - targets: ['172.17.0.1:8000']
+      - targets: ['192.168.1.1:8000']
   - job_name: zigbee
     metrics_path: '/'
     static_configs:
-      - targets: ['172.17.0.1:9000']
+      - targets: ['192.168.1.1:9000']
