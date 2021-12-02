@@ -14,7 +14,7 @@ groups:
       - alert: Plusieurs valves fonctionnent en même temps
         expr: sum({topic=~"zigbee2mqtt_valve_.+", topic!~".+_set", __name__=~"mqtt_state.*"}) > 1
       - alert: L'arrosage fonctionne depuis trop longtemps
-        expr: {topic=~"zigbee2mqtt_valve_.+", topic!~".+_set", __name__=~"mqtt_state.*"} >= 1
+        expr: "{topic=~\"zigbee2mqtt_valve_.+\", topic!~\".+_set\", __name__=~\"mqtt_state.*\"} >= 1"
         for: 30m
       - alert: Batterie faible
         expr: mqtt_battery < 30
