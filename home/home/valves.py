@@ -17,7 +17,7 @@ _PROM_VALVE = Gauge(
 )
 
 
-@dataclass(frozen=True)
+@dataclass(unsafe_hash=True)
 class Valve:
     area: str
     line: int
