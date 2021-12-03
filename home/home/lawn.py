@@ -27,9 +27,9 @@ class Irrigation(Actionable):
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
         VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=7)),
-        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=15), timedelta(days=3)),
-        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=15), timedelta(days=3)),
-        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=15), timedelta(days=3)),
+        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=10), timedelta(days=5)),
+        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=10), timedelta(days=5)),
+        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=10), timedelta(days=5)),
     }
 
     @property
