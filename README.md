@@ -2,7 +2,7 @@
 Don't waste your time on this repo, this is very much useless to everyone but me and my family. This is the code and architecture that runs the House.
 
 # TODOs
-* [bug] If the Soaker triggers, then the backyard lawn will believe it needs to water all valves forever.
+* [bug] Irrigation can work for a minute at a time if the soaker consumed some times. It needs to be on a hysteresis
 * Deploy managed systemd files
 * Integrate rainfall data
 * Protect MQTT
