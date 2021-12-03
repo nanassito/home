@@ -5,8 +5,13 @@ from datetime import timedelta
 
 from home import facts
 from home.prometheus import COUNTER_NUM_RUNS
-from home.valves import VALVE_BACKYARD_SCHOOL, VALVE_BACKYARD_SIDE, Valve
 from home.time import now
+from home.valves import (
+    VALVE_BACKYARD_DECK,
+    VALVE_BACKYARD_SCHOOL,
+    VALVE_BACKYARD_SIDE,
+    Valve,
+)
 
 log = logging.getLogger(__name__)
 
@@ -44,4 +49,5 @@ class Soaker:
 
 
 SOAKER_SIDE = Soaker(VALVE_BACKYARD_SIDE)
-SOAKER_BACK = Soaker(VALVE_BACKYARD_SCHOOL)
+SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
+SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
