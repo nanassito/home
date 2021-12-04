@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 class Soaker:
     ENABLED = True
-    DURATION = timedelta(seconds=10)
+    DURATION = timedelta(seconds=5)
     ANTI_REBOUND = timedelta(minutes=2)
 
     def __init__(self: "Soaker", valve: Valve) -> None:
@@ -31,6 +31,7 @@ class Soaker:
 
     async def soak(self: "Soaker", message: str) -> None:
         if not Soaker.ENABLED:
+            self.log.warning("Disabled, ignoring the trigger.")
             return
         data = json.loads(message)
         if data["occupancy"]:
