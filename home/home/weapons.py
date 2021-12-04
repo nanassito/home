@@ -13,7 +13,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import API
+from home.web import API, WEB
 from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 class Soaker:
     ENABLED = True
-    DURATION = timedelta(seconds=5)
+    DURATION = timedelta(seconds=10)
     ANTI_REBOUND = timedelta(minutes=2)
 
     def __init__(self: "Soaker", valve: Valve) -> None:
@@ -71,7 +71,7 @@ async def http_get_soaker() -> _HttpSoakerSettings:
 
 
 def init():
-    @API.on_event("startup")
+    @WEB.on_event("startup")
     def _():
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak)

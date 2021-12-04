@@ -18,7 +18,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import API
+from home.web import API, WEB
 from starlette.responses import RedirectResponse
 
 log = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ async def http_post_irrigation(config: _HttpIrrigation) -> RedirectResponse:
 
 
 def init() -> None:
-    @API.on_event("startup")
+    @WEB.on_event("startup")
     def _():
         cycle = timedelta(minutes=1)
 

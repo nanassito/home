@@ -9,7 +9,7 @@ import yaml
 import home.lawn
 import home.prometheus
 import home.weapons
-from home.web import API
+from home.web import WEB
 
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
@@ -18,7 +18,7 @@ with (Path(__file__).parent / "logging.yaml").open() as fd:
 log = logging.getLogger(__name__)
 
 
-@API.on_event("startup")
+@WEB.on_event("startup")
 def _():
     def shutdown_on_error(loop, context):
         loop.default_exception_handler(context)
@@ -31,11 +31,4 @@ home.weapons.init()
 home.lawn.init()
 home.prometheus.init()
 
-web = FastAPI()
-web.mount("/api", API, name="api")
-web.mount(
-    "/",
-    StaticFiles(directory=str(Path("__file__").parent / "web"), html=True),
-    name="static",
-)
-uvicorn.run(web, host="0.0.0.0", port=8000, log_config=logging_cfg)
+uvicorn.run(WEB, host="0.0.0.0", port=8000, log_config=logging_cfg)
