@@ -2,7 +2,7 @@ set -eux
 
 
 cd /github/home/
-git pull
+git pull -s recursive -X theirs
 
 OLD_PROC=$(docker ps | grep "home:latest" | awk '{print $1}')
 docker build -t home home/

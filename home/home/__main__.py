@@ -38,4 +38,4 @@ web.mount(
     StaticFiles(directory=str(Path("__file__").parent / "web"), html=True),
     name="static",
 )
-uvicorn.run(web, port=8000, log_config=logging_cfg)
+uvicorn.run(web, host="0.0.0.0", port=8000, log_config=logging_cfg)
