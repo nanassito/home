@@ -8,6 +8,7 @@ from fastapi.applications import FastAPI
 from urllib_ext.parse import urlparse
 
 from home.utils import n_tries
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 PROMETHEUS_URL = urlparse("http://192.168.1.1:9090/")
@@ -51,6 +52,6 @@ async def prom_query_labels(query: str) -> list[dict[str, str]]:
         raise
 
 
-def init(web: FastAPI) -> None:
-    web.add_middleware(MetricsMiddleware)
-    web.add_route("/metrics", metrics)
+def init() -> None:
+    WEB.add_middleware(MetricsMiddleware)
+    WEB.add_route("/metrics", metrics)

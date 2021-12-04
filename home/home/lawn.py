@@ -1,9 +1,11 @@
 import asyncio
-import logging
 from dataclasses import dataclass
+import logging
 from datetime import timedelta
+from typing import Optional
 
-from fastapi.applications import FastAPI
+from fastapi import HTTPException
+from pydantic import BaseModel
 
 from home import facts
 from home.model import Actionable
@@ -16,6 +18,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 
@@ -68,8 +71,55 @@ class Irrigation(Actionable):
                 await valve.switch_off()
 
 
-def init(web: FastAPI) -> None:
-    @web.on_event("startup")
+class _HttpSchedule(BaseModel):
+    water_time_minutes: int
+    over_days: int
+
+
+class _HttpIrrigation(BaseModel):
+    enabled: Optional[bool]
+    valves: Optional[dict[str, _HttpSchedule]]
+
+
+def serialize_Irrigation():
+    return _HttpIrrigation(
+        enabled=Irrigation.ENABLED,
+        valves={
+            valve.area: _HttpSchedule(
+                water_time_minutes=int(schedule.water_time.total_seconds() / 60),
+                over_days=schedule.over.days,
+            )
+            for valve, schedule in Irrigation.SCHEDULE.items()
+        },
+    )
+
+
+@WEB.get("/lawn/irrigation", response_model=_HttpIrrigation)
+async def http_get_irrigation() -> _HttpIrrigation:
+    return serialize_Irrigation()
+
+
+@WEB.post("/lawn/irrigation", response_model=_HttpIrrigation)
+async def http_post_irrigation(config: _HttpIrrigation) -> _HttpIrrigation:
+    if config.enabled is not None:
+        Irrigation.ENABLED = config.enabled
+    area2valve = {valve.area: valve for valve in Irrigation.SCHEDULE}
+    for area, schedule in (config.valves or {}).items():
+        if area not in area2valve:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{area} isn't a valve that is part of the schedule.",
+            )
+        valve = area2valve[area]
+        Irrigation.SCHEDULE[valve] = Schedule(
+            water_time=timedelta(minutes=schedule.water_time_minutes),
+            over=timedelta(days=schedule.over_days),
+        )
+    return serialize_Irrigation()
+
+
+def init() -> None:
+    @WEB.on_event("startup")
     def _():
         cycle = timedelta(minutes=1)
 

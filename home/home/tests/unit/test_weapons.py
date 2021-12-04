@@ -3,6 +3,7 @@ from datetime import timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
 from home.valves import Valve
 from home.weapons import Soaker
 
@@ -31,7 +32,7 @@ class MockValve(Valve):
     [
         ("Should remain open", [True], True),
         ("Should be closed", [True, False], False),
-    ]
+    ],
 )
 async def test_soaker_reverts_valves(message, change_history, was_running):
     valve = MockValve(was_running)
@@ -55,7 +56,9 @@ async def test_soaker_runs(message, runs, occupancy, mower_running):
     valve = MockValve(False)
     soaker = Soaker(valve)
     Soaker.DURATION = timedelta(seconds=0)
-    with patch("home.weapons.facts.is_mower_running", new_callable=AsyncMock) as is_mower_running:
+    with patch(
+        "home.weapons.facts.is_mower_running", new_callable=AsyncMock
+    ) as is_mower_running:
         is_mower_running.return_value = mower_running
         await soaker.soak(json.dumps({"occupancy": occupancy}))
     assert bool(valve.change_history) == runs, message
@@ -67,7 +70,7 @@ async def test_soaker_runs(message, runs, occupancy, mower_running):
     [
         ("Should run once", 1, timedelta(seconds=1)),
         ("Should run everytime", 3, timedelta(seconds=0)),
-    ]
+    ],
 )
 async def test_soaker_anti_rebound(message, runs, anti_rebound):
     valve = MockValve(True)

@@ -39,7 +39,9 @@ class Valve:
         _PROM_VALVE.set(
             {"area": self.area, "line": str(self.line)}, self.should_be_running
         )
-        await mqtt_send("zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value})
+        await mqtt_send(
+            "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
+        )
         self.log.info(f"Switched {value}.")
 
     async def switch_on(self: "Valve") -> None:

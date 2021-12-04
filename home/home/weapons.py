@@ -13,6 +13,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 
@@ -54,9 +55,15 @@ SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 
 
-def init(web):
-    @web.on_event("startup")
+def init():
+    @WEB.on_event("startup")
     def _():
-        asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak))
-        asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak))
-        asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_DECK.soak))
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak)
+        )
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak)
+        )
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_DECK.soak)
+        )
