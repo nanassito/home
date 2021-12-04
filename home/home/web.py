@@ -1,3 +1,4 @@
 from fastapi import FastAPI
 
-WEB = FastAPI()
+
+API = FastAPI()

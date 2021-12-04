@@ -13,7 +13,9 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import WEB
+from home.web import API
+from starlette.responses import RedirectResponse
+from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
 
@@ -55,8 +57,22 @@ SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 
 
+class _HttpSoakerSettings(BaseModel):
+    enabled: bool
+
+@API.post("/weapons/soaker")
+async def http_post_soaker(settings: _HttpSoakerSettings) -> RedirectResponse:
+    Soaker.ENABLED = settings.enabled
+    return RedirectResponse("/")
+
+
+@API.get("/weapons/soaker")
+async def http_get_soaker() -> _HttpSoakerSettings:
+    return _HttpSoakerSettings(enabled=Soaker.ENABLED)
+
+
 def init():
-    @WEB.on_event("startup")
+    @API.on_event("startup")
     def _():
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak)

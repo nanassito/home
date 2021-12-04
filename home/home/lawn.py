@@ -18,7 +18,8 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import WEB
+from home.web import API
+from starlette.responses import RedirectResponse
 
 log = logging.getLogger(__name__)
 
@@ -81,7 +82,8 @@ class _HttpIrrigation(BaseModel):
     valves: Optional[dict[str, _HttpSchedule]]
 
 
-def serialize_Irrigation():
+@API.get("/lawn/irrigation", response_model=_HttpIrrigation)
+async def http_get_irrigation() -> _HttpIrrigation:
     return _HttpIrrigation(
         enabled=Irrigation.ENABLED,
         valves={
@@ -94,13 +96,8 @@ def serialize_Irrigation():
     )
 
 
-@WEB.get("/lawn/irrigation", response_model=_HttpIrrigation)
-async def http_get_irrigation() -> _HttpIrrigation:
-    return serialize_Irrigation()
-
-
-@WEB.post("/lawn/irrigation", response_model=_HttpIrrigation)
-async def http_post_irrigation(config: _HttpIrrigation) -> _HttpIrrigation:
+@API.post("/lawn/irrigation", response_model=_HttpIrrigation)
+async def http_post_irrigation(config: _HttpIrrigation) -> RedirectResponse:
     if config.enabled is not None:
         Irrigation.ENABLED = config.enabled
     area2valve = {valve.area: valve for valve in Irrigation.SCHEDULE}
@@ -115,11 +112,11 @@ async def http_post_irrigation(config: _HttpIrrigation) -> _HttpIrrigation:
             water_time=timedelta(minutes=schedule.water_time_minutes),
             over=timedelta(days=schedule.over_days),
         )
-    return serialize_Irrigation()
+    return RedirectResponse("/")
 
 
 def init() -> None:
-    @WEB.on_event("startup")
+    @API.on_event("startup")
     def _():
         cycle = timedelta(minutes=1)
 
