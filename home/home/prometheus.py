@@ -1,7 +1,10 @@
 import logging
 
 import aiohttp
+from aioprometheus import MetricsMiddleware
+from aioprometheus.asgi.starlette import metrics
 from aioprometheus.collectors import Counter
+from fastapi.applications import FastAPI
 from urllib_ext.parse import urlparse
 
 from home.utils import n_tries
@@ -46,3 +49,8 @@ async def prom_query_labels(query: str) -> list[dict[str, str]]:
     except Exception as err:
         log.debug(f"prom_query_one: {query} ...Failed: {err}")
         raise
+
+
+def init(web: FastAPI) -> None:
+    web.add_middleware(MetricsMiddleware)
+    web.add_route("/metrics", metrics)

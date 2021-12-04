@@ -1,10 +1,14 @@
+import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
+from fastapi.applications import FastAPI
+
 from home import facts
 from home.model import Actionable
 from home.prometheus import prom_query_one
+from home.time import now
 from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_HOUSE,
@@ -52,9 +56,7 @@ class Irrigation(Actionable):
         return {valve: await valve.is_running() for valve in cls.SCHEDULE}
 
     @classmethod
-    async def apply_state(
-        cls: type["Irrigation"], state: dict[Valve, bool]
-    ) -> None:
+    async def apply_state(cls: type["Irrigation"], state: dict[Valve, bool]) -> None:
         if not cls.ENABLED:
             cls.LOG.warning("Irrigation is disabled.")
             return
@@ -64,3 +66,28 @@ class Irrigation(Actionable):
                 await valve.switch_on()
             else:
                 await valve.switch_off()
+
+
+def init(web: FastAPI) -> None:
+    @web.on_event("startup")
+    def _():
+        cycle = timedelta(minutes=1)
+
+        async def controller_main_loop():
+            while True:
+                before = now()
+
+                desired_state = await Irrigation.get_desired_state()
+                if desired_state != await Irrigation.get_current_state():
+                    await Irrigation.apply_state(desired_state)
+
+                after = now()
+                duration = after - before
+                Irrigation.RUNTIME_MS_GAUGE.set(
+                    {"looper": "Irrigation"}, duration.total_seconds() * 1000
+                )
+                if duration > cycle:
+                    log.warning(f"Full cycle took {duration - cycle} too long.")
+                await asyncio.sleep((cycle - duration % cycle).total_seconds())
+
+        asyncio.create_task(controller_main_loop())

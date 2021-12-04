@@ -4,6 +4,7 @@ import logging
 from datetime import timedelta
 
 from home import facts
+from home.mqtt import watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS
 from home.time import now
 from home.valves import (
@@ -51,3 +52,11 @@ class Soaker:
 SOAKER_SIDE = Soaker(VALVE_BACKYARD_SIDE)
 SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
+
+
+def init(web):
+    @web.on_event("startup")
+    def _():
+        asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak))
+        asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak))
+        asyncio.create_task(watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_DECK.soak))
