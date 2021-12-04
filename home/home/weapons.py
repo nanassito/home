@@ -14,7 +14,6 @@ from home.valves import (
     Valve,
 )
 from home.web import API
-from starlette.responses import RedirectResponse
 from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
@@ -61,9 +60,8 @@ class _HttpSoakerSettings(BaseModel):
     enabled: bool
 
 @API.post("/weapons/soaker")
-async def http_post_soaker(settings: _HttpSoakerSettings) -> RedirectResponse:
+async def http_post_soaker(settings: _HttpSoakerSettings):
     Soaker.ENABLED = settings.enabled
-    return RedirectResponse("/")
 
 
 @API.get("/weapons/soaker")
