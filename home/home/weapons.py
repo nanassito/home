@@ -77,6 +77,7 @@ async def http_post_soaker(settings: _HttpSoakerSettings):
 def init():
     @WEB.on_event("startup")
     def _():
+        Soaker.FEATURE_FLAG.enable()
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak)
         )
