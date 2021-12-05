@@ -12,6 +12,7 @@ import home.lawn
 import home.prometheus
 import home.weapons
 from home.web import WEB
+from home.time import TimeZone
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
@@ -40,7 +41,16 @@ TEMPLATES = Jinja2Templates(directory=str(Path("__file__").parent / "templates")
 async def get_index(request: Request):
     return TEMPLATES.TemplateResponse(
         "index.html",
-        {"request": request, "soaker_enabled": home.weapons.Soaker.ENABLED},
+        {
+            "request": request,
+            "soaker": {
+                "enabled": home.weapons.Soaker.FEATURE_FLAG.enabled,
+                "last_runs": [
+                    (ts.astimezone(tz=TimeZone.PT.value).isoformat()[:16], area)
+                    for ts, area in home.weapons.Soaker.LAST_RUNS
+                ],
+            },
+        },
     )
 
 

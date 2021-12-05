@@ -1,7 +1,8 @@
 import asyncio
 import json
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
+from typing import Deque
 
 from pydantic import BaseModel
 
@@ -9,6 +10,7 @@ from home import facts
 from home.mqtt import watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS
 from home.time import now
+from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_SCHOOL,
@@ -21,9 +23,10 @@ log = logging.getLogger(__name__)
 
 
 class Soaker:
-    ENABLED = True
+    FEATURE_FLAG = FeatureFlag("Soaker")
     DURATION = timedelta(seconds=10)
     ANTI_REBOUND = timedelta(minutes=2)
+    LAST_RUNS: Deque[tuple[datetime, str]] = Deque([], maxlen=10)
 
     def __init__(self: "Soaker", valve: Valve) -> None:
         self.log = log.getChild("Soaker").getChild(valve.area)
@@ -31,7 +34,7 @@ class Soaker:
         self.last_activation = now() - Soaker.ANTI_REBOUND
 
     async def soak(self: "Soaker", message: str) -> None:
-        if not Soaker.ENABLED:
+        if Soaker.FEATURE_FLAG.disabled:
             self.log.warning("Disabled, ignoring the trigger.")
             return
         data = json.loads(message)
@@ -45,6 +48,7 @@ class Soaker:
             self.last_activation = now()
 
             COUNTER_NUM_RUNS.inc({"item": "Soaker"})
+            Soaker.LAST_RUNS.append((now(), self.valve.area))
             self.log.info("Soaking!")
             should_shutoff = not self.valve.should_be_running
             await self.valve.switch_on()
@@ -64,7 +68,10 @@ class _HttpSoakerSettings(BaseModel):
 
 @WEB.post("/api/weapons/soaker")
 async def http_post_soaker(settings: _HttpSoakerSettings):
-    Soaker.ENABLED = settings.enabled
+    if settings.enabled:
+        Soaker.FEATURE_FLAG.enable()
+    else:
+        Soaker.FEATURE_FLAG.disable()
 
 
 def init():

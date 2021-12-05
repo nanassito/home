@@ -7,10 +7,23 @@
 
     <body>
         <section id="weapons">
-            <h1>🔫</h1>
+            <h1>🦝</h1>
             <div>
                 <label class="enabled">Enabled</label>
-                <input id="soaker_enabled" type="checkbox" {{ "checked" if soaker_enabled else "" }}>
+                <input id="soaker_enabled" type="checkbox" {{ "checked" if soaker["enabled"] else "" }}>
+                <h2>Last activations:</h2>
+                <table>
+                    <tr>
+                        <th>When</th>
+                        <th>Where</th>
+                    </tr>
+                    {% for ts, area in soaker["last_runs"] %}
+                        <tr>
+                            <td>{{ts}}</td>
+                            <td>{{area}}</td>
+                        </tr>
+                    {% endfor %}
+                </table> 
             </div>
         </section>
 
