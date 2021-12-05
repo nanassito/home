@@ -7,6 +7,6 @@ from fastapi.staticfiles import StaticFiles
 WEB = FastAPI()
 WEB.mount(
     "/static",
-    StaticFiles(directory=str(Path("__file__").parent / "web"), html=True),
+    StaticFiles(directory=str(Path("__file__").parent / "static"), html=True),
     name="static",
 )
