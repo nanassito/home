@@ -1,11 +1,12 @@
 import asyncio
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from datetime import timedelta
 from typing import Optional
 
 from fastapi import HTTPException
 from pydantic import BaseModel
+from starlette.responses import RedirectResponse
 
 from home import facts
 from home.model import Actionable
@@ -18,8 +19,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import API, WEB
-from starlette.responses import RedirectResponse
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 
@@ -82,21 +82,7 @@ class _HttpIrrigation(BaseModel):
     valves: Optional[dict[str, _HttpSchedule]]
 
 
-@API.get("/lawn/irrigation", response_model=_HttpIrrigation)
-async def http_get_irrigation() -> _HttpIrrigation:
-    return _HttpIrrigation(
-        enabled=Irrigation.ENABLED,
-        valves={
-            valve.area: _HttpSchedule(
-                water_time_minutes=int(schedule.water_time.total_seconds() / 60),
-                over_days=schedule.over.days,
-            )
-            for valve, schedule in Irrigation.SCHEDULE.items()
-        },
-    )
-
-
-@API.post("/lawn/irrigation", response_model=_HttpIrrigation)
+@WEB.post("/api/lawn/irrigation", response_model=_HttpIrrigation)
 async def http_post_irrigation(config: _HttpIrrigation) -> RedirectResponse:
     if config.enabled is not None:
         Irrigation.ENABLED = config.enabled

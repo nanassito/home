@@ -3,6 +3,8 @@ import json
 import logging
 from datetime import timedelta
 
+from pydantic import BaseModel
+
 from home import facts
 from home.mqtt import watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS
@@ -13,8 +15,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import API, WEB
-from pydantic import BaseModel
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 
@@ -60,14 +61,10 @@ SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 class _HttpSoakerSettings(BaseModel):
     enabled: bool
 
-@API.post("/weapons/soaker")
+
+@WEB.post("/api/weapons/soaker")
 async def http_post_soaker(settings: _HttpSoakerSettings):
     Soaker.ENABLED = settings.enabled
-
-
-@API.get("/weapons/soaker")
-async def http_get_soaker() -> _HttpSoakerSettings:
-    return _HttpSoakerSettings(enabled=Soaker.ENABLED)
 
 
 def init():

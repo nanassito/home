@@ -14,8 +14,3 @@ document.querySelectorAll("#weapons input").forEach(function (checkbox) {
         document.location.pathname = "/"  // Force reload everything
     })
 })
-
-document.addEventListener("DOMContentLoaded", async () => {
-    var soaker = await (await fetch("/api/weapons/soaker")).json()
-    document.querySelector("#soaker_enabled").checked = soaker.enabled
-})
