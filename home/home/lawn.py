@@ -106,9 +106,22 @@ async def http_post_irrigation(config: _HttpIrrigation) -> RedirectResponse:
     return RedirectResponse("/")
 
 
+class _HttpIrrigationSettings(BaseModel):
+    enabled: bool
+
+
+@WEB.post("/api/lawn/irrigation")
+async def http_post_soaker(settings: _HttpIrrigationSettings):
+    if settings.enabled:
+        Irrigation.FEATURE_FLAG.enable()
+    else:
+        Irrigation.FEATURE_FLAG.disable()
+
+
 def init() -> None:
     @WEB.on_event("startup")
     def _():
+        Irrigation.FEATURE_FLAG.enable()
         cycle = timedelta(minutes=1)
 
         async def controller_main_loop():

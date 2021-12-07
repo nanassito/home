@@ -62,18 +62,6 @@ SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 
 
-class _HttpSoakerSettings(BaseModel):
-    enabled: bool
-
-
-@WEB.post("/api/weapons/soaker")
-async def http_post_soaker(settings: _HttpSoakerSettings):
-    if settings.enabled:
-        Soaker.FEATURE_FLAG.enable()
-    else:
-        Soaker.FEATURE_FLAG.disable()
-
-
 def init():
     @WEB.on_event("startup")
     def _():

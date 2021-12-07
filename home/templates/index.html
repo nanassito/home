@@ -2,15 +2,15 @@
 <html>
     <head>
         <title>Home</title>
-        <script type="module" src="/static/soaker.js" defer></script>
+        <script type="module" src="/static/app.js" defer></script>
     </head>
 
     <body>
         <section id="weapons">
             <h1>🦝</h1>
             <div>
-                <label class="enabled">Enabled</label>
-                <input id="soaker_enabled" type="checkbox" {{ "checked" if soaker["enabled"] else "" }}>
+                <label>Enabled</label>
+                <input class="feature_flag_switch" data-target="soaker" type="checkbox" {{ "checked" if soaker["enabled"] else "" }}>
                 <h2>Last activations:</h2>
                 <table>
                     <tr>
@@ -30,7 +30,8 @@
         <section id="irrigation">
             <h1>💧</h1>
             <div>
-                
+                <label>Enabled</label>
+                <input class="feature_flag_switch" data-target="irrigation" type="checkbox" {{ "checked" if irrigation["enabled"] else "" }}>
             </div>
         </section>
 

@@ -1,13 +1,15 @@
 import asyncio
 import logging
 from pathlib import Path
+from fastapi.exceptions import HTTPException
 
 import uvicorn
 import yaml
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-
+from pydantic import BaseModel
+from enum import Enum
 import home.lawn
 import home.prometheus
 import home.weapons
@@ -50,8 +52,31 @@ async def get_index(request: Request):
                     for ts, area in home.weapons.Soaker.LAST_RUNS
                 ],
             },
+            "irrigation": {
+                "enabled": home.lawn.Irrigation.FEATURE_FLAG.enabled,
+            },
         },
     )
+
+
+class _HttpFeatureFlag(BaseModel):
+    enabled: bool
+    target: str
+
+
+@WEB.post("/api/feature_flag")
+async def http_post_soaker(settings: _HttpFeatureFlag):
+    targets = {
+        "soaker": home.weapons.Soaker,
+        "irrigation": home.lawn.Irrigation,
+    }
+    if settings.target.lower() not in targets:
+        return HTTPException(400, detail=f"Invalid target: {settings.target}.")
+    target = targets[settings.target.lower()]
+    if settings.enabled:
+        target.FEATURE_FLAG.enable()
+    else:
+        target.FEATURE_FLAG.disable()
 
 
 uvicorn.run(WEB, host="0.0.0.0", port=8000, log_config=logging_cfg)
