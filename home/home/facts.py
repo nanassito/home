@@ -23,7 +23,7 @@ async def is_day_time() -> bool:
     return bool(is_day)
 
 
-_PROM_MOWER_STATUS_CODE = Gauge("mower_status_code", "home=1, mowing=7, others?")
+_PROM_MOWER_STATUS_CODE = Gauge("mower_status_code", "home=1, mowing=7, 30=going_home, others?")
 
 
 @n_tries(3)
@@ -37,7 +37,7 @@ async def is_mower_running() -> bool:
                 _PROM_MOWER_STATUS_CODE.set(
                     {"city": "east_palo_alto"}, rs["statusCode"]
                 )
-                return rs["statusCode"] == 7
+                return rs["statusCode"] in (7, 30)
     except Exception as err:
         log.debug(f"is_mower_running Failed: {err}")
         raise
