@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from enum import Enum
 from pathlib import Path
 
 import uvicorn
@@ -75,9 +74,9 @@ async def http_post_soaker(settings: _HttpFeatureFlag):
         return HTTPException(400, detail=f"Invalid target: {settings.target}.")
     target = targets[settings.target.lower()]
     if settings.enabled:
-        target.FEATURE_FLAG.enable()
+        target.FEATURE_FLAG.enable()  # type: ignore
     else:
-        target.FEATURE_FLAG.disable()
+        target.FEATURE_FLAG.disable()  # type: ignore
 
 
 uvicorn.run(WEB, host="0.0.0.0", port=8000, log_config=logging_cfg)
