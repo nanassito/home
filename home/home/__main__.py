@@ -22,7 +22,6 @@ with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
 
 log = logging.getLogger(__name__)
-GIT_VERSION = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
 STARTUP = now()
 
 
@@ -50,7 +49,6 @@ async def get_index(request: Request):
         {
             "request": request,
             "app": {
-                "version": GIT_VERSION,
                 "uptime": str((now() - STARTUP) // timedelta(seconds=1) * timedelta(seconds=1)),
             },
             "soaker": {
