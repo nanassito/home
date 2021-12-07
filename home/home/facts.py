@@ -23,7 +23,9 @@ async def is_day_time() -> bool:
     return bool(is_day)
 
 
-_PROM_MOWER_STATUS_CODE = Gauge("mower_status_code", "home=1, mowing=7, 30=going_home, others?")
+_PROM_MOWER_STATUS_CODE = Gauge(
+    "mower_status_code", "home=1, mowing=7, 30=going_home, others?"
+)
 
 
 @n_tries(3)

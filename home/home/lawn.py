@@ -77,47 +77,6 @@ class Irrigation(Actionable):
                 await valve.switch_off()
 
 
-class _HttpSchedule(BaseModel):
-    water_time_minutes: int
-    over_days: int
-
-
-class _HttpIrrigation(BaseModel):
-    enabled: Optional[bool]
-    valves: Optional[dict[str, _HttpSchedule]]
-
-
-@WEB.post("/api/lawn/irrigation", response_model=_HttpIrrigation)
-async def http_post_irrigation(config: _HttpIrrigation) -> RedirectResponse:
-    if config.enabled is not None:
-        Irrigation.ENABLED = config.enabled
-    area2valve = {valve.area: valve for valve in Irrigation.SCHEDULE}
-    for area, schedule in (config.valves or {}).items():
-        if area not in area2valve:
-            raise HTTPException(
-                status_code=422,
-                detail=f"{area} isn't a valve that is part of the schedule.",
-            )
-        valve = area2valve[area]
-        Irrigation.SCHEDULE[valve] = Schedule(
-            water_time=timedelta(minutes=schedule.water_time_minutes),
-            over=timedelta(days=schedule.over_days),
-        )
-    return RedirectResponse("/")
-
-
-class _HttpIrrigationSettings(BaseModel):
-    enabled: bool
-
-
-@WEB.post("/api/lawn/irrigation")
-async def http_post_soaker(settings: _HttpIrrigationSettings):
-    if settings.enabled:
-        Irrigation.FEATURE_FLAG.enable()
-    else:
-        Irrigation.FEATURE_FLAG.disable()
-
-
 def init() -> None:
     @WEB.on_event("startup")
     def _():

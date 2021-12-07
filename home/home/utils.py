@@ -1,5 +1,6 @@
 import logging
 from typing import Callable, Tuple, TypeVar
+
 from aioprometheus.collectors import Gauge
 
 log = logging.getLogger(__name__)

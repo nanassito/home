@@ -1,20 +1,21 @@
 import asyncio
 import logging
+from enum import Enum
 from pathlib import Path
-from fastapi.exceptions import HTTPException
 
 import uvicorn
 import yaml
 from fastapi import Request
+from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from enum import Enum
+
 import home.lawn
 import home.prometheus
 import home.weapons
-from home.web import WEB
 from home.time import TimeZone
+from home.web import WEB
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
