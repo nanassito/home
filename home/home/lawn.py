@@ -32,7 +32,7 @@ class Schedule:
 
 
 class Irrigation(Actionable):
-    FEATURE_FLAG = FeatureFlag("Soaker")
+    FEATURE_FLAG = FeatureFlag("Irrigation")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
         VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=7)),
