@@ -1,6 +1,5 @@
 import json
 import logging
-from abc import ABC, abstractmethod
 from typing import Callable
 
 from asyncio_mqtt import Client as Mqtt

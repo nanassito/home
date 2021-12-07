@@ -1,12 +1,9 @@
 import logging
-from asyncio import Lock
-from datetime import datetime, timedelta
 
 import aiohttp
 from aioprometheus import Gauge
 
 from home.prometheus import prom_query_one
-from home.time import now
 from home.utils import n_tries
 
 log = logging.getLogger(__name__)

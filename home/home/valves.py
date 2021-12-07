@@ -1,11 +1,8 @@
 import logging
-from dataclasses import dataclass, field
-from datetime import timedelta
+from dataclasses import dataclass
 
 from aioprometheus import Gauge
 
-from home import facts
-from home.model import Actionable
 from home.mqtt import mqtt_send
 from home.prometheus import prom_query_one
 

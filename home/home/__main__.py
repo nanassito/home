@@ -1,7 +1,6 @@
 import asyncio
-from datetime import timedelta
 import logging
-import subprocess
+from datetime import timedelta
 from pathlib import Path
 
 import uvicorn
@@ -49,7 +48,9 @@ async def get_index(request: Request):
         {
             "request": request,
             "app": {
-                "uptime": str((now() - STARTUP) // timedelta(seconds=1) * timedelta(seconds=1)),
+                "uptime": str(
+                    (now() - STARTUP) // timedelta(seconds=1) * timedelta(seconds=1)
+                ),
             },
             "soaker": {
                 "enabled": home.weapons.Soaker.FEATURE_FLAG.enabled,

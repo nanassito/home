@@ -4,8 +4,6 @@ import logging
 from datetime import datetime, timedelta
 from typing import Deque
 
-from pydantic import BaseModel
-
 from home import facts
 from home.mqtt import watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS
