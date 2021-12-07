@@ -12,6 +12,7 @@ from home import facts
 from home.model import Actionable
 from home.prometheus import prom_query_one
 from home.time import now
+from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_HOUSE,
@@ -31,7 +32,7 @@ class Schedule:
 
 
 class Irrigation(Actionable):
-    ENABLED = True
+    FEATURE_FLAG = FeatureFlag("Soaker")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
         VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=7)),
@@ -51,7 +52,11 @@ class Irrigation(Actionable):
         for valve, schedule in cls.SCHEDULE.items():
             promql = f'sum without(instance) (sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{schedule.over.days}d]))'
             runtime = timedelta(minutes=await prom_query_one(promql))
-            if runtime < schedule.water_time:
+            if runtime < schedule.water_time and valve.should_be_running:
+                # Valve is already running so let's keep it going.
+                return {v: (v == valve) for v in cls.SCHEDULE}
+            if runtime < schedule.water_time / 2:
+                # Valve isn't running so we'll wait a bit more to avoid watering a single minute.
                 return {v: (v == valve) for v in cls.SCHEDULE}
         return {v: False for v in cls.SCHEDULE}
 
@@ -61,7 +66,7 @@ class Irrigation(Actionable):
 
     @classmethod
     async def apply_state(cls: type["Irrigation"], state: dict[Valve, bool]) -> None:
-        if not cls.ENABLED:
+        if cls.FEATURE_FLAG.disabled:
             cls.LOG.warning("Irrigation is disabled.")
             return
         cls.LOG.info("Applying changes on the backyard valves.")
