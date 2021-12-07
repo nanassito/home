@@ -23,7 +23,7 @@
                             <td>{{area}}</td>
                         </tr>
                     {% endfor %}
-                </table> 
+                </table>
             </div>
         </section>
 
@@ -39,6 +39,24 @@
             <h1>🌡️</h1>
             <div>
                 
+            </div>
+        </section>
+
+        <section>
+            <h1>📱</h1>
+            <div>
+                <table>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                    {% for prop, value in app.items() %}
+                        <tr>
+                            <td>{{prop}}</td>
+                            <td>{{value}}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
         </section>
     </body>

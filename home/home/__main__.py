@@ -1,5 +1,7 @@
 import asyncio
+from datetime import timedelta
 import logging
+import subprocess
 from pathlib import Path
 
 import uvicorn
@@ -13,13 +15,15 @@ from pydantic import BaseModel
 import home.lawn
 import home.prometheus
 import home.weapons
-from home.time import TimeZone
+from home.time import TimeZone, now
 from home.web import WEB
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
 
 log = logging.getLogger(__name__)
+GIT_VERSION = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+STARTUP = now()
 
 
 @WEB.on_event("startup")
@@ -45,6 +49,10 @@ async def get_index(request: Request):
         "index.html",
         {
             "request": request,
+            "app": {
+                "version": GIT_VERSION,
+                "uptime": str((now() - STARTUP) // timedelta(seconds=1) * timedelta(seconds=1)),
+            },
             "soaker": {
                 "enabled": home.weapons.Soaker.FEATURE_FLAG.enabled,
                 "last_runs": [
