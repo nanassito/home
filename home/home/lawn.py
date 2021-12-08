@@ -61,6 +61,7 @@ class Irrigation(Actionable):
 
     @classmethod
     async def apply_state(cls: type["Irrigation"], state: dict[Valve, bool]) -> None:
+        cls.LOG.debug(f"apply_state({state})")
         if cls.FEATURE_FLAG.disabled:
             cls.LOG.warning("Irrigation is disabled.")
             return
