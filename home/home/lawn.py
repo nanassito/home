@@ -8,6 +8,8 @@ from home.model import Actionable
 from home.prometheus import prom_query_one
 from home.time import now
 from home.utils import FeatureFlag
+from pydantic import BaseModel
+from fastapi import HTTPException
 from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_HOUSE,
@@ -30,10 +32,10 @@ class Irrigation(Actionable):
     FEATURE_FLAG = FeatureFlag("Irrigation")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
-        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=7)),
-        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=10), timedelta(days=5)),
-        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=10), timedelta(days=5)),
-        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=10), timedelta(days=5)),
+        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=0), timedelta(days=30)),
+        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=0), timedelta(days=30)),
+        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=0), timedelta(days=30)),
+        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=0), timedelta(days=30)),
     }
 
     @property
@@ -71,6 +73,27 @@ class Irrigation(Actionable):
                 await valve.switch_on()
             else:
                 await valve.switch_off()
+
+
+class _HttpIrrigationValveSettings(BaseModel):
+    water_time_minutes: int
+    over_days: int
+
+
+class _HttpIrrigationSettings(BaseModel):
+    valves: dict[str, _HttpIrrigationValveSettings]
+
+
+@WEB.post("/api/lawn/irrigation")
+async def http_update_irrigation_settings(settings: _HttpIrrigationSettings):
+    schedule = {valve.area: setting for valve, setting in Irrigation.SCHEDULE.items()}
+    unknown_valves = settings.valves.keys() - schedule.keys()
+    if unknown_valves:
+        raise HTTPException(400, f"Unknown valves {unknown_valves}")
+    for area, setting in settings.valves.items():
+        schedule[area].water_time = timedelta(minutes=setting.water_time_minutes)
+        schedule[area].over = timedelta(days=setting.over_days)
+        # TODO: Find a way to expose this to Prometheus
 
 
 def init() -> None:
