@@ -61,6 +61,14 @@ async def get_index(request: Request):
             },
             "irrigation": {
                 "enabled": home.lawn.Irrigation.FEATURE_FLAG.enabled,
+                "settings": [
+                    (
+                        valve.area,
+                        int(schedule.water_time.total_seconds() / 60),
+                        schedule.over.days,
+                    )
+                    for valve, schedule in home.lawn.Irrigation.SCHEDULE.items()
+                ],
             },
         },
     )

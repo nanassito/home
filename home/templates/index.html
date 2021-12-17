@@ -32,6 +32,11 @@
             <div>
                 <label>Enabled</label>
                 <input class="feature_flag_switch" data-target="irrigation" type="checkbox" {{ "checked" if irrigation["enabled"] else "" }}>
+                <ul>
+                    {% for area, water, window in irrigation["settings"] %}
+                        <li data-area="{{area}}">Water near {{area}} for <input type="number" min="0" class="water_minutes" value="{{water}}"/> minutes every <input type="number" min="0" class="over" value="{{window}}"/> days.</li>
+                    {% endfor %}
+                </ul>
             </div>
         </section>
 
