@@ -10,6 +10,7 @@ git_version(){
 
 HOME_GIT_PREV=$(git_version home)
 PROM_GIT_PREV=$(git_version prometheus)
+NGINX_GIT_PREV=$(git_version nginx)
 
 
 git pull -s recursive -X theirs
@@ -24,4 +25,9 @@ fi
 if [ "${PROM_GIT_PREV}" != "$(git_version prometheus)" ]; then
     systemctl daemon-reload
     systemctl restart prometheus
+fi
+
+if [ "${NGINX_GIT_PREV}" != "$(git_version nginx)" ]; then
+    systemctl daemon-reload
+    systemctl restart nginx
 fi
