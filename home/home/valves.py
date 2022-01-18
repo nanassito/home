@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from dataclasses import dataclass
 
@@ -5,6 +6,7 @@ from aioprometheus import Gauge
 
 from home.mqtt import mqtt_send
 from home.prometheus import prom_query_one
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 
@@ -52,3 +54,19 @@ VALVE_BACKYARD_SIDE = Valve("side", 1)
 VALVE_BACKYARD_HOUSE = Valve("house", 2)
 VALVE_BACKYARD_SCHOOL = Valve("school", 3)
 VALVE_BACKYARD_DECK = Valve("deck", 4)
+
+
+def init():
+    @WEB.on_event("startup")
+    async def ensure_valves_off():
+        await asyncio.gather(
+            *[
+                valve.switch_off()
+                for valve in (
+                    VALVE_BACKYARD_DECK,
+                    VALVE_BACKYARD_HOUSE,
+                    VALVE_BACKYARD_HOUSE,
+                    VALVE_BACKYARD_SIDE,
+                )
+            ]
+        )

@@ -1,10 +1,8 @@
 import asyncio
-from curses.ascii import SO
-from http.client import HTTPException
 import json
 import logging
 from datetime import datetime, timedelta
-from re import S
+from http.client import HTTPException
 from typing import Deque
 
 from pydantic import BaseModel
@@ -69,7 +67,6 @@ SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 
 
-
 class _HttpSoakerSnooze(BaseModel):
     ttl_minutes: int
 
@@ -91,7 +88,7 @@ def init():
     @WEB.post("/api/soaker/snooze")
     async def http_post_soaker_snooze(settings: _HttpSoakerSnooze):
         if settings.ttl_minutes <= 0:
-            return HTTPException(400, detail="Snooze must be a positive number.")
+            return HTTPException(400, "Snooze must be a positive number.")
         snooze_ttl = timedelta(minutes=settings.ttl_minutes)
         Soaker.SNOOZE_UNTIL = now() + snooze_ttl
         log.info(f"Snoozing the soakers for {snooze_ttl}.")

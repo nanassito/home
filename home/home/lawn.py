@@ -3,13 +3,14 @@ import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
+from fastapi import HTTPException
+from pydantic import BaseModel
+
 from home import facts
 from home.model import Actionable
 from home.prometheus import prom_query_one
 from home.time import now
 from home.utils import FeatureFlag
-from pydantic import BaseModel
-from fastapi import HTTPException
 from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_HOUSE,
