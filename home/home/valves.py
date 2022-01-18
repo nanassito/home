@@ -33,7 +33,7 @@ class Valve:
         )
 
     async def _switch(self: "Valve", should_be_running: bool) -> None:
-        self.should_be_running = True
+        self.should_be_running = should_be_running
         value = "ON" if should_be_running else "OFF"
         _PROM_VALVE.set(
             {"area": self.area, "line": str(self.line)}, self.should_be_running
