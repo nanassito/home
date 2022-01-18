@@ -1,75 +1,78 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Home</title>
-        <script type="module" src="/static/app.js" defer></script>
-    </head>
 
-    <body>
-        <section id="weapons">
-            <h1>🦝</h1>
-            <div>
-                <form>
-                    <label>Enabled</label>
-                    <input class="feature_flag_switch" data-target="soaker" type="checkbox" {{ "checked" if soaker["enabled"] else "" }}>
-                </form>
-                <form>
-                    <label>Snooze for</label>
-                    <input id="soaker_snooze_minutes" type="number" min="0" value="5"> minutes
-                    <button id="soaker_snooze_btn">Snooze!</button>
-                </form>
-                <h2>Last activations:</h2>
-                <table>
-                    <tr>
-                        <th>When</th>
-                        <th>Where</th>
-                    </tr>
-                    {% for ts, area in soaker["last_runs"] %}
-                        <tr>
-                            <td>{{ts}}</td>
-                            <td>{{area}}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </section>
+<head>
+    <title>Home</title>
+    <script type="module" src="/static/app.js" defer></script>
+    <link rel="stylesheet" href="/static/app.css">
+</head>
 
-        <section id="irrigation">
-            <h1>💧</h1>
-            <div>
+<body>
+    <section id="weapons">
+        <h1>🦝</h1>
+        <div>
+            <form>
                 <label>Enabled</label>
-                <input class="feature_flag_switch" data-target="irrigation" type="checkbox" {{ "checked" if irrigation["enabled"] else "" }}>
-                <ul>
-                    {% for area, water, window in irrigation["settings"] %}
-                        <li data-area="{{area}}">Water near {{area}} for <input type="number" min="0" class="water_minutes" value="{{water}}"/> minutes every <input type="number" min="0" class="over" value="{{window}}"/> days.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </section>
+                <input class="feature_flag_switch" data-target="soaker" type="checkbox" {{ "checked" if soaker[ "enabled" ] else "" }}>
+            </form>
+            <form>
+                <label>Snooze for</label>
+                <input id="soaker_snooze_minutes" type="number" min="0" value="5"> minutes
+                <button id="soaker_snooze_btn">Snooze!</button>
+            </form>
+            <h2>Last activations:</h2>
+            <table>
+                <tr>
+                    <th>When</th>
+                    <th>Where</th>
+                </tr>
+                {% for ts, area in soaker["last_runs"] %}
+                <tr>
+                    <td>{{ts}}</td>
+                    <td>{{area}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </section>
 
-        <section id="temperature">
-            <h1>🌡️</h1>
-            <div>
-                
-            </div>
-        </section>
+    <section id="irrigation">
+        <h1>💧</h1>
+        <div>
+            <label>Enabled</label>
+            <input class="feature_flag_switch" data-target="irrigation" type="checkbox" {{ "checked" if irrigation[ "enabled" ] else "" }}>
+            <ul>
+                {% for area, water, window in irrigation["settings"] %}
+                <li data-area="{{area}}">Water near {{area}} for <input type="number" min="0" class="water_minutes" value="{{water}}" /> minutes every <input type="number" min="0" class="over" value="{{window}}" /> days.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
 
-        <section>
-            <h1>📱</h1>
-            <div>
-                <table>
-                    <tr>
-                        <th>Property</th>
-                        <th>Value</th>
-                    </tr>
-                    {% for prop, value in app.items() %}
-                        <tr>
-                            <td>{{prop}}</td>
-                            <td>{{value}}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </section>
-    </body>
+    <section id="temperature">
+        <h1>🌡️</h1>
+        <div>
+
+        </div>
+    </section>
+
+    <section>
+        <h1>📱</h1>
+        <div>
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+                {% for prop, value in app.items() %}
+                <tr>
+                    <td>{{prop}}</td>
+                    <td>{{value}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </section>
+</body>
+
 </html>

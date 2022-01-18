@@ -1,5 +1,5 @@
-document.querySelectorAll(".feature_flag_switch").forEach(function (checkbox) {
-    checkbox.addEventListener("click", async function () {
+document.querySelectorAll(".feature_flag_switch").forEach(function(checkbox) {
+    checkbox.addEventListener("click", async function() {
         try {
             await fetch("/api/feature_flag", {
                 method: "POST",
@@ -14,11 +14,11 @@ document.querySelectorAll(".feature_flag_switch").forEach(function (checkbox) {
         } catch (err) {
             alert("failed to save changes: " + err)
         }
-        document.location.pathname = "/"  // Force reload everything
+        document.location.pathname = "/" // Force reload everything
     })
 })
 
-document.querySelector("#soaker_snooze_btn").addEventListener("click", async function () {
+document.querySelector("#soaker_snooze_btn").addEventListener("click", async function() {
     try {
         await fetch("/api/soaker/snooze", {
             method: "POST",
@@ -32,5 +32,5 @@ document.querySelector("#soaker_snooze_btn").addEventListener("click", async fun
     } catch (err) {
         alert("failed to save changes: " + err)
     }
-    document.location.pathname = "/"  // Force reload everything
+    document.location.pathname = "/" // Force reload everything
 })
