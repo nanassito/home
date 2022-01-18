@@ -1,10 +1,14 @@
 import asyncio
+from curses.ascii import SO
+from http.client import HTTPException
 import json
 import logging
 from datetime import datetime, timedelta
+from re import S
 from typing import Deque
 
-from home import facts
+from pydantic import BaseModel
+
 from home.mqtt import watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS
 from home.time import now
@@ -24,6 +28,7 @@ class Soaker:
     FEATURE_FLAG = FeatureFlag("Soaker")
     DURATION = timedelta(seconds=10)
     ANTI_REBOUND = timedelta(minutes=2)
+    SNOOZE_UNTIL = now() - timedelta(minutes=1)
     LAST_RUNS: Deque[tuple[datetime, str]] = Deque([], maxlen=10)
 
     def __init__(self: "Soaker", valve: Valve) -> None:
@@ -35,11 +40,13 @@ class Soaker:
         if Soaker.FEATURE_FLAG.disabled:
             self.log.warning("Disabled, ignoring the trigger.")
             return
+        if Soaker.SNOOZE_UNTIL >= now():
+            self.log.warning(
+                "Snoozed until {Soaker.SNOOZE_UNTIL}, ignoring the trigger."
+            )
+            return
         data = json.loads(message)
         if data["occupancy"]:
-            if await facts.is_mower_running():
-                return
-
             if self.last_activation + Soaker.ANTI_REBOUND > now():
                 self.log.info("Anti-rebound is swallowing an activation.")
                 return
@@ -62,6 +69,11 @@ SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 
 
+
+class _HttpSoakerSnooze(BaseModel):
+    ttl_minutes: int
+
+
 def init():
     @WEB.on_event("startup")
     def _():
@@ -75,3 +87,11 @@ def init():
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_DECK.soak)
         )
+
+    @WEB.post("/api/soaker/snooze")
+    async def http_post_soaker_snooze(settings: _HttpSoakerSnooze):
+        if settings.ttl_minutes <= 0:
+            return HTTPException(400, detail="Snooze must be a positive number.")
+        snooze_ttl = timedelta(minutes=settings.ttl_minutes)
+        Soaker.SNOOZE_UNTIL = now() + snooze_ttl
+        log.info(f"Snoozing the soakers for {snooze_ttl}.")

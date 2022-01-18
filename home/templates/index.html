@@ -9,8 +9,15 @@
         <section id="weapons">
             <h1>🦝</h1>
             <div>
-                <label>Enabled</label>
-                <input class="feature_flag_switch" data-target="soaker" type="checkbox" {{ "checked" if soaker["enabled"] else "" }}>
+                <form>
+                    <label>Enabled</label>
+                    <input class="feature_flag_switch" data-target="soaker" type="checkbox" {{ "checked" if soaker["enabled"] else "" }}>
+                </form>
+                <form>
+                    <label>Snooze for</label>
+                    <input id="soaker_snooze_minutes" type="number" min="0" value="5"> minutes
+                    <button id="soaker_snooze_btn">Snooze!</button>
+                </form>
                 <h2>Last activations:</h2>
                 <table>
                     <tr>

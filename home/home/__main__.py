@@ -80,7 +80,7 @@ class _HttpFeatureFlag(BaseModel):
 
 
 @WEB.post("/api/feature_flag")
-async def http_post_soaker(settings: _HttpFeatureFlag):
+async def http_post_feature_flag(settings: _HttpFeatureFlag):
     targets = {
         "soaker": home.weapons.Soaker,
         "irrigation": home.lawn.Irrigation,
