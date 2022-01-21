@@ -1,10 +1,8 @@
 import logging
 
-import aiohttp
 from aioprometheus import Gauge
 
 from home.prometheus import prom_query_one
-from home.utils import n_tries
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +18,5 @@ async def is_day_time() -> bool:
     return is_day
 
 
-_PROM_MOWER_STATUS_CODE = Gauge(
-    "mower_status_code", "home=1, mowing=7, 30=going_home, others?"
-)
+async def is_night_time() -> bool:
+    return not await is_day_time()

@@ -5,6 +5,8 @@ Don't waste your time on this repo, this is very much useless to everyone but me
 * Deploy managed systemd files
 * Integrate rainfall data
 * Protect MQTT
+* Irrigation settings POST doesn't work
+* Move state to a db
 
 # Pie in the sky
 * Integrate weather forecast?

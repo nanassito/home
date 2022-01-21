@@ -53,13 +53,7 @@ class Soaker:
             COUNTER_NUM_RUNS.inc({"item": "Soaker"})
             Soaker.LAST_RUNS.append((now(), self.valve.area))
             self.log.info("Soaking!")
-            should_shutoff = not self.valve.should_be_running
-            self.log.debug(f"Turning on {self.valve} ({should_shutoff=})")
-            await self.valve.switch_on()
-            await asyncio.sleep(Soaker.DURATION.total_seconds())
-            if should_shutoff:
-                self.log.debug(f"Turning off {self.valve}")
-                await self.valve.switch_off()
+            self.valve.water_for(timedelta(seconds=10))
 
 
 SOAKER_SIDE = Soaker(VALVE_BACKYARD_SIDE)

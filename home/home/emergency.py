@@ -15,7 +15,7 @@ async def stop_all():
         VALVE_BACKYARD_SIDE,
         VALVE_BACKYARD_HOUSE,
     ]:
-        await valve.switch_off()
+        await valve.switch(False)
 
 
 asyncio.run(stop_all())
