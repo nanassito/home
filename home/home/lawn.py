@@ -33,10 +33,10 @@ class Irrigation(Actionable):
     FEATURE_FLAG = FeatureFlag("Irrigation")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
-        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=0), timedelta(days=30)),
-        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=0), timedelta(days=30)),
-        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=0), timedelta(days=30)),
-        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=0), timedelta(days=30)),
+        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=3), timedelta(days=7)),
+        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=3), timedelta(days=3)),
+        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=3), timedelta(days=3)),
+        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=3), timedelta(days=3)),
     }
 
     @property
