@@ -1,8 +1,8 @@
 import asyncio
-from datetime import datetime, timedelta
 import logging
-from dataclasses import dataclass
 import platform
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from aioprometheus import Gauge
 
@@ -28,6 +28,7 @@ class Valve:
         self.log = log.getChild("Valve").getChild(self.area)
         self.water_until_requests: list[datetime] = []
         self.request_lock = asyncio.Lock()
+        self.is_running = False
 
     async def water_for(self: "Valve", duration: timedelta) -> None:
         async with self.request_lock:
@@ -56,7 +57,7 @@ class Valve:
 
     async def run_forever(self: "Valve") -> None:
         await self.switch(False)
-        is_running = False
+        self.is_running = False
         while True:
             for _ in range(60):  # So that we pull external data only once a minute
                 async with self.request_lock:
@@ -64,11 +65,11 @@ class Valve:
                         until for until in self.water_until_requests if until > now()
                     ]
                 should_run = bool(self.water_until_requests)
-                if should_run != is_running:
+                if should_run != self.is_running:
                     await self.switch(should_run)
-                    is_running = should_run
+                    self.is_running = should_run
                 await asyncio.sleep(1)
-            is_running = await self.is_really_running()
+            self.is_running = await self.is_really_running()
 
 
 VALVE_BACKYARD_SIDE = Valve("side", 1)

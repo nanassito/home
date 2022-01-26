@@ -52,6 +52,8 @@ class Irrigation:
                         self.LOG.info(f"Requesting {duration} of water from {valve}")
                         await valve.water_for(duration)
                         break
+                    if valve.is_running:
+                        break  # If the valve is running we don't want to start another one.
             await asyncio.sleep(60)
 
 
