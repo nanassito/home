@@ -29,6 +29,12 @@ devices:
   '0x00158d0006f1316c':
     friendly_name: motion_back
   '0x00158d000800b65b':
-    friendly_name: ils_garage
+    friendly_name: contact_garage
   '0x00158d0007e1137a':
-    friendly_name: ils_salon
+    friendly_name: contact_livingroom
+  '0x00158d0007d11ff1':
+    friendly_name: contact_bedroom
+  '0x00158d0007d4c500':
+    friendly_name: motion_garage
+  '0x00158d0007dcbfa7':
+    friendly_name: motion_pergola
