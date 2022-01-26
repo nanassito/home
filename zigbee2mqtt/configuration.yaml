@@ -23,8 +23,12 @@ devices:
   '0x00158d000706885d':
     friendly_name: air_office
   '0x847127fffe90de4a':
-    friendly_name: 'valve_backyard'
+    friendly_name: valve_backyard
   '0x00158d0006f101ce':
     friendly_name: motion_side
   '0x00158d0006f1316c':
     friendly_name: motion_back
+  '0x00158d000800b65b':
+    friendly_name: ils_garage
+  '0x00158d0007e1137a':
+    friendly_name: ils_salon
