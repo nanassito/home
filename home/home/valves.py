@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 import logging
 from dataclasses import dataclass
+import platform
 
 from aioprometheus import Gauge
 
@@ -26,9 +27,11 @@ class Valve:
     def __post_init__(self: "Valve") -> None:
         self.log = log.getChild("Valve").getChild(self.area)
         self.water_until_requests: list[datetime] = []
+        self.request_lock = asyncio.Lock()
 
-    def water_for(self: "Valve", duration: timedelta) -> None:
-        self.water_until_requests.append(now() + duration)
+    async def water_for(self: "Valve", duration: timedelta) -> None:
+        async with self.request_lock:
+            self.water_until_requests.append(now() + duration)
 
     async def is_really_running(self: "Valve") -> bool:
         return bool(
@@ -40,9 +43,15 @@ class Valve:
     async def switch(self: "Valve", should_be_running: bool) -> None:
         value = "ON" if should_be_running else "OFF"
         _PROM_VALVE.set({"area": self.area, "line": str(self.line)}, should_be_running)
-        await mqtt_send(
-            "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
-        )
+        if platform.system() == "Darwin":
+            self.log.info(
+                "Fake mqtt send zigbee2mqtt/valve_backyard/set %s",
+                {f"state_l{self.line}": value},
+            )
+        else:
+            await mqtt_send(
+                "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
+            )
         self.log.info(f"Switched {value}.")
 
     async def run_forever(self: "Valve") -> None:
@@ -50,9 +59,10 @@ class Valve:
         is_running = False
         while True:
             for _ in range(60):  # So that we pull external data only once a minute
-                self.water_until_requests = [
-                    until for until in self.water_until_requests if until > now()
-                ]
+                async with self.request_lock:
+                    self.water_until_requests = [
+                        until for until in self.water_until_requests if until > now()
+                    ]
                 should_run = bool(self.water_until_requests)
                 if should_run != is_running:
                     await self.switch(should_run)
@@ -73,7 +83,7 @@ def init():
         all_valves = (
             VALVE_BACKYARD_DECK,
             VALVE_BACKYARD_HOUSE,
-            VALVE_BACKYARD_HOUSE,
+            VALVE_BACKYARD_SCHOOL,
             VALVE_BACKYARD_SIDE,
         )
         for valve in all_valves:

@@ -44,13 +44,13 @@ class Irrigation:
                 for valve, schedule in Irrigation.SCHEDULE.items():
                     promql = f'sum without(instance) (sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{schedule.over.days}d]))'
                     runtime = timedelta(minutes=await prom_query_one(promql))
-                    self.LOG.debug(f"{valve} has had {runtime} of water out of {schedule.water_time}")
+                    self.LOG.debug(
+                        f"{valve} has had {runtime} of water out of {schedule.water_time}"
+                    )
                     if runtime < schedule.water_time / 2:
                         duration = schedule.water_time - runtime
-                        self.LOG.info(
-                            f"Irrigation requesting {duration} of water on {valve}"
-                        )
-                        valve.water_for(duration)
+                        self.LOG.info(f"Requesting {duration} of water from {valve}")
+                        await valve.water_for(duration)
                         break
             await asyncio.sleep(60)
 

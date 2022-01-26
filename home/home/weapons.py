@@ -8,7 +8,7 @@ from typing import Deque
 from pydantic import BaseModel
 
 from home.mqtt import watch_mqtt_topic
-from home.prometheus import COUNTER_NUM_RUNS
+from home.prometheus import COUNTER_NUM_RUNS, prom_query_one
 from home.time import now
 from home.utils import FeatureFlag
 from home.valves import (
@@ -38,22 +38,35 @@ class Soaker:
         if Soaker.FEATURE_FLAG.disabled:
             self.log.warning("Disabled, ignoring the trigger.")
             return
+        if not json.loads(message)["occupancy"]:
+            return
         if Soaker.SNOOZE_UNTIL >= now():
             self.log.warning(
                 "Snoozed until {Soaker.SNOOZE_UNTIL}, ignoring the trigger."
             )
             return
-        data = json.loads(message)
-        if data["occupancy"]:
-            if self.last_activation + Soaker.ANTI_REBOUND > now():
-                self.log.info("Anti-rebound is swallowing an activation.")
-                return
-            self.last_activation = now()
+        if self.last_activation + Soaker.ANTI_REBOUND > now():
+            self.log.info("Anti-rebound, ignoring the trigger.")
+            return
+        if await prom_query_one("min(mqtt_contact)") == 0:
+            self.log.info("A door is opened, ignoring the trigger.")
+            return
+        self.last_activation = now()
 
-            COUNTER_NUM_RUNS.inc({"item": "Soaker"})
-            Soaker.LAST_RUNS.append((now(), self.valve.area))
-            self.log.info("Soaking!")
-            self.valve.water_for(timedelta(seconds=10))
+        COUNTER_NUM_RUNS.inc({"item": "Soaker", "soaker": self.valve.area})
+        Soaker.LAST_RUNS.append((now(), self.valve.area))
+        self.log.info("Soaking!")
+        await self.valve.water_for(timedelta(seconds=10))
+
+
+async def snooze(ttl: timedelta) -> None:
+    Soaker.SNOOZE_UNTIL = now() + ttl
+    log.info(f"Snoozing the soakers for {ttl}.")
+
+
+async def snooze_on_door_opening(message: str) -> None:
+    if not json.loads(message)["contact"]:
+        await snooze(timedelta(minutes=5))
 
 
 SOAKER_SIDE = Soaker(VALVE_BACKYARD_SIDE)
@@ -73,16 +86,26 @@ def init():
             watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak)
         )
         asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/motion_garage", SOAKER_SIDE.soak)
+        )
+        asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak)
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_DECK.soak)
+            watch_mqtt_topic("zigbee2mqtt/motion_pergola", SOAKER_DECK.soak)
+        )
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/contact_livingroom", snooze_on_door_opening)
+        )
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/contact_bedroom", snooze_on_door_opening)
+        )
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/contact_garage", snooze_on_door_opening)
         )
 
     @WEB.post("/api/soaker/snooze")
     async def http_post_soaker_snooze(settings: _HttpSoakerSnooze):
         if settings.ttl_minutes <= 0:
             return HTTPException(400, "Snooze must be a positive number.")
-        snooze_ttl = timedelta(minutes=settings.ttl_minutes)
-        Soaker.SNOOZE_UNTIL = now() + snooze_ttl
-        log.info(f"Snoozing the soakers for {snooze_ttl}.")
+        await snooze(timedelta(minutes=settings.ttl_minutes))
