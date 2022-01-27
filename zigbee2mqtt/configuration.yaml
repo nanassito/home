@@ -17,7 +17,7 @@ devices:
   '0xa4c1382cfb825490':
     friendly_name: air_outside
   '0x00158d0002ab2f3a':
-    friendly_name: power_bedroom_zaya_hvac
+    friendly_name: power_adhoc
   '0x00158d0007087c1a':
     friendly_name: air_parent
   '0x00158d000706885d':
