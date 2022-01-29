@@ -5,11 +5,18 @@
     <title>Home</title>
     <script type="module" src="/static/app.js" defer></script>
     <link rel="stylesheet" href="/static/app.css">
+    <meta name="viewport" content="width=device-width">
 </head>
 
 <body>
-    <section id="weapons">
-        <h1>🦝</h1>
+    <nav>
+        <a href="#soaker">🦝</a>
+        <a href="#irrigation">💧</a>
+        <a href="#temperature">🌡️</a>
+        <a href="#system">📱</a>
+    </nav>
+
+    <section id="soaker">
         <div>
             <form>
                 <label>Enabled</label>
@@ -37,7 +44,6 @@
     </section>
 
     <section id="irrigation">
-        <h1>💧</h1>
         <div>
             <label>Enabled</label>
             <input class="feature_flag_switch" data-target="irrigation" type="checkbox" {{ "checked" if irrigation[ "enabled" ] else "" }}>
@@ -51,14 +57,12 @@
     </section>
 
     <section id="temperature">
-        <h1>🌡️</h1>
         <div>
 
         </div>
     </section>
 
-    <section>
-        <h1>📱</h1>
+    <section id="system">
         <div>
             <table>
                 <tr>
