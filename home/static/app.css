@@ -12,6 +12,7 @@ nav {
 nav>a {
     width: 25%;
     text-align: center;
+    text-decoration: none;
 }
 
 body>section {
