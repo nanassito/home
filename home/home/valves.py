@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import platform
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -10,6 +9,7 @@ from home.mqtt import mqtt_send
 from home.prometheus import prom_query_one
 from home.time import now
 from home.web import WEB
+from home.facts import is_prod
 
 log = logging.getLogger(__name__)
 
@@ -44,14 +44,14 @@ class Valve:
     async def switch(self: "Valve", should_be_running: bool) -> None:
         value = "ON" if should_be_running else "OFF"
         _PROM_VALVE.set({"area": self.area, "line": str(self.line)}, should_be_running)
-        if platform.system() == "Darwin":
+        if is_prod():
+            await mqtt_send(
+                "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
+            )
+        else:
             self.log.info(
                 "Fake mqtt send zigbee2mqtt/valve_backyard/set %s",
                 {f"state_l{self.line}": value},
-            )
-        else:
-            await mqtt_send(
-                "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
             )
         self.log.info(f"Switched {value}.")
 

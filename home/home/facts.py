@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from aioprometheus import Gauge
 
@@ -20,3 +21,13 @@ async def is_day_time() -> bool:
 
 async def is_night_time() -> bool:
     return not await is_day_time()
+
+
+def is_prod() -> bool:
+    if Path("/.dockerenv").exists():
+        return True
+    with Path("/proc/self/cgroup").open() as fd:
+        while line := fd.readline():
+            if "docker" in line:
+                return True
+    return False
