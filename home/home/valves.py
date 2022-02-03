@@ -5,11 +5,11 @@ from datetime import datetime, timedelta
 
 from aioprometheus import Gauge
 
+from home.facts import is_prod
 from home.mqtt import mqtt_send
 from home.prometheus import prom_query_one
 from home.time import now
 from home.web import WEB
-from home.facts import is_prod
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +43,9 @@ class Valve:
 
     async def switch(self: "Valve", should_be_running: bool) -> None:
         value = "ON" if should_be_running else "OFF"
-        _PROM_VALVE.set({"area": self.area, "line": str(self.line)}, should_be_running)
+        _PROM_VALVE.set(
+            {"area": self.area, "line": str(self.line)}, int(should_be_running)
+        )
         if is_prod():
             await mqtt_send(
                 "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
