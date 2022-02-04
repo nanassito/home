@@ -7,6 +7,7 @@ Don't waste your time on this repo, this is very much useless to everyone but me
 * Protect MQTT
 * Irrigation settings POST doesn't work
 * Move state to a db
+* For heating, force the fan speed if outdoor temperature is <[5~7]°C
 
 # Pie in the sky
 * Integrate weather forecast?
