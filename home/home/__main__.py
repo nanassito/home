@@ -46,16 +46,21 @@ TEMPLATES = Jinja2Templates(directory=str(Path("__file__").parent / "templates")
 
 @WEB.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
-    music = {}
+    music = {
+        "Various-20_chansons_et_berçeuse_du_monde": [
+            "09.Italie-Cade_luliva.ogg",
+            "10.Grèce-I_trata_mas_i_Kourelou.ogg",
+        ]
+    }
     if is_prod():
         music = {
             album.name: [
                 song.name
-                for song in album.iterdir()
+                for song in sorted(album.iterdir())
                 if song.is_file()
                 if song.suffix == ".ogg"
             ]
-            for album in Path("/app/static/music").iterdir()
+            for album in sorted(Path("/app/static/music").iterdir())
         }
     return TEMPLATES.TemplateResponse(
         "index.html",
