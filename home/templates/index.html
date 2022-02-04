@@ -87,8 +87,9 @@
         <ul>
             {% for song in songs %}
             <li>
-                <audio control>
-                    <source src="/static/music/{{song}}" type="audio/ogg">
+                <p>{{song}}</p>
+                <audio controls>
+                    <source src="/static/music/{{album}}/{{song}}" type="audio/ogg">
                 </audio>
             </li>
             {% endfor %}
