@@ -84,16 +84,18 @@
     <section id="music">
         {% for album, songs in music.items() %}
         <h1>{{album}}</h1>
-        <ul>
+        <table>
             {% for song in songs %}
-            <li>
-                <p>{{song}}</p>
-                <audio controls>
-                    <source src="/static/music/{{album}}/{{song}}" type="audio/ogg">
-                </audio>
-            </li>
+            <tr>
+                <td>{{song}}</td>
+                <td>
+                    <audio controls>
+                        <source src="/static/music/{{album}}/{{song}}" type="audio/ogg">
+                    </audio>
+                </td>
+            </tr>
             {% endfor %}
-        </ul>
+        </table>
         {% endfor %}
     </section>
 </body>
