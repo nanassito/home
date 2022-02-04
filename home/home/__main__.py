@@ -15,6 +15,7 @@ import home.lawn
 import home.prometheus
 import home.valves
 import home.weapons
+from home.facts import is_prod
 from home.time import TimeZone, now
 from home.web import WEB
 
@@ -45,6 +46,17 @@ TEMPLATES = Jinja2Templates(directory=str(Path("__file__").parent / "templates")
 
 @WEB.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
+    music = {}
+    if is_prod():
+        music = {
+            album.name: [
+                song.name
+                for song in album.iterdir()
+                if song.is_file()
+                if song.suffix == ".ogg"
+            ]
+            for album in Path("/app/static/music").iterdir()
+        }
     return TEMPLATES.TemplateResponse(
         "index.html",
         {
@@ -72,6 +84,7 @@ async def get_index(request: Request):
                     for valve, schedule in home.lawn.Irrigation.SCHEDULE.items()
                 ],
             },
+            "music": music,
         },
     )
 

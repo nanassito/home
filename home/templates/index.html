@@ -15,6 +15,7 @@
         <a href="#irrigation">💧</a>
         <a href="#temperature">🌡️</a>
         <a href="#system">📱</a>
+        <a href="#music">📱</a>
     </nav>
 
     <section id="soaker">
@@ -78,6 +79,21 @@
                 {% endfor %}
             </table>
         </div>
+    </section>
+
+    <section id="music">
+        {% for album, songs in music.items() %}
+        <h1>{{album}}</h1>
+        <ul>
+            {% for song in songs %}
+            <li>
+                <audio control>
+                    <source src="/static/music/{{song}}" type="audio/ogg">
+                </audio>
+            </li>
+            {%% endfor %%}
+        </ul>
+        {% endfor %}
     </section>
 </body>
 
