@@ -1,23 +1,21 @@
 import asyncio
 import logging
-from datetime import timedelta
 from pathlib import Path
 
 import uvicorn
 import yaml
 from fastapi import Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
 import home.lawn
+import home.music
 import home.prometheus
 import home.valves
 import home.weapons
-import home.music
-from home.facts import is_prod
-from home.time import TimeZone, now
-from home.web import WEB, TEMPLATES
+from home.time import now
+from home.web import WEB
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
@@ -40,6 +38,11 @@ home.weapons.init()
 home.lawn.init()
 home.prometheus.init()
 home.music.init()
+
+
+@WEB.get("/", response_class=RedirectResponse)
+async def get_index(request: Request):
+    return "/soaker"
 
 
 class _HttpFeatureFlag(BaseModel):
