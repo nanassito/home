@@ -1,0 +1,22 @@
+nav {
+    font-size: xx-large;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+}
+
+audio {
+    width: inherit;
+}
+
+h1 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
+    width: 100%;
+}

@@ -1,0 +1,49 @@
+{% extends "base.html.jinja" %}
+<!--  -->
+{% block head %}
+<script type="module" src="/static/soaker.js?nocache" defer></script>
+{% endblock %}
+<!--  -->
+{% block content %}
+<section class="container-fluid">
+    <div class="form-check form-switch form-control-lg">
+        <label class="form-check-label" for="enabled">Enabled</label>
+        <input class="form-check-input" data-target="soaker" type="checkbox" role="switch" id="enabled" {% if enabled %}checked{% endif %}>
+    </div>
+</section>
+
+<section class="container-fluid">
+    <p>Snoozed until {{snoozed_until}}</p>
+</section>
+
+<section class="container-fluid" id="burst">
+    <h1>Burst</h1>
+    <div class="btn-group container-fluid" role="group" aria-label="Burst soakers">
+        <button type="button" class="btn btn-outline-primary" data-target="side">Side</button>
+        <button type="button" class="btn btn-outline-primary" data-target="house">House</button>
+        <button type="button" class="btn btn-outline-primary" data-target="school">School</button>
+        <button type="button" class="btn btn-outline-primary" data-target="deck">Deck</button>
+    </div>
+</section>
+
+<section class="container-fluid">
+    <h1>History</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">When</th>
+                <th scope="col">Where</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ts, area in last_runs %}
+            <tr>
+                <td>{{ts}}</td>
+                <td>{{area}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<!--  -->
+{% endblock %}

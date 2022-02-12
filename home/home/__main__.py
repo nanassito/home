@@ -8,16 +8,16 @@ import yaml
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 import home.lawn
 import home.prometheus
 import home.valves
 import home.weapons
+import home.music
 from home.facts import is_prod
 from home.time import TimeZone, now
-from home.web import WEB
+from home.web import WEB, TEMPLATES
 
 with (Path(__file__).parent / "logging.yaml").open() as fd:
     logging_cfg = yaml.load(fd.read(), yaml.Loader)
@@ -39,59 +39,7 @@ home.valves.init()
 home.weapons.init()
 home.lawn.init()
 home.prometheus.init()
-
-
-TEMPLATES = Jinja2Templates(directory=str(Path("__file__").parent / "templates"))
-
-
-@WEB.get("/", response_class=HTMLResponse)
-async def get_index(request: Request):
-    music = {
-        "Various-20_chansons_et_berçeuse_du_monde": [
-            "09.Italie-Cade_luliva.ogg",
-            "10.Grèce-I_trata_mas_i_Kourelou.ogg",
-        ]
-    }
-    if is_prod():
-        music = {
-            album.name: [
-                song.name
-                for song in sorted(album.iterdir())
-                if song.is_file()
-                if song.suffix == ".ogg"
-            ]
-            for album in sorted(Path("/app/static/music").iterdir())
-        }
-    return TEMPLATES.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "app": {
-                "uptime": str(
-                    (now() - STARTUP) // timedelta(seconds=1) * timedelta(seconds=1)
-                ),
-            },
-            "soaker": {
-                "enabled": home.weapons.Soaker.FEATURE_FLAG.enabled,
-                "last_runs": [
-                    (ts.astimezone(tz=TimeZone.PT.value).isoformat()[:16], area)
-                    for ts, area in home.weapons.Soaker.LAST_RUNS
-                ],
-            },
-            "irrigation": {
-                "enabled": home.lawn.Irrigation.FEATURE_FLAG.enabled,
-                "settings": [
-                    (
-                        valve.area,
-                        int(schedule.water_time.total_seconds() / 60),
-                        schedule.over.days,
-                    )
-                    for valve, schedule in home.lawn.Irrigation.SCHEDULE.items()
-                ],
-            },
-            "music": music,
-        },
-    )
+home.music.init()
 
 
 class _HttpFeatureFlag(BaseModel):

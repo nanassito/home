@@ -1,0 +1,12 @@
+{% extends "base.html.jinja" %}
+<!--  -->
+{% block content %}
+<section class="container-fluid">
+    <div class="form-check form-switch form-control-lg">
+        <label class="form-check-label" for="enabled">Enabled</label>
+        <input class="form-check-input" data-target="irrigation" type="checkbox" role="switch" id="enabled" {% if enabled %}checked{% endif %}>
+    </div>
+</section>
+
+<!--  -->
+{% endblock %}

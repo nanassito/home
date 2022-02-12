@@ -6,10 +6,12 @@ from http.client import HTTPException
 from typing import Deque
 
 from pydantic import BaseModel
+from fastapi import HTTPException, Request
+from fastapi.responses import HTMLResponse
 
 from home.mqtt import watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS, prom_query_one
-from home.time import now
+from home.time import TimeZone, now
 from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
@@ -17,7 +19,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import WEB
+from home.web import WEB, TEMPLATES
 
 log = logging.getLogger(__name__)
 
@@ -74,10 +76,6 @@ SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
 
 
-class _HttpSoakerSnooze(BaseModel):
-    ttl_minutes: int
-
-
 def init():
     @WEB.on_event("startup")
     def _():
@@ -104,8 +102,18 @@ def init():
             watch_mqtt_topic("zigbee2mqtt/contact_garage", snooze_on_door_opening)
         )
 
-    @WEB.post("/api/soaker/snooze")
-    async def http_post_soaker_snooze(settings: _HttpSoakerSnooze):
-        if settings.ttl_minutes <= 0:
-            return HTTPException(400, "Snooze must be a positive number.")
-        await snooze(timedelta(minutes=settings.ttl_minutes))
+    @WEB.get("/soaker", response_class=HTMLResponse)
+    async def get_soaker(request: Request):
+        return TEMPLATES.TemplateResponse(
+            "soaker.html.jinja",
+            {
+                "request": request,
+                "page": "Soaker",
+                "enabled": Soaker.FEATURE_FLAG.enabled,
+                "snoozed_until": Soaker.SNOOZE_UNTIL.astimezone(tz=TimeZone.PT.value).isoformat()[:16],
+                "last_runs": [
+                    (ts.astimezone(tz=TimeZone.PT.value).isoformat()[:16], area)
+                    for ts, area in Soaker.LAST_RUNS
+                ],
+            },
+        )

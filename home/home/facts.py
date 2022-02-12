@@ -26,8 +26,10 @@ async def is_night_time() -> bool:
 def is_prod() -> bool:
     if Path("/.dockerenv").exists():
         return True
-    with Path("/proc/self/cgroup").open() as fd:
-        while line := fd.readline():
-            if "docker" in line:
-                return True
+    cgroup = Path("/proc/self/cgroup")
+    if cgroup.exists():
+        with cgroup.open() as fd:
+            while line := fd.readline():
+                if "docker" in line:
+                    return True
     return False

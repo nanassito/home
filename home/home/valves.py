@@ -4,12 +4,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from aioprometheus import Gauge
+from fastapi import HTTPException
 
 from home.facts import is_prod
 from home.mqtt import mqtt_send
 from home.prometheus import prom_query_one
 from home.time import now
 from home.web import WEB
+from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +82,18 @@ VALVE_BACKYARD_SCHOOL = Valve("school", 3)
 VALVE_BACKYARD_DECK = Valve("deck", 4)
 
 
+class _HttpValve(BaseModel):
+    area: str
+
+
+_HTTP_VALVE_MAPPING = {
+    "side": VALVE_BACKYARD_SIDE,
+    "house": VALVE_BACKYARD_HOUSE,
+    "school": VALVE_BACKYARD_SCHOOL,
+    "deck": VALVE_BACKYARD_DECK,
+}
+
+
 def init():
     @WEB.on_event("startup")
     def start_valves_controllers():
@@ -91,3 +105,9 @@ def init():
         )
         for valve in all_valves:
             asyncio.create_task(valve.run_forever())
+
+    @WEB.post("/api/valve/burst")
+    async def http_post_soaker_snooze(valve: _HttpValve):
+        if valve.area not in _HTTP_VALVE_MAPPING:
+            return HTTPException(400, f"No known valve covering the {valve.area} area.")
+        await _HTTP_VALVE_MAPPING[valve.area].water_for(timedelta(seconds=10))

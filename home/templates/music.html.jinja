@@ -1,0 +1,27 @@
+<!--  -->
+{% extends "base.html.jinja" %}
+<!--  -->
+{% block content %}
+<!--  -->
+{% for album, songs in albums.items() %}
+<section class="container-fluid">
+    <h1>{{album}}</h1>
+    <ul class="list-group">
+        {% for song in songs %}
+        <a href="/music?album={{album}}&song={{song}}">
+            <li class="list-group-item {% if album == listen.album and song == listen.song %}active{% endif %}">{{song}}</li>
+        </a>
+        {% endfor %}
+    </ul>
+</section>
+{% endfor %}
+
+<footer>
+    <div class="container-fluid">
+        <audio controls autoplay>
+            <source src="https://static.epa.jaminais.fr/music/{{listen.album}}/{{listen.song}}" type="audio/ogg">
+        </audio>
+    </div>
+</footer>
+<!--  -->
+{% endblock %}
