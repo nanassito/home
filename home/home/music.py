@@ -4,8 +4,7 @@ from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from home.facts import is_prod
-from home.web import WEB, TEMPLATES
-
+from home.web import TEMPLATES, WEB
 
 if is_prod():
     MUSIC = {

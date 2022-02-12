@@ -5,13 +5,13 @@ from datetime import datetime, timedelta
 
 from aioprometheus import Gauge
 from fastapi import HTTPException
+from pydantic import BaseModel
 
 from home.facts import is_prod
 from home.mqtt import mqtt_send
 from home.prometheus import prom_query_one
 from home.time import now
 from home.web import WEB
-from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
 

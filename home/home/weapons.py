@@ -2,11 +2,9 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
-from http.client import HTTPException
 from typing import Deque
 
-from pydantic import BaseModel
-from fastapi import HTTPException, Request
+from fastapi import Request
 from fastapi.responses import HTMLResponse
 
 from home.mqtt import watch_mqtt_topic
@@ -19,7 +17,7 @@ from home.valves import (
     VALVE_BACKYARD_SIDE,
     Valve,
 )
-from home.web import WEB, TEMPLATES
+from home.web import TEMPLATES, WEB
 
 log = logging.getLogger(__name__)
 
@@ -110,7 +108,9 @@ def init():
                 "request": request,
                 "page": "Soaker",
                 "enabled": Soaker.FEATURE_FLAG.enabled,
-                "snoozed_until": Soaker.SNOOZE_UNTIL.astimezone(tz=TimeZone.PT.value).isoformat()[:16],
+                "snoozed_until": Soaker.SNOOZE_UNTIL.astimezone(
+                    tz=TimeZone.PT.value
+                ).isoformat()[:16],
                 "last_runs": [
                     (ts.astimezone(tz=TimeZone.PT.value).isoformat()[:16], area)
                     for ts, area in Soaker.LAST_RUNS

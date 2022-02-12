@@ -3,14 +3,11 @@ import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
-from fastapi import HTTPException
-from pydantic import BaseModel
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 
 from home import facts
 from home.prometheus import prom_query_one
-from home.time import now
 from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
@@ -18,7 +15,7 @@ from home.valves import (
     VALVE_BACKYARD_SCHOOL,
     VALVE_BACKYARD_SIDE,
 )
-from home.web import WEB, TEMPLATES
+from home.web import TEMPLATES, WEB
 
 log = logging.getLogger(__name__)
 
@@ -84,7 +81,7 @@ def init() -> None:
     def _():
         Irrigation.FEATURE_FLAG.enable()
         asyncio.create_task(Irrigation().run_forever())
-    
+
     @WEB.get("/irrigation", response_class=HTMLResponse)
     async def get_soaker(request: Request):
         return TEMPLATES.TemplateResponse(
