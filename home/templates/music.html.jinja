@@ -3,6 +3,12 @@
 <!--  -->
 {% block content %}
 <!--  -->
+<section class="container-fluid">
+    <audio controls autoplay>
+        <source src="https://static.epa.jaminais.fr/music/{{listen.album}}/{{listen.song}}" type="audio/ogg">
+    </audio>
+</section>
+
 {% for album, songs in albums.items() %}
 <section class="container-fluid">
     <h1>{{album}}</h1>
@@ -15,13 +21,5 @@
     </ul>
 </section>
 {% endfor %}
-
-<footer>
-    <div class="container-fluid">
-        <audio controls autoplay>
-            <source src="https://static.epa.jaminais.fr/music/{{listen.album}}/{{listen.song}}" type="audio/ogg">
-        </audio>
-    </div>
-</footer>
 <!--  -->
 {% endblock %}
