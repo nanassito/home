@@ -14,6 +14,7 @@ import home.music
 import home.prometheus
 import home.valves
 import home.weapons
+import home.air
 from home.time import now
 from home.web import WEB
 
@@ -38,11 +39,12 @@ home.weapons.init()
 home.lawn.init()
 home.prometheus.init()
 home.music.init()
+home.air.init()
 
 
 @WEB.get("/", response_class=RedirectResponse)
 async def get_index(request: Request):
-    return "/soaker"
+    return "/temperature"
 
 
 class _HttpFeatureFlag(BaseModel):

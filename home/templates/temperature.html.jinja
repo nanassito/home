@@ -1,0 +1,24 @@
+<!--  -->
+{% extends "base.html.jinja" %}
+<!--  -->
+{% block content %}
+<!--  -->
+<section class="container">
+    <div class="row">
+        {% for room in rooms %}
+        <div class="col-6 gy-4">
+            <div class="card text-center">
+                <div class="card-header">{{room.name}}</div>
+                <div class="card-body">
+                    <h1>{{room.current}}</h1>
+                    <span style="color: var(--bs-blue);">{{room.min_1d}}</span>
+                    <span> - </span>
+                    <span style="color: var(--bs-red);">{{room.max_1d}}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<!--  -->
+{% endblock %}
