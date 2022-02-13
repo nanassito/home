@@ -82,8 +82,9 @@ VALVE_BACKYARD_SCHOOL = Valve("school", 3)
 VALVE_BACKYARD_DECK = Valve("deck", 4)
 
 
-class _HttpValve(BaseModel):
+class _HttpValveRequest(BaseModel):
     area: str
+    duration_sec: int
 
 
 _HTTP_VALVE_MAPPING = {
@@ -106,8 +107,10 @@ def init():
         for valve in all_valves:
             asyncio.create_task(valve.run_forever())
 
-    @WEB.post("/api/valve/burst")
-    async def http_post_soaker_snooze(valve: _HttpValve):
-        if valve.area not in _HTTP_VALVE_MAPPING:
-            return HTTPException(400, f"No known valve covering the {valve.area} area.")
-        await _HTTP_VALVE_MAPPING[valve.area].water_for(timedelta(seconds=10))
+    @WEB.post("/api/valve/activate")
+    async def http_valve_activate(rq: _HttpValveRequest):
+        if rq.area not in _HTTP_VALVE_MAPPING:
+            return HTTPException(400, f"No known valve covering the {rq.area} area.")
+        if not 0 <= rq.duration_sec <= 15 * 60:
+            return HTTPException(400, "Duration must be between 0s and 15m.")
+        await _HTTP_VALVE_MAPPING[rq.area].water_for(timedelta(seconds=rq.duration_sec))

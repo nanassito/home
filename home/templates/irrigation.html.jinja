@@ -1,11 +1,31 @@
 {% extends "base.html.jinja" %}
 <!--  -->
+{% block head %}
+<script type="module" src="/static/irrigation.js?nocache" defer></script>
+{% endblock %}
+<!--  -->
 {% block content %}
 <section class="container-fluid">
     <div class="form-check form-switch form-control-lg">
         <label class="form-check-label" for="enabled">Enabled</label>
         <input class="form-check-input" data-target="irrigation" type="checkbox" role="switch" id="enabled" {% if enabled %}checked{% endif %}>
     </div>
+</section>
+
+<section class="container-fluid">
+    <h1>Force run:</h1>
+    <div class="input-group">
+        <select class="form-select form-select-lg" aria-label=".form-select-lg" id="zone">
+            <option value="side">Side</option>
+            <option value="house">House</option>
+            <option value="school">School</option>
+            <option value="deck" selected>Deck</option>
+        </select>
+        <span class="input-group-text">For</span>
+        <input type="number" class="form-control" id="duration" min="0" max="15" value="5">
+        <span class="input-group-text">minutes</span>
+    </div>
+    <button type="button" class="btn btn-primary float-end" id="start">Start</button>
 </section>
 
 <!--  -->

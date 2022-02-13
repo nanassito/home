@@ -1,4 +1,4 @@
-document.querySelectorAll("#burst button").forEach(function(btn) {
+document.querySelectorAll("#start").forEach(function(btn) {
     btn.addEventListener("click", async function() {
         btn.disabled = true
         try {
@@ -8,8 +8,8 @@ document.querySelectorAll("#burst button").forEach(function(btn) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    area: btn.dataset.target,
-                    duration_sec: 10,
+                    area: document.getElementById("zone").value,
+                    duration_sec: document.getElementById("duration").value * 60,
                 })
             });
         } catch (err) {
