@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
 import logging
 
 import aiohttp
 from aioprometheus import MetricsMiddleware
 from aioprometheus.asgi.starlette import metrics
 from aioprometheus.collectors import Counter
+from home.time import TimeZone, now
+from pytz import BaseTzInfo
 from urllib_ext.parse import urlparse
 
 from home.utils import n_tries
@@ -48,6 +51,35 @@ async def prom_query_labels(query: str) -> list[dict[str, str]]:
                 return value
     except Exception as err:
         log.debug(f"prom_query_one: {query} ...Failed: {err}")
+        raise
+
+
+@n_tries(3)
+async def prom_query_series(query: str, duration: timedelta, tz: BaseTzInfo | TimeZone = TimeZone.UTC) -> list[tuple[datetime, float]]:
+    tz = tz.value if isinstance(tz, TimeZone) else tz
+    end = now()
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                str(PROMETHEUS_URL / "/api/v1/query_range"),
+                params={
+                    "query": query,
+                    "start": (end - duration).isoformat(),
+                    "end": end.isoformat(),
+                    "step": 60,
+                },
+            ) as response:
+                rs = await response.json()
+                assert rs["status"] == "success", f"Prometheus API call failed: {rs}"
+                assert len(rs["data"]["result"]) == 1
+                values = [
+                    (datetime.fromtimestamp(ts, tz), float(val))
+                    for ts, val in rs["data"]["result"][0]["values"]
+                ]
+                log.debug(f"prom_query_series: {query} ...{len(values)}")
+                return values
+    except Exception as err:
+        log.debug(f"prom_query_series: {query} ...Failed: {err}")
         raise
 
 

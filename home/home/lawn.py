@@ -1,19 +1,25 @@
 import asyncio
+from base64 import b64encode
 import logging
+from collections import deque
 from dataclasses import dataclass
 from datetime import timedelta
+from home.time import TimeZone
 
+import plotly.express as px
 from fastapi import Request
 from fastapi.responses import HTMLResponse
+from pandas import DataFrame
 
 from home import facts
-from home.prometheus import prom_query_one
+from home.prometheus import prom_query_one, prom_query_series
 from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_HOUSE,
     VALVE_BACKYARD_SCHOOL,
     VALVE_BACKYARD_SIDE,
+    Valve,
 )
 from home.web import TEMPLATES, WEB
 
@@ -84,11 +90,28 @@ def init() -> None:
 
     @WEB.get("/irrigation", response_class=HTMLResponse)
     async def get_soaker(request: Request):
+        async def get_valve_history(valve: Valve) -> DataFrame:
+            df = DataFrame(
+                await prom_query_series(valve.prom_query, timedelta(days=7)),
+                columns=("ts", valve.area),
+            ).set_index("ts")
+            df["date"] = df.index.date
+            return df.groupby("date").sum()
+
+        valves = deque(Irrigation.SCHEDULE)
+        history = await get_valve_history(valves.pop())
+        while valves:
+            history = history.merge(await get_valve_history(valves.pop()), on="date")
         return TEMPLATES.TemplateResponse(
             "irrigation.html.jinja",
             {
                 "request": request,
                 "page": "Irrigation",
                 "enabled": Irrigation.FEATURE_FLAG.enabled,
+                "history": b64encode(
+                    px.imshow(
+                        history, color_continuous_scale="BuGn", zmin=0, zmax=10
+                    ).to_image("webp")
+                ).decode(),
             },
         )

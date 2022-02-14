@@ -32,16 +32,16 @@ class Valve:
         self.request_lock = asyncio.Lock()
         self.is_running = False
 
+    @property
+    def prom_query(self: "Valve") -> str:
+        return f'mqtt_state_l{self.line}{{topic!~".+_set"}}'
+
     async def water_for(self: "Valve", duration: timedelta) -> None:
         async with self.request_lock:
             self.water_until_requests.append(now() + duration)
 
     async def is_really_running(self: "Valve") -> bool:
-        return bool(
-            await prom_query_one(
-                f'mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_backyard"}}'
-            )
-        )
+        return bool(await prom_query_one(self.prom_query))
 
     async def switch(self: "Valve", should_be_running: bool) -> None:
         value = "ON" if should_be_running else "OFF"
