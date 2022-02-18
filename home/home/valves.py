@@ -23,6 +23,7 @@ _PROM_VALVE = Gauge(
 
 @dataclass(unsafe_hash=True)
 class Valve:
+    section: str
     area: str
     line: int
 
@@ -34,7 +35,7 @@ class Valve:
 
     @property
     def prom_query(self: "Valve") -> str:
-        return f'mqtt_state_l{self.line}{{topic!~".+_set"}}'
+        return f'mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_{self.section}"}}'
 
     async def water_for(self: "Valve", duration: timedelta) -> None:
         async with self.request_lock:
@@ -50,11 +51,11 @@ class Valve:
         )
         if is_prod():
             await mqtt_send(
-                "zigbee2mqtt/valve_backyard/set", {f"state_l{self.line}": value}
+                f"zigbee2mqtt/valve_{self.section}/set", {f"state_l{self.line}": value}
             )
         else:
             self.log.info(
-                "Fake mqtt send zigbee2mqtt/valve_backyard/set %s",
+                f"Fake mqtt send zigbee2mqtt/valve_{self.section}/set %s",
                 {f"state_l{self.line}": value},
             )
         self.log.info(f"Switched {value}.")
@@ -76,10 +77,14 @@ class Valve:
             self.is_running = await self.is_really_running()
 
 
-VALVE_BACKYARD_SIDE = Valve("side", 1)
-VALVE_BACKYARD_HOUSE = Valve("house", 2)
-VALVE_BACKYARD_SCHOOL = Valve("school", 3)
-VALVE_BACKYARD_DECK = Valve("deck", 4)
+VALVE_BACKYARD_SIDE = Valve("backyard", "side", 1)
+VALVE_BACKYARD_HOUSE = Valve("backyard", "house", 2)
+VALVE_BACKYARD_SCHOOL = Valve("backyard", "school", 3)
+VALVE_BACKYARD_DECK = Valve("backyard", "deck", 4)
+VALVE_FRONTYARD_STREET = Valve("frontyard", "street", 1)
+VALVE_FRONTYARD_DRIVEWAY = Valve("frontyard", "driveway", 2)
+VALVE_FRONTYARD_NEIGHBOR = Valve("frontyard", "neighbor", 3)
+VALVE_FRONTYARD_PLANTER = Valve("frontyard", "planter", 3)
 
 
 class _HttpValveRequest(BaseModel):
@@ -92,6 +97,10 @@ _HTTP_VALVE_MAPPING = {
     "house": VALVE_BACKYARD_HOUSE,
     "school": VALVE_BACKYARD_SCHOOL,
     "deck": VALVE_BACKYARD_DECK,
+    "street": VALVE_FRONTYARD_STREET,
+    "driveway": VALVE_FRONTYARD_DRIVEWAY,
+    "neighbor": VALVE_FRONTYARD_NEIGHBOR,
+    "planter": VALVE_FRONTYARD_PLANTER,
 }
 
 
@@ -103,6 +112,10 @@ def init():
             VALVE_BACKYARD_HOUSE,
             VALVE_BACKYARD_SCHOOL,
             VALVE_BACKYARD_SIDE,
+            VALVE_FRONTYARD_STREET,
+            VALVE_FRONTYARD_DRIVEWAY,
+            VALVE_FRONTYARD_NEIGHBOR,
+            VALVE_FRONTYARD_PLANTER,
         )
         for valve in all_valves:
             asyncio.create_task(valve.run_forever())

@@ -28,6 +28,7 @@ STARTUP = now()
 @WEB.on_event("startup")
 def _():
     def shutdown_on_error(loop, context):
+        loop.set_debug(True)
         loop.default_exception_handler(context)
         loop.stop()
 

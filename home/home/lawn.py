@@ -19,6 +19,10 @@ from home.valves import (
     VALVE_BACKYARD_HOUSE,
     VALVE_BACKYARD_SCHOOL,
     VALVE_BACKYARD_SIDE,
+    VALVE_FRONTYARD_DRIVEWAY,
+    VALVE_FRONTYARD_NEIGHBOR,
+    VALVE_FRONTYARD_PLANTER,
+    VALVE_FRONTYARD_STREET,
     Valve,
 )
 from home.web import TEMPLATES, WEB
@@ -40,6 +44,10 @@ class Irrigation:
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=3)),
+        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=5), timedelta(days=3)),
+        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=3)),
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=5), timedelta(days=3)),
+        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=2), timedelta(days=1)),
     }
 
     async def run_forever(self: "Irrigation") -> None:
