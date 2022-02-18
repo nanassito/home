@@ -38,3 +38,5 @@ devices:
     friendly_name: motion_garage
   '0x00158d0007dcbfa7':
     friendly_name: motion_pergola
+  '0xa4c138cb26b19b8a':
+    friendly_name: valve_frontyard
