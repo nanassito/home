@@ -54,7 +54,7 @@ class Irrigation:
         while True:
             if await facts.is_night_time():
                 for valve, schedule in Irrigation.SCHEDULE.items():
-                    promql = f'sum without(instance) (sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{schedule.over.days}d]))'
+                    promql = f'sum without(instance) (sum_over_time({valve.prom_query}[{schedule.over.days}d]))'
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
                         f"{valve} has had {runtime} of water out of {schedule.water_time}"
