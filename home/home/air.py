@@ -1,7 +1,8 @@
 from fastapi import Request
-from home.prometheus import prom_query_one
-from home.web import WEB, TEMPLATES
 from fastapi.responses import HTMLResponse
+
+from home.prometheus import prom_query_one
+from home.web import TEMPLATES, WEB
 
 
 def init():

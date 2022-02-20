@@ -1,14 +1,14 @@
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 
 import aiohttp
 from aioprometheus import MetricsMiddleware
 from aioprometheus.asgi.starlette import metrics
 from aioprometheus.collectors import Counter
-from home.time import TimeZone, now
 from pytz import BaseTzInfo
 from urllib_ext.parse import urlparse
 
+from home.time import TimeZone, now
 from home.utils import n_tries
 from home.web import WEB
 
@@ -55,7 +55,9 @@ async def prom_query_labels(query: str) -> list[dict[str, str]]:
 
 
 @n_tries(3)
-async def prom_query_series(query: str, duration: timedelta, tz: BaseTzInfo | TimeZone = TimeZone.UTC) -> list[tuple[datetime, float]]:
+async def prom_query_series(
+    query: str, duration: timedelta, tz: BaseTzInfo | TimeZone = TimeZone.UTC
+) -> list[tuple[datetime, float]]:
     tz = tz.value if isinstance(tz, TimeZone) else tz
     end = now()
     try:

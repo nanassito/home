@@ -9,12 +9,12 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
+import home.air
 import home.lawn
 import home.music
 import home.prometheus
 import home.valves
 import home.weapons
-import home.air
 from home.time import now
 from home.web import WEB
 

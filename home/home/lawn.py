@@ -1,10 +1,9 @@
 import asyncio
-from base64 import b64encode
 import logging
+from base64 import b64encode
 from collections import deque
 from dataclasses import dataclass
 from datetime import timedelta
-from home.time import TimeZone
 
 import plotly.express as px
 from fastapi import Request
@@ -13,6 +12,7 @@ from pandas import DataFrame
 
 from home import facts
 from home.prometheus import prom_query_one, prom_query_series
+from home.time import TimeZone
 from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
@@ -53,8 +53,13 @@ class Irrigation:
     async def run_forever(self: "Irrigation") -> None:
         while True:
             if await facts.is_night_time():
+                # Sigmoid tuned to that we water every day during drought and water half as often when super humid
+                promql = '2 / (1 + 2.71828 ^ -( avg_over_time(mqtt_humidity{topic="zigbee2mqtt_air_outside"}[7d]) * 0.05 -2.5) )'
+                humidity_factor = await prom_query_one(promql)
+                self.log.info(f"Humidity factor is {round(humidity_factor, 3)}")
                 for valve, schedule in Irrigation.SCHEDULE.items():
-                    promql = f'sum without(instance) (sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{schedule.over.days}d]))'
+                    days = round(schedule.over.days * humidity_factor)
+                    promql = f'sum without(instance) (sum_over_time(mqtt_state_l{valve.line}{{topic="zigbee2mqtt_valve_backyard"}}[{days}d]))'
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
                         f"{valve} has had {runtime} of water out of {schedule.water_time}"
@@ -97,7 +102,7 @@ def init() -> None:
         asyncio.create_task(Irrigation().run_forever())
 
     @WEB.get("/irrigation", response_class=HTMLResponse)
-    async def get_soaker(request: Request):
+    async def get_irrigation(request: Request):
         async def get_valve_history(valve: Valve) -> DataFrame:
             df = DataFrame(
                 await prom_query_series(valve.prom_query, timedelta(days=7)),
