@@ -56,7 +56,7 @@ class Irrigation:
                 # Sigmoid tuned to that we water every day during drought and water half as often when super humid
                 promql = '2 / (1 + 2.71828 ^ -( avg_over_time(mqtt_humidity{topic="zigbee2mqtt_air_outside"}[7d]) * 0.05 -2.5) )'
                 humidity_factor = await prom_query_one(promql)
-                self.log.info(f"Humidity factor is {round(humidity_factor, 3)}")
+                self.LOG.info(f"Humidity factor is {round(humidity_factor, 3)}")
                 for valve, schedule in Irrigation.SCHEDULE.items():
                     days = round(schedule.over.days * humidity_factor)
                     promql = f'sum without(instance) (sum_over_time({valve.prom_query}[{days}d]))'
