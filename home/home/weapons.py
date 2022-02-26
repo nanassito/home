@@ -88,9 +88,6 @@ def init():
             watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak)
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/motion_pergola", SOAKER_DECK.soak)
-        )
-        asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/contact_livingroom", snooze_on_door_opening)
         )
         asyncio.create_task(
