@@ -8,9 +8,6 @@ groups:
       - alert: Un capteur a planté
         expr: (rate(mqtt_message_total{topic=~"zigbee2mqtt_air_.+"}[1h])) * on() group_left() absent(6 <= hour() <= 14) == 0
         for: 1h
-      - alert: L'arrosage automatique fonctionne depuis trop longtemps
-        expr: sum by (topic)({__name__=~"mqtt_state_l[0-9]"}) > 0
-        for: 1h
       - alert: Plusieurs valves fonctionnent en même temps
         expr: sum({topic=~"zigbee2mqtt_valve_.+", topic!~".+_set", __name__=~"mqtt_state.*"}) > 1
         for: 2m
@@ -19,3 +16,6 @@ groups:
         for: 30m
       - alert: Batterie faible
         expr: mqtt_battery < 30
+      - alert: Le controle d'une valve a été perdu
+        expr: sum(valve_should_be_running) - sum({__name__=~"mqtt_state_l."}) > 1
+        for: 30m
