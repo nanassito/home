@@ -34,7 +34,7 @@ def init():
                             ),
                             1,
                         ),
-                        "link": f'https://prometheus.epa.jaminais.fr/graph?g0.expr=mqtt_temperature{{topic%3D"{topic}"}}&g0.tab=0&g0.range_input=1d'
+                        "link": f'https://prometheus.epa.jaminais.fr/graph?g0.expr=mqtt_temperature{{topic%3D"{topic}"}}&g0.tab=0&g0.range_input=1d',
                     }
                     for room, topic in {
                         "Zaya": "zigbee2mqtt_air_zaya",

@@ -59,7 +59,7 @@ class Irrigation:
                 self.LOG.info(f"Humidity factor is {round(humidity_factor, 3)}")
                 for valve, schedule in Irrigation.SCHEDULE.items():
                     days = round(schedule.over.days * humidity_factor)
-                    promql = f'sum without(instance) (sum_over_time({valve.prom_query}[{days}d]))'
+                    promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{days}d]))"
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
                         f"{valve} has had {runtime} of water out of {schedule.water_time}"

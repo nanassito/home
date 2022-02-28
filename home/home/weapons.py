@@ -42,7 +42,7 @@ class Soaker:
             return
         if Soaker.SNOOZE_UNTIL >= now():
             self.log.warning(
-                "Snoozed until {Soaker.SNOOZE_UNTIL}, ignoring the trigger."
+                f"Snoozed until {Soaker.SNOOZE_UNTIL}, ignoring the trigger."
             )
             return
         if self.last_activation + Soaker.ANTI_REBOUND > now():
