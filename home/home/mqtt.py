@@ -5,9 +5,9 @@ from typing import Callable
 
 from asyncio_mqtt import Client as Mqtt
 from asyncio_mqtt import MqttError
-from home.home import web
 
 from home.utils import n_tries
+from home.web import WEB
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ async def handle_zigbee_error(message: str) -> None:
 
 
 def init() -> None:
-    @web.on_event("startup")
+    @WEB.on_event("startup")
     def _():
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/bridge/log", handle_zigbee_error)

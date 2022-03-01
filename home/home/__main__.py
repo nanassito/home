@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 import home.air
 import home.lawn
+import home.mqtt
 import home.music
 import home.prometheus
 import home.valves
@@ -41,6 +42,7 @@ home.lawn.init()
 home.prometheus.init()
 home.music.init()
 home.air.init()
+home.mqtt.init()
 
 
 @WEB.get("/", response_class=RedirectResponse)

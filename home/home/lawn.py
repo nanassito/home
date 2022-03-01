@@ -65,7 +65,9 @@ class Irrigation:
                         f"{valve} has had {runtime} of water out of {schedule.water_time}"
                     )
                     if runtime < schedule.water_time / 2:
-                        self.LOG.info(f"Requesting {schedule.water_time} of water from {valve}")
+                        self.LOG.info(
+                            f"Requesting {schedule.water_time} of water from {valve}"
+                        )
                         await valve.water_for(schedule.water_time)
                         break
                     if valve.is_running:
