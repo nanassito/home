@@ -1,9 +1,11 @@
+import asyncio
 import json
 import logging
 from typing import Callable
 
 from asyncio_mqtt import Client as Mqtt
 from asyncio_mqtt import MqttError
+from home.home import web
 
 from home.utils import n_tries
 
@@ -31,3 +33,15 @@ async def watch_mqtt_topic(topic: str, callback: Callable[[bytes], None]):
             await _watch_mqtt_topic()
         except MqttError as err:
             log.warning(f"Got an issue with mqtt: {err}")
+
+
+async def handle_zigbee_error(message: str) -> None:
+    log.error(message)
+
+
+def init() -> None:
+    @web.on_event("startup")
+    def _():
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/bridge/log", handle_zigbee_error)
+        )
