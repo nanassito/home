@@ -1,6 +1,8 @@
 import asyncio
 import logging
 from pathlib import Path
+from time import time_ns
+from aioprometheus import Histogram
 
 import uvicorn
 import yaml
@@ -24,6 +26,11 @@ with (Path(__file__).parent / "logging.yaml").open() as fd:
 
 log = logging.getLogger(__name__)
 STARTUP = now()
+_PROM_ASYNCIO_LATENCY = Histogram(
+    "asyncio_latency_ns",
+    "ns level deviance between the asyncio event loop and the wall clock.",
+    buckets=[10**i for i in range(3, 9)],
+)
 
 
 @WEB.on_event("startup")
@@ -33,7 +40,14 @@ def _():
         loop.default_exception_handler(context)
         loop.stop()
 
+    async def monitor_event_loop_latency():
+        while True:
+            before = time_ns()
+            await asyncio.sleep(1)
+            _PROM_ASYNCIO_LATENCY.observe({}, time_ns() - before - 1_000_000_000)
+
     asyncio.get_event_loop().set_exception_handler(shutdown_on_error)
+    asyncio.create_task(monitor_event_loop_latency())
 
 
 home.valves.init()
