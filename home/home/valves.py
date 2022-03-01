@@ -84,7 +84,7 @@ VALVE_BACKYARD_DECK = Valve("backyard", "deck", 4)
 VALVE_FRONTYARD_STREET = Valve("frontyard", "street", 1)
 VALVE_FRONTYARD_DRIVEWAY = Valve("frontyard", "driveway", 2)
 VALVE_FRONTYARD_NEIGHBOR = Valve("frontyard", "neighbor", 3)
-VALVE_FRONTYARD_PLANTER = Valve("frontyard", "planter", 3)
+VALVE_FRONTYARD_PLANTER = Valve("frontyard", "planter", 4)
 
 
 class _HttpValveRequest(BaseModel):
