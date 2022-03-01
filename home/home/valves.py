@@ -75,6 +75,8 @@ class Valve:
                     self.is_running = should_run
                 await asyncio.sleep(1)
             self.is_running = await self.is_really_running()
+            outstanding = [rq - now() for rq in self.water_until_requests]
+            self.log.debug(f"Outstanding watering requests: {outstanding}")
 
 
 VALVE_BACKYARD_SIDE = Valve("backyard", "side", 1)
