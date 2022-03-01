@@ -2,10 +2,10 @@ version: 1
 disable_existing_loggers: false
 formatters:
   simple:
-    format: "%(levelname)-7s | %(name)-25s | %(message)s"
+    format: "%(levelname)-7s | %(name)-26s | %(message)s"
   colored:
     "()": "colorlog.ColoredFormatter"
-    format: "%(log_color)s%(levelname)-7s | %(name)-25s | %(message)s"
+    format: "%(log_color)s%(levelname)-7s | %(name)-26s | %(message)s"
 handlers:
   console:
     class: logging.StreamHandler
