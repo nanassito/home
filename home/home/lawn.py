@@ -58,8 +58,8 @@ class Irrigation:
                 humidity_factor = await prom_query_one(promql)
                 self.LOG.info(f"Humidity factor is {round(humidity_factor, 3)}")
                 for valve, schedule in Irrigation.SCHEDULE.items():
-                    days = round(schedule.over.days * humidity_factor)
-                    promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{days}d]))"
+                    hours = round(schedule.over.days * 24 * humidity_factor)
+                    promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{hours}h]))"
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
                         f"{valve} has had {runtime} of water out of {schedule.water_time}"
@@ -72,27 +72,6 @@ class Irrigation:
                     if valve.is_running:
                         break  # If the valve is running we don't want to start another one.
             await asyncio.sleep(60)
-
-
-# class _HttpIrrigationValveSettings(BaseModel):
-#     water_time_minutes: int
-#     over_days: int
-
-
-# class _HttpIrrigationSettings(BaseModel):
-#     valves: dict[str, _HttpIrrigationValveSettings]
-
-
-# @WEB.post("/api/lawn/irrigation")
-# async def http_update_irrigation_settings(settings: _HttpIrrigationSettings):
-#     schedule = {valve.area: setting for valve, setting in Irrigation.SCHEDULE.items()}
-#     unknown_valves = settings.valves.keys() - schedule.keys()
-#     if unknown_valves:
-#         raise HTTPException(400, f"Unknown valves {unknown_valves}")
-#     for area, setting in settings.valves.items():
-#         schedule[area].water_time = timedelta(minutes=setting.water_time_minutes)
-#         schedule[area].over = timedelta(days=setting.over_days)
-#         # TODO: Find a way to expose this to Prometheus
 
 
 def init() -> None:
