@@ -12,7 +12,6 @@ from pandas import DataFrame
 
 from home import facts
 from home.prometheus import prom_query_one, prom_query_series
-from home.time import TimeZone
 from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
@@ -44,9 +43,9 @@ class Irrigation:
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=3)),
-        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=7), timedelta(days=3)),
-        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=7), timedelta(days=3)),
-        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=7), timedelta(days=3)),
+        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
+        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=5), timedelta(days=1)),
         # VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=2), timedelta(days=1)),
     }
 
