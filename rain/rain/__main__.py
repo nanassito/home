@@ -56,8 +56,8 @@ class RainCollector(object):
             case 1:  # success
                 for station in data["STATION"]:
                     for obs in station["OBSERVATIONS"]["precipitation"]:
-                        self.last_values[station["NAME"]] = obs["total"]
-                        c.add_metric([station["NAME"]], obs["total"])
+                        self.last_values[station["STID"]] = obs["total"]
+                        c.add_metric([station["STID"]], obs["total"])
             case 2:  # No data in the requested range
                 for station in self.stations:
                     c.add_metric([station], 0)
