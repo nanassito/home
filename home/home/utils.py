@@ -37,7 +37,9 @@ def retry(
 
 
 def n_tries(n: int):
-    return retry(n, lambda _err, state: (state > 1, state - 1))
+    return retry(
+        n, lambda _err, remaining_tries: (remaining_tries > 1, remaining_tries - 1)
+    )
 
 
 class FeatureFlag:
