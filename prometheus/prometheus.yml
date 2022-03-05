@@ -19,6 +19,7 @@ scrape_configs:
       - targets: ['192.168.1.1:8000']
   - job_name: 'rain'
     scrape_interval: 10m
+    metrics_path: '/'
     static_configs:
       - targets: ['192.168.1.1:8001']
   - job_name: zigbee
