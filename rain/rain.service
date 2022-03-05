@@ -1,0 +1,16 @@
+[Unit]
+Description=Rain
+After=docker.service
+Requires=prometheus.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 8001:8001 \
+        rain:latest
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

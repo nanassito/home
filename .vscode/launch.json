@@ -12,7 +12,7 @@
             "module": "home",
             "args": [
                 // "--log-level=DEBUG"
-            ]
+            ],
         },
         {
             "name": "STOP",
@@ -20,6 +20,13 @@
             "request": "launch",
             "cwd": "${workspaceFolder}/home",
             "module": "home.emergency",
+        },
+        {
+            "name": "rain",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/rain",
+            "module": "rain",
         }
     ]
 }

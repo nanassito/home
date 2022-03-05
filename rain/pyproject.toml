@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "rain"
+version = "0.1.0"
+description = "Expose rainfall data to Prometheus"
+authors = ["Dorian Jaminais-Grellier <dorian@jaminais.fr>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+prometheus-client = "^0.13.1"
+requests = "^2.27.1"
+
+[tool.poetry.dev-dependencies]
+isort = "^5.10.1"
+ipython = "^8.1.1"
+black = "^22.1.0"
+mypy = "^0.931"
+types-requests = "^2.27.11"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
