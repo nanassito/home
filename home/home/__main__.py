@@ -2,10 +2,10 @@ import asyncio
 import logging
 from pathlib import Path
 from time import time_ns
-from aioprometheus import Histogram
 
 import uvicorn
 import yaml
+from aioprometheus import Histogram
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
@@ -29,7 +29,7 @@ STARTUP = now()
 _PROM_ASYNCIO_LATENCY = Histogram(
     "asyncio_latency_ns",
     "ns level deviance between the asyncio event loop and the wall clock.",
-    buckets=[10**i for i in range(3, 9)],
+    buckets=[10 ** i for i in range(3, 9)],
 )
 
 

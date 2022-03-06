@@ -1,10 +1,10 @@
 import asyncio
-from enum import Enum
 import logging
 from base64 import b64encode
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
+from enum import Enum
 
 import plotly.express as px
 from fastapi import Request
@@ -38,8 +38,11 @@ class ScheduleModifiers(Enum):
 class Schedule:
     water_time: timedelta
     over: timedelta
-    modifiers: set[ScheduleModifiers] = {ScheduleModifiers.HUMIDITY, }
-
+    modifiers: set[ScheduleModifiers] = field(
+        default_factory=lambda: {
+            ScheduleModifiers.HUMIDITY,
+        }
+    )
 
 
 class Irrigation:
@@ -50,10 +53,18 @@ class Irrigation:
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=3)),
-        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
-        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
-        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
-        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=5), timedelta(days=1), modifiers=set()),
+        VALVE_FRONTYARD_STREET: Schedule(
+            timedelta(minutes=5), timedelta(days=1)
+        ),  # Should be 7m/3d
+        VALVE_FRONTYARD_DRIVEWAY: Schedule(
+            timedelta(minutes=5), timedelta(days=1)
+        ),  # Should be 7m/3d
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(
+            timedelta(minutes=5), timedelta(days=1)
+        ),  # Should be 7m/3d
+        VALVE_FRONTYARD_PLANTER: Schedule(
+            timedelta(minutes=5), timedelta(days=1), modifiers=set()
+        ),
     }
 
     async def run_forever(self: "Irrigation") -> None:

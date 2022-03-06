@@ -1,10 +1,10 @@
+import logging
+
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 
 from home.prometheus import prom_query_one
 from home.web import TEMPLATES, WEB
-
-import logging
 
 log = logging.getLogger(__name__)
 

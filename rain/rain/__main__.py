@@ -26,7 +26,7 @@ class RainCollector(object):
 
     def get_minutes_since_start(self) -> int:
         return int((time.time() - self.start_time) / 60)
-    
+
     def get_counter_family(self):
         return CounterMetricFamily(
             "rainfall", "Amount of rain fall in millimeters", labels=["station"]
