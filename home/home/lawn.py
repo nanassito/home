@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum
 import logging
 from base64 import b64encode
 from collections import deque
@@ -29,10 +30,16 @@ from home.web import TEMPLATES, WEB
 log = logging.getLogger(__name__)
 
 
+class ScheduleModifiers(Enum):
+    HUMIDITY = "humidity"
+
+
 @dataclass
 class Schedule:
     water_time: timedelta
     over: timedelta
+    modifiers: set[ScheduleModifiers] = {ScheduleModifiers.HUMIDITY, }
+
 
 
 class Irrigation:
@@ -44,9 +51,9 @@ class Irrigation:
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=3)),
         VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
-        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),
-        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=5), timedelta(days=1)),
-        # VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=2), timedelta(days=1)),
+        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=5), timedelta(days=1)),  # Should be 7m/3d
+        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=5), timedelta(days=1), modifiers=set()),
     }
 
     async def run_forever(self: "Irrigation") -> None:
@@ -54,10 +61,13 @@ class Irrigation:
             if await facts.is_night_time():
                 # Sigmoid tuned to that we water every day during drought and water half as often when super humid
                 promql = '2 / (1 + 2.71828 ^ -( avg_over_time(mqtt_humidity{topic="zigbee2mqtt_air_outside"}[7d]) * 0.05 -2.5) )'
-                humidity_factor = await prom_query_one(promql)
-                self.LOG.info(f"Humidity factor is {round(humidity_factor, 3)}")
+                dryness_factor = await prom_query_one(promql)
+                self.LOG.info(f"Humidity factor is {round(dryness_factor, 3)}")
                 for valve, schedule in Irrigation.SCHEDULE.items():
-                    hours = round(schedule.over.days * 24 * humidity_factor)
+                    if ScheduleModifiers.HUMIDITY in schedule.modifiers:
+                        hours = round(schedule.over.days * 24 * dryness_factor)
+                    else:
+                        hours = round(schedule.over.days * 24)
                     promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{hours}h]))"
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
