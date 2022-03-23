@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from typing import Callable
+
 from aioprometheus import Counter
 from asyncio_mqtt import Client as Mqtt
 from asyncio_mqtt import MqttError
