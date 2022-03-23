@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 from typing import Callable
-
+from aioprometheus import Counter
 from asyncio_mqtt import Client as Mqtt
 from asyncio_mqtt import MqttError
 
@@ -10,6 +10,11 @@ from home.utils import n_tries
 from home.web import WEB
 
 log = logging.getLogger(__name__)
+
+_PROM_ZIGBEE_LOG = Counter(
+    "zigbee_logs",
+    "Counter of each logs published by zigbee2mqtt",
+)
 
 
 @n_tries(3)
@@ -35,8 +40,10 @@ async def watch_mqtt_topic(topic: str, callback: Callable[[bytes], None]):
             log.warning(f"Got an issue with mqtt: {err}")
 
 
-async def handle_zigbee_error(message: str) -> None:
-    log.error(message)
+async def handle_zigbee_error(payload: bytes) -> None:
+    msg = json.loads(payload).get("message")
+    _PROM_ZIGBEE_LOG.inc({"msg": msg})
+    log.error(msg)
 
 
 def init() -> None:
