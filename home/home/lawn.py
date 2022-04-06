@@ -49,16 +49,14 @@ class Irrigation:
     FEATURE_FLAG = FeatureFlag("Irrigation")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
-        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=7)),
-        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=5), timedelta(days=3)),
-        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=5), timedelta(days=3)),
-        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=3)),
-        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=8), timedelta(days=1)),
-        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=3)),
-        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=8), timedelta(days=1)),
-        VALVE_FRONTYARD_PLANTER: Schedule(
-            timedelta(minutes=15), timedelta(days=1), modifiers=set()
-        ),
+        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=5)),
+        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=5), timedelta(days=2)),
+        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=8), timedelta(days=2)),
+        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=2)),
+        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=8), timedelta(days=2)),
+        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=2)),
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=8), timedelta(days=2)),
+        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=15), timedelta(days=2)),
     }
 
     async def run_forever(self: "Irrigation") -> None:
@@ -69,10 +67,7 @@ class Irrigation:
                 dryness_factor = await prom_query_one(promql)
                 self.LOG.info(f"Humidity factor is {round(dryness_factor, 3)}")
                 for valve, schedule in Irrigation.SCHEDULE.items():
-                    if ScheduleModifiers.HUMIDITY in schedule.modifiers:
-                        hours = round(schedule.over.days * 24 * dryness_factor)
-                    else:
-                        hours = round(schedule.over.days * 24)
+                    hours = round(schedule.over.days * 24)
                     promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{hours}h]))"
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
