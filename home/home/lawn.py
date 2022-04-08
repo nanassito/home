@@ -49,7 +49,7 @@ class Irrigation:
     FEATURE_FLAG = FeatureFlag("Irrigation")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
-        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=5)),
+        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=4), timedelta(days=2)),
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=5), timedelta(days=2)),
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=8), timedelta(days=2)),
         VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=5), timedelta(days=2)),
