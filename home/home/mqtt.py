@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import re
 from typing import Callable
 
 from aioprometheus import Counter
@@ -41,9 +42,12 @@ async def watch_mqtt_topic(topic: str, callback: Callable[[bytes], None]):
             log.warning(f"Got an issue with mqtt: {err}")
 
 
+PROM_LABEL_RX = re.compile(r"[^\w ]")
+
+
 async def handle_zigbee_error(payload: bytes) -> None:
     msg = json.loads(payload).get("message")
-    _PROM_ZIGBEE_LOG.inc({"msg": msg})
+    _PROM_ZIGBEE_LOG.inc({"msg": PROM_LABEL_RX.sub("", msg)})
     log.error(msg)
 
 
