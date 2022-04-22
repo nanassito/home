@@ -11,3 +11,4 @@ sudo docker run \
     --manual \
     -d "*.epa.jaminais.fr,*.eastpaloalto.jaminais.fr,epa.jaminais.fr,eastpaloalto.jaminais.fr" \
     --preferred-challenges=dns
+systemctl restart nginx
