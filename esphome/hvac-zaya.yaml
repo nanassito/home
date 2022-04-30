@@ -27,7 +27,7 @@ uart:
 
 climate:
   platform: midea
-  name: parent
+  name: zaya
   autoconf: true
   beeper: false
   action_state_topic: esphome/zaya/action_state
