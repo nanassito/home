@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 import re
-from typing import Callable
+from typing import Any, Callable
 
 from aioprometheus import Counter
 from asyncio_mqtt import Client as Mqtt
@@ -21,9 +21,11 @@ _PROM_ZIGBEE_LOG = Counter(
 
 
 @n_tries(3)
-async def mqtt_send(topic: str, message: dict | str) -> None:
-    if isinstance(message, dict):
+async def mqtt_send(topic: str, message: Any) -> None:
+    if isinstance(message, (dict, list)):
         message = json.dumps(message)
+    if not isinstance(message, str):
+        message = str(message)
     async with Mqtt("192.168.1.1") as mqtt:
         await mqtt.publish(topic, payload=message.encode())
 
