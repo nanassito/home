@@ -13,7 +13,9 @@ _PROM_IS_DAY_TIME = Gauge("is_day_time", "1 if day, 0 if night.")
 
 async def is_day_time() -> bool:
     # Temporarily excluding the site motion sensor due to reliability issues.
-    promql = 'max(max_over_time(mqtt_illuminance_lux{topic!="zigbee2mqtt_motion_side"}[1h]))'
+    promql = (
+        'max(max_over_time(mqtt_illuminance_lux{topic!="zigbee2mqtt_motion_side"}[1h]))'
+    )
     lux = await prom_query_one(promql)
     is_day = lux > 100
     _PROM_IS_DAY_TIME.set({"city": "east_palo_alto"}, int(is_day))

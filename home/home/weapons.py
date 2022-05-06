@@ -7,7 +7,7 @@ from typing import Deque
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 
-from home.mqtt import watch_mqtt_topic
+from home.mqtt import MQTTMessage, watch_mqtt_topic
 from home.prometheus import COUNTER_NUM_RUNS, prom_query_one
 from home.time import TimeZone, now
 from home.utils import FeatureFlag
@@ -34,11 +34,11 @@ class Soaker:
         self.valve = valve
         self.last_activation = now() - Soaker.ANTI_REBOUND
 
-    async def soak(self: "Soaker", message: str) -> None:
+    async def soak(self: "Soaker", msg: MQTTMessage) -> None:
         if Soaker.FEATURE_FLAG.disabled:
             self.log.warning("Disabled, ignoring the trigger.")
             return
-        if not json.loads(message)["occupancy"]:
+        if not json.loads(msg.payload)["occupancy"]:
             return
         if Soaker.SNOOZE_UNTIL >= now():
             self.log.warning(
@@ -64,8 +64,8 @@ async def snooze(ttl: timedelta) -> None:
     log.info(f"Snoozing the soakers for {ttl}.")
 
 
-async def snooze_on_door_opening(message: str) -> None:
-    if not json.loads(message)["contact"]:
+async def snooze_on_door_opening(msg: MQTTMessage) -> None:
+    if not json.loads(msg.payload)["contact"]:
         await snooze(timedelta(minutes=5))
 
 

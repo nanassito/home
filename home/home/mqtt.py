@@ -7,6 +7,7 @@ from typing import Callable
 from aioprometheus import Counter
 from asyncio_mqtt import Client as Mqtt
 from asyncio_mqtt import MqttError
+from paho.mqtt.client import MQTTMessage
 
 from home.utils import n_tries
 from home.web import WEB
@@ -27,13 +28,13 @@ async def mqtt_send(topic: str, message: dict | str) -> None:
         await mqtt.publish(topic, payload=message.encode())
 
 
-async def watch_mqtt_topic(topic: str, callback: Callable[[bytes], None]):
+async def watch_mqtt_topic(topic: str, callback: Callable[[MQTTMessage], None]):
     async def _watch_mqtt_topic():
         async with Mqtt("192.168.1.1") as mqtt:
             async with mqtt.filtered_messages(topic) as messages:
                 await mqtt.subscribe(topic)
                 async for message in messages:
-                    await callback(message.payload)
+                    await callback(message)
 
     while True:
         try:
@@ -45,8 +46,8 @@ async def watch_mqtt_topic(topic: str, callback: Callable[[bytes], None]):
 PROM_LABEL_RX = re.compile(r"[^\w ]")
 
 
-async def handle_zigbee_error(payload: bytes) -> None:
-    msg = json.loads(payload).get("message")
+async def handle_zigbee_error(msg: MQTTMessage) -> None:
+    msg = json.loads(msg.payload).get("message")
     _PROM_ZIGBEE_LOG.inc({"msg": PROM_LABEL_RX.sub("", msg)})
     log.error(msg)
 
