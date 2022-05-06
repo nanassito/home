@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 import logging
 from math import inf
-from typing import Counter
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -143,7 +142,15 @@ async def hvac_controller():
         mode = await infer_general_mode()
         for room in ALL_ROOMS:
             for hvac in room.hvacs:
-                await hvac.set_mode(mode)
+                # Set the running mode
+                curr = await room.get_current_temp()
+                if mode == mode.HEAT and room.min_temp + 3 <= curr:
+                    await hvac.set_mode(Mode.OFF)  # Room is warm enough
+                elif mode == mode.COOL and room.max_temp - 3 >= curr:
+                    await hvac.set_mode(Mode.OFF)  # Room is cold enough
+                else:
+                    await hvac.set_mode(mode)  # Apply whatever the majority needs
+
                 # Set the temperature target
                 if mode is Mode.HEAT:
                     await hvac.set_temp(room.min_temp)
