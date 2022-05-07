@@ -97,7 +97,7 @@ class Room:
     sensor_topic: str
     hvacs: list[Hvac]
     min_temp: int = 19
-    max_temp: int = 28
+    max_temp: int = 30
 
     async def get_current_temp(self: "Room") -> float:
         return await prom_query_one(f'mqtt_temperature{{topic="{self.sensor_topic}"}}')
@@ -106,7 +106,7 @@ class Room:
 ALL_ROOMS = [
     Room("Zaya", "zigbee2mqtt_air_zaya", [Hvac("zaya")]),
     Room("Parent", "zigbee2mqtt_air_parent", [Hvac("parent")]),
-    Room("Salon", "zigbee2mqtt_air_livingroom", [Hvac("living"), Hvac("kitchen")], min_temp=21),
+    Room("Salon", "zigbee2mqtt_air_livingroom", [Hvac("living"), Hvac("kitchen")]),
     Room("Office", "zigbee2mqtt_air_office", [Hvac("office")]),
     Room("Outside", "zigbee2mqtt_air_outside", []),
 ]
