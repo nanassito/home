@@ -125,7 +125,7 @@ async def infer_general_mode():
         if curr > room.max_temp:
             desired_temp_delta -= inf
         if curr >= max(room.max_temp - 3, room.min_temp):
-            desired_temp_delta += curr - room.max_temp + 3
+            desired_temp_delta -= curr - room.max_temp + 3
     if desired_temp_delta > 0:
         return Mode.HEAT
     elif desired_temp_delta < 0:
