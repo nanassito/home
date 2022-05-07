@@ -8,9 +8,17 @@
         {% for room in rooms %}
         <div class="col-6 gy-4">
             <div class="card text-center">
-                <a href="{{room.link}}">
-                    <div class="card-header">{{room.name}}</div>
-                </a>
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{room.link}}"><i class="bi bi-graph-up"></i></a>
+                        <span>{{room.name}}</span>
+                        <span>
+                            {% for icon in room.hvac_icons %}
+                            <i class="bi {{icon}}"></i>
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h1>{{room.current}}</h1>
                     <span style="color: var(--bs-blue);">{{room.min_1d}}</span>

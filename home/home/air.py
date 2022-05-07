@@ -192,25 +192,27 @@ def init():
                 "page": "Temperature",
                 "rooms": [
                     {
-                        "name": room,
+                        "name": room.name,
                         "current": await get_temp(
-                            f'mqtt_temperature{{topic="{topic}"}}'
+                            f'mqtt_temperature{{topic="{room.sensor_topic}"}}'
                         ),
                         "min_1d": await get_temp(
-                            f'min_over_time(mqtt_temperature{{topic="{topic}"}}[1d])'
+                            f'min_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d])'
                         ),
                         "max_1d": await get_temp(
-                            f'max_over_time(mqtt_temperature{{topic="{topic}"}}[1d])'
+                            f'max_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d])'
                         ),
-                        "link": f'https://prometheus.epa.jaminais.fr/graph?g0.expr=mqtt_temperature{{topic%3D"{topic}"}}&g0.tab=0&g0.range_input=1d',
+                        "link": f'https://prometheus.epa.jaminais.fr/graph?g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=1d',
+                        "hvac_icons": [
+                            {
+                                Mode.HEAT: "bi-thermometer-sun",
+                                Mode.COOL: "bi-thermometer-snow",
+                                Mode.OFF: "bi-power",
+                            }.get(hvac.mode, "bi-question-diamond")
+                            for hvac in room.hvacs
+                        ],
                     }
-                    for room, topic in {
-                        "Zaya": "zigbee2mqtt_air_zaya",
-                        "Parent": "zigbee2mqtt_air_parent",
-                        "Salon": "zigbee2mqtt_air_livingroom",
-                        "Office": "zigbee2mqtt_air_office",
-                        "Outside": "zigbee2mqtt_air_outside",
-                    }.items()
+                    for room in ALL_ROOMS
                 ],
             },
         )
