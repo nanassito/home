@@ -49,7 +49,7 @@ class Hvac:
     log: logging.Logger = field(init=False, repr=False)
 
     def __post_init__(self: "Hvac") -> None:
-        self.log = log.getChild("Hvac").getChild("esp_name")
+        self.log = log.getChild("Hvac").getChild(self.esp_name)
 
     async def on_mqtt(self: "Hvac", msg: MQTTMessage):
         changed = True
