@@ -11,6 +11,7 @@ from home.mqtt import mqtt_send, watch_mqtt_topic, MQTTMessage
 
 from home.prometheus import prom_query_one
 from home.time import now
+from home.utils import FeatureFlag
 from home.web import TEMPLATES, WEB
 
 log = logging.getLogger(__name__)
@@ -47,6 +48,7 @@ class Hvac:
     fan: Fan = Fan.AUTO
     last_command: datetime = field(default=now(), repr=False)
     log: logging.Logger = field(init=False, repr=False)
+    manual_control: bool = field(default=False, repr=False)
 
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
@@ -134,36 +136,41 @@ async def infer_general_mode():
         return Mode.OFF
 
 
-async def hvac_controller():
-    # TODO: Add support for disabling
-    # TODO: Add support for disabling a specific unit
-    while True:
-        await asyncio.sleep(60)
-        mode = await infer_general_mode()
-        for room in ALL_ROOMS:
-            for hvac in room.hvacs:
-                # Set the running mode
-                curr = await room.get_current_temp()
-                if mode == mode.HEAT and room.min_temp + 3 <= curr:
-                    await hvac.set_mode(Mode.OFF)  # Room is warm enough
-                elif mode == mode.COOL and room.max_temp - 3 >= curr:
-                    await hvac.set_mode(Mode.OFF)  # Room is cold enough
-                else:
-                    await hvac.set_mode(mode)  # Apply whatever the majority needs
+class HvacController:
+    FEATURE_FLAG = FeatureFlag("HvacController")
 
-                # Set the temperature target
-                if mode is Mode.HEAT:
-                    await hvac.set_temp(room.min_temp)
-                if mode is Mode.COOL:
-                    await hvac.set_temp(room.max_temp)
-                # Set the fan speed
-                delta_temp = abs(await room.get_current_temp() - hvac.current_temp)
-                if delta_temp > 4:
-                    await hvac.set_fan(Fan.HIGH)
-                elif delta_temp > 2:
-                    await hvac.set_fan(Fan.MEDIUM)
-                else:
-                    await hvac.set_fan(Fan.AUTO)
+    async def run():
+        while True:
+            await asyncio.sleep(60)
+            if HvacController.FEATURE_FLAG.disabled:
+                continue
+            mode = await infer_general_mode()
+            for room in ALL_ROOMS:
+                for hvac in room.hvacs:
+                    if hvac.manual_control:
+                        continue
+                    # Set the running mode
+                    curr = await room.get_current_temp()
+                    if mode == mode.HEAT and room.min_temp + 3 <= curr:
+                        await hvac.set_mode(Mode.OFF)  # Room is warm enough
+                    elif mode == mode.COOL and room.max_temp - 3 >= curr:
+                        await hvac.set_mode(Mode.OFF)  # Room is cold enough
+                    else:
+                        await hvac.set_mode(mode)  # Apply whatever the majority needs
+
+                    # Set the temperature target
+                    if mode is Mode.HEAT:
+                        await hvac.set_temp(room.min_temp)
+                    if mode is Mode.COOL:
+                        await hvac.set_temp(room.max_temp)
+                    # Set the fan speed
+                    delta_temp = abs(await room.get_current_temp() - hvac.current_temp)
+                    if delta_temp > 4:
+                        await hvac.set_fan(Fan.HIGH)
+                    elif delta_temp > 2:
+                        await hvac.set_fan(Fan.MEDIUM)
+                    else:
+                        await hvac.set_fan(Fan.AUTO)
 
 
 def init():
@@ -174,10 +181,38 @@ def init():
                 asyncio.create_task(
                     watch_mqtt_topic(f"esphome/{hvac.esp_name}/+", hvac.on_mqtt)
                 )
-        asyncio.create_task(hvac_controller())
+        asyncio.create_task(HvacController.run())
+    
+    @WEB.get("/hvac", response_class=HTMLResponse)
+    async def get_hvac(request: Request):
+        return TEMPLATES.TemplateResponse(
+            "hvac.html.jinja",
+            {
+                "request": request,
+                "page": "Temperature",
+                "rooms": [
+                    {
+                        "name": room.name,
+                        "min": room.min_temp,
+                        "max": room.max_temp,
+                        "hvacs": [
+                            {
+                                "name": hvac.esp_name,
+                                "manual": hvac.manual_control,
+                                "mode": hvac.mode.name,
+                                "fan": hvac.fan.name,
+                                "target": hvac.target_temp,
+                            }
+                            for hvac in room.hvacs
+                        ],
+                    }
+                    for room in ALL_ROOMS
+                ],
+            },
+        )
 
     @WEB.get("/temperature", response_class=HTMLResponse)
-    async def get_soaker(request: Request):
+    async def get_temperature(request: Request):
         async def get_temp(promql: str) -> float | str:
             try:
                 return round(await prom_query_one(promql), 1)
@@ -190,6 +225,7 @@ def init():
             {
                 "request": request,
                 "page": "Temperature",
+                "hvac_controller_enabled": HvacController.FEATURE_FLAG.enabled,
                 "rooms": [
                     {
                         "name": room.name,

@@ -74,6 +74,7 @@ async def http_post_feature_flag(settings: _HttpFeatureFlag):
     targets = {
         "soaker": home.weapons.Soaker,
         "irrigation": home.lawn.Irrigation,
+        "hvac": home.air.HvacController,
     }
     if settings.target.lower() not in targets:
         return HTTPException(400, f"Invalid target: {settings.target}.")

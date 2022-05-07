@@ -4,6 +4,15 @@
 {% block content %}
 <!--  -->
 <section class="container">
+    <div class="form-check form-switch d-flex justify-content-between">
+        <span class="form-control-lg">
+            <label class="form-check-label" for="enabled">Enabled</label>
+            <input class="form-check-input" data-target="hvac" type="checkbox" role="switch" id="enabled" {% if hvac_controller_enabled %}checked{% endif %}>
+        </span>
+        <button id="settings-btn" type="submit" class="btn btn-secondary"><i class="bi bi-gear"></i></button>
+    </div>
+</section>
+<section class="container">
     <div class="row">
         {% for room in rooms %}
         <div class="col-6 gy-4">
