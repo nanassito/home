@@ -8,7 +8,6 @@ from aioprometheus import Gauge
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from home.facts import is_prod
 from home.mqtt import MQTTMessage, mqtt_send, watch_mqtt_topic
 from home.prometheus import prom_query_one
 from home.time import now
@@ -50,15 +49,9 @@ class Valve:
         _PROM_VALVE.set(
             {"area": self.area, "line": str(self.line)}, int(should_be_running)
         )
-        if is_prod():
-            await mqtt_send(
-                f"zigbee2mqtt/valve_{self.section}/set", {f"state_l{self.line}": value}
-            )
-        else:
-            self.log.info(
-                f"Fake mqtt send zigbee2mqtt/valve_{self.section}/set %s",
-                {f"state_l{self.line}": value},
-            )
+        await mqtt_send(
+            f"zigbee2mqtt/valve_{self.section}/set", {f"state_l{self.line}": value}
+        )
         self.log.info(f"Switched {value}.")
 
     async def run_forever(self: "Valve") -> None:

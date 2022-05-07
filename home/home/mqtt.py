@@ -11,6 +11,7 @@ from paho.mqtt.client import MQTTMessage
 
 from home.utils import n_tries
 from home.web import WEB
+from home.facts import is_prod
 
 log = logging.getLogger(__name__)
 
@@ -26,8 +27,9 @@ async def mqtt_send(topic: str, message: Any) -> None:
         message = json.dumps(message)
     if not isinstance(message, str):
         message = str(message)
-    async with Mqtt("192.168.1.1") as mqtt:
-        await mqtt.publish(topic, payload=message.encode())
+    if is_prod():
+        async with Mqtt("192.168.1.1") as mqtt:
+            await mqtt.publish(topic, payload=message.encode())
 
 
 async def watch_mqtt_topic(topic: str, callback: Callable[[MQTTMessage], None]):
