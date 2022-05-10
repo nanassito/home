@@ -165,9 +165,9 @@ class HvacController:
                         await hvac.set_temp(room.max_temp)
                     # Set the fan speed
                     delta_temp = abs(await room.get_current_temp() - hvac.current_temp)
-                    if delta_temp > 4:
+                    if delta_temp > 3:
                         await hvac.set_fan(Fan.HIGH)
-                    elif delta_temp > 2:
+                    elif delta_temp > 1.5:
                         await hvac.set_fan(Fan.MEDIUM)
                     else:
                         await hvac.set_fan(Fan.AUTO)
