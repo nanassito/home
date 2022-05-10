@@ -98,7 +98,7 @@ class Room:
     name: str
     sensor_topic: str
     hvacs: list[Hvac]
-    min_temp: int = 19
+    min_temp: int = 20
     max_temp: int = 30
 
     async def get_current_temp(self: "Room") -> float:
