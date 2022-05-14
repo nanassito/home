@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class Mode(Enum):
+    INVALID = None
     OFF = "off"
     AUTO = "heat_cool"
     COOL = "cool"
@@ -27,6 +28,7 @@ class Mode(Enum):
 
 
 class Fan(Enum):
+    INVALID = None
     AUTO = "auto"
     LOW = "low"
     MEDIUM = "medium"
@@ -40,12 +42,18 @@ class Fan(Enum):
 
 
 @dataclass
+class HvacState:
+    target_temp: int = -1
+    mode: Mode = Mode.INVALID
+    fan: Fan = Fan.INVALID
+
+
+@dataclass
 class Hvac:
     esp_name: str
+    reported_state: HvacState = field(default_factory=HvacState)
+    desired_state: HvacState = field(default_factory=HvacState)
     current_temp: float = -1
-    target_temp: int = -1
-    mode: Mode = Mode.OFF
-    fan: Fan = Fan.AUTO
     last_command: datetime = field(default=now(), repr=False)
     log: logging.Logger = field(init=False, repr=False)
     manual_control: bool = field(default=False, repr=False)
@@ -57,13 +65,13 @@ class Hvac:
         changed = True
         match msg.topic.rsplit("/", 1)[-1]:
             case "mode_state":
-                self.mode = Mode(msg.payload.decode())
+                self.reported_state.mode = Mode(msg.payload.decode())
             case "current_temperature_state":
-                self.current_temp = float(msg.payload)
+                self.reported_state.current_temp = float(msg.payload)
             case "target_temperature_low_state":
-                self.target_temp = int(float(msg.payload))
+                self.reported_state.target_temp = int(float(msg.payload))
             case "fan_mode_state":
-                self.fan = Fan(msg.payload.decode())
+                self.reported_state.fan = Fan(msg.payload.decode())
             case _:
                 changed = False
         if changed:
@@ -74,23 +82,34 @@ class Hvac:
         await asyncio.sleep(delay.total_seconds())
         self.last_command = now()
     
-    async def set_mode(self: "Hvac", mode: Mode) -> None:
-        if self.mode != mode:
-            self.log.info(f"Mode {self.mode} > {mode}")
+    async def enforce_mode(self: "Hvac") -> None:
+        mode = self.desired_state.mode
+        if mode != self.reported_state.mode and mode is not Mode.INVALID:
+            self.log.info(f"Mode {self.reported_state.mode} > {mode}")
             await mqtt_send(f"esphome/{self.esp_name}/mode_command", mode.value)
             await self.protect_against_uart()
     
-    async def set_fan(self: "Hvac", fan: Fan) -> None:
-        if self.fan != fan:
-            self.log.info(f"Fan {self.fan} > {fan}")
+    async def enforce_fan(self: "Hvac") -> None:
+        fan = self.desired_state.fan
+        if fan != self.reported_state.fan and fan is not Fan.INVALID:
+            self.log.info(f"Fan {self.reported_state.fan} > {fan}")
             await mqtt_send(f"esphome/{self.esp_name}/fan_mode_command", fan.value)
             await self.protect_against_uart()
     
-    async def set_temp(self: "Hvac", temp: int) -> None:
-        if self.target_temp != temp:
-            self.log.info(f"Target temperature {self.target_temp} > {temp}")
+    async def enforce_temp(self: "Hvac") -> None:
+        temp = self.desired_state.target_temp
+        if temp != self.reported_state.target_temp and temp != -1:
+            self.log.info(f"Target temperature {self.reported_state.target_temp} > {temp}")
             await mqtt_send(f"esphome/{self.esp_name}/target_temperature_command", temp)
             await self.protect_against_uart()
+    
+    async def control_loop(self: "Hvac") -> None:
+        while True:
+            await asyncio.sleep(1)
+            await self.enforce_mode()
+            await self.enforce_temp()
+            await self.enforce_fan()
+            
 
 
 @dataclass
@@ -152,25 +171,25 @@ class HvacController:
                     # Set the running mode
                     curr = await room.get_current_temp()
                     if mode == mode.HEAT and room.min_temp + 3 <= curr:
-                        await hvac.set_mode(Mode.OFF)  # Room is warm enough
+                        hvac.desired_state.mode = Mode.OFF  # Room is warm enough
                     elif mode == mode.COOL and room.max_temp - 3 >= curr:
-                        await hvac.set_mode(Mode.OFF)  # Room is cold enough
+                        hvac.desired_state.mode = Mode.OFF  # Room is cold enough
                     else:
-                        await hvac.set_mode(mode)  # Apply whatever the majority needs
+                        hvac.desired_state.mode = mode  # Apply whatever the majority needs
 
                     # Set the temperature target
                     if mode is Mode.HEAT:
-                        await hvac.set_temp(room.min_temp)
+                        hvac.desired_state.target_temp = room.min_temp
                     if mode is Mode.COOL:
-                        await hvac.set_temp(room.max_temp)
+                        hvac.desired_state.target_temp = room.max_temp
                     # Set the fan speed
                     delta_temp = abs(await room.get_current_temp() - hvac.current_temp)
                     if delta_temp > 3:
-                        await hvac.set_fan(Fan.HIGH)
+                        hvac.desired_state.fan = Fan.HIGH
                     elif delta_temp > 1.5:
-                        await hvac.set_fan(Fan.MEDIUM)
+                        hvac.desired_state.fan = Fan.MEDIUM
                     else:
-                        await hvac.set_fan(Fan.AUTO)
+                        hvac.desired_state.fan = Fan.AUTO
 
 
 def init():
@@ -181,6 +200,7 @@ def init():
                 asyncio.create_task(
                     watch_mqtt_topic(f"esphome/{hvac.esp_name}/+", hvac.on_mqtt)
                 )
+                asyncio.create_task(hvac.control_loop())
         asyncio.create_task(HvacController.run())
     
     @WEB.get("/hvac", response_class=HTMLResponse)
