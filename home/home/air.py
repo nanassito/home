@@ -85,21 +85,18 @@ class Hvac:
     async def enforce_mode(self: "Hvac") -> None:
         mode = self.desired_state.mode
         if mode != self.reported_state.mode and mode is not Mode.INVALID:
-            self.log.info(f"Mode {self.reported_state.mode} > {mode}")
             await mqtt_send(f"esphome/{self.esp_name}/mode_command", mode.value)
             await self.protect_against_uart()
     
     async def enforce_fan(self: "Hvac") -> None:
         fan = self.desired_state.fan
         if fan != self.reported_state.fan and fan is not Fan.INVALID:
-            self.log.info(f"Fan {self.reported_state.fan} > {fan}")
             await mqtt_send(f"esphome/{self.esp_name}/fan_mode_command", fan.value)
             await self.protect_against_uart()
     
     async def enforce_temp(self: "Hvac") -> None:
         temp = self.desired_state.target_temp
         if temp != self.reported_state.target_temp and temp != -1:
-            self.log.info(f"Target temperature {self.reported_state.target_temp} > {temp}")
             await mqtt_send(f"esphome/{self.esp_name}/target_temperature_command", temp)
             await self.protect_against_uart()
     
@@ -264,7 +261,7 @@ def init():
                                 Mode.HEAT: "bi-thermometer-sun",
                                 Mode.COOL: "bi-thermometer-snow",
                                 Mode.OFF: "bi-power",
-                            }.get(hvac.mode, "bi-question-diamond")
+                            }.get(hvac.reported_state.mode, "bi-question-diamond")
                             for hvac in room.hvacs
                         ],
                     }
