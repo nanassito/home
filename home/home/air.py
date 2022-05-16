@@ -59,7 +59,7 @@ class Hvac:
     log: logging.Logger = field(init=False, repr=False)
     manual_control: bool = field(default=False, repr=False)
 
-    FEATURE_FLAG: ClassVar[FeatureFlag] = FeatureFlag("HvacController")
+    FEATURE_FLAG: ClassVar[FeatureFlag] = FeatureFlag("Hvac")
 
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
@@ -106,7 +106,7 @@ class Hvac:
     async def control_loop(self: "Hvac") -> None:
         while True:
             await asyncio.sleep(1)
-            if HvacController.FEATURE_FLAG.enabled:
+            if Hvac.FEATURE_FLAG.enabled:
                 await self.enforce_mode()
                 await self.enforce_temp()
                 await self.enforce_fan()
