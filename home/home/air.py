@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 import logging
 from math import inf
+from typing import ClassVar
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -58,6 +59,8 @@ class Hvac:
     log: logging.Logger = field(init=False, repr=False)
     manual_control: bool = field(default=False, repr=False)
 
+    FEATURE_FLAG: ClassVar[FeatureFlag] = FeatureFlag("HvacController")
+
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
 
@@ -103,9 +106,10 @@ class Hvac:
     async def control_loop(self: "Hvac") -> None:
         while True:
             await asyncio.sleep(1)
-            await self.enforce_mode()
-            await self.enforce_temp()
-            await self.enforce_fan()
+            if HvacController.FEATURE_FLAG.enabled:
+                await self.enforce_mode()
+                await self.enforce_temp()
+                await self.enforce_fan()
             
 
 
@@ -153,13 +157,9 @@ async def infer_general_mode():
 
 
 class HvacController:
-    FEATURE_FLAG = FeatureFlag("HvacController")
-
     async def run():
         while True:
             await asyncio.sleep(60)
-            if HvacController.FEATURE_FLAG.disabled:
-                continue
             mode = await infer_general_mode()
             for room in ALL_ROOMS:
                 for hvac in room.hvacs:
