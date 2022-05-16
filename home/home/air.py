@@ -242,7 +242,7 @@ def init():
             {
                 "request": request,
                 "page": "Temperature",
-                "hvac_controller_enabled": HvacController.FEATURE_FLAG.enabled,
+                "hvac_controller_enabled": Hvac.FEATURE_FLAG.enabled,
                 "rooms": [
                     {
                         "name": room.name,
