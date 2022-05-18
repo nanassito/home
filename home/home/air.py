@@ -126,7 +126,7 @@ class Room:
 
 
 ALL_ROOMS = [
-    Room("Zaya", "zigbee2mqtt_air_zaya", [Hvac("zaya")]),
+    Room("Zaya", "zigbee2mqtt_air_zaya", [Hvac("zaya")], min_temp=19),
     Room("Parent", "zigbee2mqtt_air_parent", [Hvac("parent")]),
     Room("Salon", "zigbee2mqtt_air_livingroom", [Hvac("living"), Hvac("kitchen")]),
     Room("Office", "zigbee2mqtt_air_office", [Hvac("office")]),
