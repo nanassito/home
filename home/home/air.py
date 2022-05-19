@@ -54,7 +54,6 @@ class Hvac:
     esp_name: str
     reported_state: HvacState = field(default_factory=HvacState)
     desired_state: HvacState = field(default_factory=HvacState)
-    current_temp: float = -1
     last_command: datetime = field(default=now(), repr=False)
     log: logging.Logger = field(init=False, repr=False)
     manual_control: bool = field(default=False, repr=False)
@@ -63,14 +62,19 @@ class Hvac:
 
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
+    
+    @property
+    def esp_topic(self: "Room") -> str:
+        return f"esphome_{self.esp_name}"
+
+    async def get_current_temp(self: "Room") -> float:
+        return await prom_query_one(f'mqtt_current_temperature_state{{topic="{self.esp_topic}"}}')
 
     async def on_mqtt(self: "Hvac", msg: MQTTMessage):
         changed = True
         match msg.topic.rsplit("/", 1)[-1]:
             case "mode_state":
                 self.reported_state.mode = Mode(msg.payload.decode())
-            case "current_temperature_state":
-                self.reported_state.current_temp = float(msg.payload)
             case "target_temperature_low_state":
                 self.reported_state.target_temp = int(float(msg.payload))
             case "fan_mode_state":
@@ -165,6 +169,7 @@ class HvacController:
                 for hvac in room.hvacs:
                     if hvac.manual_control:
                         continue
+
                     # Set the running mode
                     curr = await room.get_current_temp()
                     if mode == mode.HEAT and room.min_temp + 3 <= curr:
@@ -179,8 +184,9 @@ class HvacController:
                         hvac.desired_state.target_temp = room.min_temp
                     if mode is Mode.COOL:
                         hvac.desired_state.target_temp = room.max_temp
+
                     # Set the fan speed
-                    delta_temp = abs(await room.get_current_temp() - hvac.current_temp)
+                    delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
                     if delta_temp > 3:
                         hvac.desired_state.fan = Fan.HIGH
                     elif delta_temp > 1.5:
