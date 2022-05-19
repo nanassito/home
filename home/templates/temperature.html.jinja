@@ -4,40 +4,89 @@
 {% block content %}
 <!--  -->
 <section class="container">
-    <div class="form-check form-switch d-flex justify-content-between">
-        <span class="form-control-lg">
-            <label class="form-check-label" for="enabled">Enabled</label>
-            <input class="form-check-input" data-target="hvac" type="checkbox" role="switch" id="enabled" {% if hvac_controller_enabled %}checked{% endif %}>
-        </span>
-        <button id="settings-btn" type="submit" class="btn btn-secondary"><i class="bi bi-gear"></i></button>
-    </div>
-</section>
-<section class="container">
     <div class="row">
         {% for room in rooms %}
         <div class="col-6 gy-4">
             <div class="card text-center">
                 <div class="card-header">
-                    <div class="d-flex justify-content-between">
-                        <a href="{{room.link}}"><i class="bi bi-graph-up"></i></a>
-                        <span>{{room.name}}</span>
+                    {{room.name}}
+                </div>
+                <div class="card-body">
+                    <div>
+                        <h1>{{room.current}}</h1>
+                    </div>
+                    <div>
+                        <span style="color: var(--bs-blue);">{{room.min_1d}}</span>
+                        <span> - </span>
+                        <span style="color: var(--bs-red);">{{room.max_1d}}</span>
+                    </div>
+                    <div class="mt-2 d-flex justify-content-between">
+                        <button type="button" class="btn btn-link btn-sm" href="{{room.link}}">
+                            <i class="bi bi-graph-up"></i>
+                        </button>
                         <span>
-                            {% for icon in room.hvac_icons %}
-                            <i class="bi {{icon}}"></i>
+                            {% for hvac in room.hvacs %}
+                            <button type="button" class="btn {{
+                                {
+                                    "OFF": "btn-secondary",
+                                    "HEAT": "btn-warning",
+                                    "COOL": "btn-info",
+                                }[hvac.mode] | default("btn-success")
+                            }} btn-sm" data-toggle="modal" data-target="#{{hvac.name}}Settings">
+                                <i class="bi {{
+                                    {
+                                        "AUTO": "bi-water",
+                                        "MEDIUM": "bi-wind",
+                                        "HIGH": "bi-tornado",
+                                    }[hvac.fan] | default("bi-question-diamond")
+                                }}"></i>
+                            </button>
                             {% endfor %}
                         </span>
                     </div>
-                </div>
-                <div class="card-body">
-                    <h1>{{room.current}}</h1>
-                    <span style="color: var(--bs-blue);">{{room.min_1d}}</span>
-                    <span> - </span>
-                    <span style="color: var(--bs-red);">{{room.max_1d}}</span>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+</section>
+
+<section>
+    {% for room in rooms %}
+    {% for hvac in room.hvacs %}
+    <div class="modal fade" id="{{hvac.name}}Settings" tabindex="-1" role="dialog" aria-labelledby="{{hvac.name}}SettingsLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="{{hvac.name}}SettingsLabel">{{hvac.name}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-secondary">
+                            <input type="radio" name="options" id="AUTO" autocomplete="off" {% if hvac.control == "AUTO" %}checked{% endif %}>
+                            <i class="bi bi-robot"></i>
+                        </label>
+                        <label class="btn btn-secondary">
+                            <input type="radio" name="options" id="APP" autocomplete="off" {% if hvac.control == "APP" %}checked{% endif %}>
+                            <i class="bi bi-phone"></i>
+                        </label>
+                        <label class="btn btn-secondary">
+                            <input type="radio" name="options" id="REMOTE" autocomplete="off" {% if hvac.control == "REMOTE" %}checked{% endif %}>
+                            <i class="bi bi-hand-index"></i>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endfor %}
 </section>
 <!--  -->
 {% endblock %}

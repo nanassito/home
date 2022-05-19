@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 import logging
 from math import inf
-from typing import ClassVar
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -12,7 +11,6 @@ from home.mqtt import mqtt_send, watch_mqtt_topic, MQTTMessage
 
 from home.prometheus import prom_query_one
 from home.time import now
-from home.utils import FeatureFlag
 from home.web import TEMPLATES, WEB
 
 log = logging.getLogger(__name__)
@@ -49,6 +47,12 @@ class HvacState:
     fan: Fan = Fan.INVALID
 
 
+class HvacControl(Enum):
+    AUTO = "auto"
+    APP = "app"
+    REMOTE = "remote"
+
+
 @dataclass
 class Hvac:
     esp_name: str
@@ -56,9 +60,7 @@ class Hvac:
     desired_state: HvacState = field(default_factory=HvacState)
     last_command: datetime = field(default=now(), repr=False)
     log: logging.Logger = field(init=False, repr=False)
-    manual_control: bool = field(default=False, repr=False)
-
-    FEATURE_FLAG: ClassVar[FeatureFlag] = FeatureFlag("Hvac")
+    control: HvacControl = HvacControl.AUTO
 
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
@@ -110,10 +112,11 @@ class Hvac:
     async def control_loop(self: "Hvac") -> None:
         while True:
             await asyncio.sleep(1)
-            if Hvac.FEATURE_FLAG.enabled:
-                await self.enforce_mode()
-                await self.enforce_temp()
-                await self.enforce_fan()
+            if self.control is HvacControl.REMOTE:
+                continue
+            await self.enforce_mode()
+            await self.enforce_temp()
+            await self.enforce_fan()
             
 
 
@@ -167,32 +170,30 @@ class HvacController:
             mode = await infer_general_mode()
             for room in ALL_ROOMS:
                 for hvac in room.hvacs:
-                    if hvac.manual_control:
-                        continue
+                    if hvac.control is HvacControl.AUTO:
+                        # Set the running mode
+                        curr = await room.get_current_temp()
+                        if mode == mode.HEAT and room.min_temp + 3 <= curr:
+                            hvac.desired_state.mode = Mode.OFF  # Room is warm enough
+                        elif mode == mode.COOL and room.max_temp - 3 >= curr:
+                            hvac.desired_state.mode = Mode.OFF  # Room is cold enough
+                        else:
+                            hvac.desired_state.mode = mode  # Apply whatever the majority needs
 
-                    # Set the running mode
-                    curr = await room.get_current_temp()
-                    if mode == mode.HEAT and room.min_temp + 3 <= curr:
-                        hvac.desired_state.mode = Mode.OFF  # Room is warm enough
-                    elif mode == mode.COOL and room.max_temp - 3 >= curr:
-                        hvac.desired_state.mode = Mode.OFF  # Room is cold enough
-                    else:
-                        hvac.desired_state.mode = mode  # Apply whatever the majority needs
+                        # Set the temperature target
+                        if mode is Mode.HEAT:
+                            hvac.desired_state.target_temp = room.min_temp
+                        if mode is Mode.COOL:
+                            hvac.desired_state.target_temp = room.max_temp
 
-                    # Set the temperature target
-                    if mode is Mode.HEAT:
-                        hvac.desired_state.target_temp = room.min_temp
-                    if mode is Mode.COOL:
-                        hvac.desired_state.target_temp = room.max_temp
-
-                    # Set the fan speed
-                    delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
-                    if delta_temp > 3:
-                        hvac.desired_state.fan = Fan.HIGH
-                    elif delta_temp > 1.5:
-                        hvac.desired_state.fan = Fan.MEDIUM
-                    else:
-                        hvac.desired_state.fan = Fan.AUTO
+                        # Set the fan speed
+                        delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
+                        if delta_temp > 3:
+                            hvac.desired_state.fan = Fan.HIGH
+                        elif delta_temp > 1.5:
+                            hvac.desired_state.fan = Fan.MEDIUM
+                        else:
+                            hvac.desired_state.fan = Fan.AUTO
 
 
 def init():
@@ -205,34 +206,6 @@ def init():
                 )
                 asyncio.create_task(hvac.control_loop())
         asyncio.create_task(HvacController.run())
-    
-    @WEB.get("/hvac", response_class=HTMLResponse)
-    async def get_hvac(request: Request):
-        return TEMPLATES.TemplateResponse(
-            "hvac.html.jinja",
-            {
-                "request": request,
-                "page": "Temperature",
-                "rooms": [
-                    {
-                        "name": room.name,
-                        "min": room.min_temp,
-                        "max": room.max_temp,
-                        "hvacs": [
-                            {
-                                "name": hvac.esp_name,
-                                "manual": hvac.manual_control,
-                                "mode": hvac.mode.name,
-                                "fan": hvac.fan.name,
-                                "target": hvac.target_temp,
-                            }
-                            for hvac in room.hvacs
-                        ],
-                    }
-                    for room in ALL_ROOMS
-                ],
-            },
-        )
 
     @WEB.get("/temperature", response_class=HTMLResponse)
     async def get_temperature(request: Request):
@@ -248,7 +221,6 @@ def init():
             {
                 "request": request,
                 "page": "Temperature",
-                "hvac_controller_enabled": Hvac.FEATURE_FLAG.enabled,
                 "rooms": [
                     {
                         "name": room.name,
@@ -262,12 +234,13 @@ def init():
                             f'max_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d])'
                         ),
                         "link": f'https://prometheus.epa.jaminais.fr/graph?g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=1d',
-                        "hvac_icons": [
+                        "hvacs": [
                             {
-                                Mode.HEAT: "bi-thermometer-sun",
-                                Mode.COOL: "bi-thermometer-snow",
-                                Mode.OFF: "bi-power",
-                            }.get(hvac.reported_state.mode, "bi-question-diamond")
+                                "name": hvac.esp_name,
+                                "mode": hvac.reported_state.mode.name,
+                                "fan": hvac.reported_state.fan.name,
+                                "control": hvac.control.name,
+                            }
                             for hvac in room.hvacs
                         ],
                     }
