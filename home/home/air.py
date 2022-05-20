@@ -203,6 +203,13 @@ class _HttpRoomRequest(BaseModel):
     max_temp: int
 
 
+class _HttpHvacAppRequest(BaseModel):
+    hvac: str
+    mode: Mode
+    fan: Fan
+    target_temp: int
+
+
 def init():
     @WEB.on_event("startup")
     def _():
@@ -259,4 +266,16 @@ def init():
                 room.min_temp = rq.min_temp
                 room.max_temp = rq.max_temp
                 return
-        return HTTPException(400, f"No room names {rq.room}.")
+        return HTTPException(400, f"No room named {rq.room}.")
+    
+    @WEB.post("/api/hvac/app")
+    async def http_room(rq: _HttpHvacAppRequest):
+        for room in ALL_ROOMS:
+            for hvac in room.hvacs:
+                if hvac.esp_name == rq.hvac:
+                    hvac.control = HvacControl.APP
+                    hvac.desired_state.mode = rq.mode
+                    hvac.desired_state.fan = rq.fan
+                    hvac.desired_state.target_temp = rq.target_temp
+                    return
+        return HTTPException(400, f"No hvac named {rq.hvac}.")

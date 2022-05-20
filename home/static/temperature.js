@@ -31,8 +31,10 @@ document.querySelectorAll(".settings button.btn-activate[data-control='app']").f
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    // area: btn.dataset.target,
-                    // duration_sec: 10,
+                    "hvac": btn.dataset.hvac,
+                    "mode": target.querySelector("#ddbtn-mode").value,
+                    "fan": target.querySelector("#ddbtn-fan").value,
+                    "target_temp": target.querySelector("#in-temp").value * 1,
                 })
             });
         } catch (err) {
