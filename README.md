@@ -11,6 +11,7 @@ Don't waste your time on this repo, this is very much useless to everyone but me
   * For heating, force the fan speed if outdoor temperature is <[5~7]°C
   * Integrate rainfall data
   * Integrate weather forecast?
+  * Maybe the hvac control should be global
 * UI
   * Irrigation page should show the active sprinkler (and reload upon start)
   * Speedup irrigation page

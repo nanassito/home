@@ -5,8 +5,9 @@ from enum import Enum
 import logging
 from math import inf
 
-from fastapi import Request
+from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from home.mqtt import mqtt_send, watch_mqtt_topic, MQTTMessage
 
 from home.prometheus import prom_query_one
@@ -196,6 +197,12 @@ class HvacController:
                             hvac.desired_state.fan = Fan.AUTO
 
 
+class _HttpRoomRequest(BaseModel):
+    room: str
+    min_temp: int
+    max_temp: int
+
+
 def init():
     @WEB.on_event("startup")
     def _():
@@ -242,3 +249,14 @@ def init():
                 ],
             },
         )
+    
+    @WEB.post("/api/room")
+    async def http_room(rq: _HttpRoomRequest):
+        for room in ALL_ROOMS:
+            if room.name == rq.room:
+                for hvac in room.hvacs:
+                    hvac.control = HvacControl.AUTO
+                room.min_temp = rq.min_temp
+                room.max_temp = rq.max_temp
+                return
+        return HTTPException(400, f"No room names {rq.room}.")
