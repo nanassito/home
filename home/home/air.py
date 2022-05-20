@@ -233,16 +233,10 @@ def init():
                         "max_1d": await get_temp(
                             f'max_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d])'
                         ),
+                        "min_temp": room.min_temp,
+                        "max_temp": room.max_temp,
                         "link": f'https://prometheus.epa.jaminais.fr/graph?g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=1d',
-                        "hvacs": [
-                            {
-                                "name": hvac.esp_name,
-                                "mode": hvac.reported_state.mode.name,
-                                "fan": hvac.reported_state.fan.name,
-                                "control": hvac.control.name,
-                            }
-                            for hvac in room.hvacs
-                        ],
+                        "hvacs": room.hvacs,
                     }
                     for room in ALL_ROOMS
                 ],
