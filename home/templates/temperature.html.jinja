@@ -25,9 +25,9 @@
                         <span style="color: var(--bs-red);">{{room.max_1d}}</span>
                     </div>
                     <div class="mt-2 d-flex justify-content-between">
-                        <button type="button" class="btn btn-link btn-sm" href="{{room.link}}">
+                        <a type="button" class="btn btn-link btn-sm" href="{{room.link}}">
                             <i class="bi bi-graph-up"></i>
-                        </button>
+                        </a>
                         <span>
                             {% for hvac in room.hvacs %}
                             <button type="button" class="btn {{
