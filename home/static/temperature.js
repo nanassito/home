@@ -55,8 +55,7 @@ document.querySelectorAll(".settings button.btn-activate[data-control='remote']"
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    // area: btn.dataset.target,
-                    // duration_sec: 10,
+                    "hvac": btn.dataset.hvac,
                 })
             });
         } catch (err) {
