@@ -68,7 +68,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-control" id="control-auto">
+                    <div class="form-control {% if hvac.control.name == "AUTO" %}bg-success{% endif %}" id="control-auto">
                         <h5><i class="bi bi-robot"></i> Automatique</a></h5>
                         <div class="form-group row container">
                             <label for="in-min-temp" class="col col-form-label">Min:</label>
@@ -83,11 +83,11 @@
                         </div>
                     </div>
 
-                    <div class="form-control" id="control-app">
+                    <div class="form-control {% if hvac.control.name == "APP" %}bg-success{% endif %}" id="control-app">
                         <h5><i class="bi bi-phone"></i> Application</a></h5>
                         <div class="form-group row container">
                             <label for="ddbtn-mode" class="col col-form-label">Mode:</label>
-                            <select id="ddbtn-mode" class="form-control col col-sm-2">
+                            <select id="ddbtn-mode" class="form-control col">
                                 <option value="off" {% if hvac.desired_state.mode.name == "OFF" %}selected="selected"{% endif %}>Off</option>
                                 <option value="heat" {% if hvac.desired_state.mode.name == "HEAT" %}selected="selected"{% endif %}>Chaud</option>
                                 <option value="cool" {% if hvac.desired_state.mode.name == "COOL" %}selected="selected"{% endif %}>Froid</option>
@@ -110,7 +110,7 @@
                         </div>
                     </div>
 
-                    <div class="form-control" id="control-remote">
+                    <div class="form-control {% if hvac.control.name == "REMOTE" %}bg-success{% endif %}" id="control-remote">
                         <h5><i class="bi bi-hand-index"></i> Télécommande</a></h5>
                         <div class="form-group row container justify-content-end">
                             <button type="button" class="btn btn-primary btn-activate" data-context="{{hvac.esp_name}}Settings" data-control="remote" data-hvac="{{hvac.esp_name}}">Activer</button>
