@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 from pathlib import Path
+from turtle import color
 
 from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
@@ -25,6 +27,29 @@ else:
     }
 
 
+@dataclass
+class Video:
+    title: str
+    color: str
+    id: str
+    start: int = 4
+
+
+VIDEOS = [
+    Video("Un éléphant qui se balançait", "#4c85ba", "SQHmmlliuEc"),
+    Video("Mon petit lapin a du chagrin", "#9ab360", "jYKPpizdqQo"),
+    Video("Petit escargot", "#b3b92b", "7R7Aoc7sC0A"),
+    Video("L'araignée Gipsy", "#0091bf", "H5BcoZgpaI4"),
+    Video("Il pleut, il mouille", "#e87256", "XRCQnGaNHy0"),
+    Video("Mousse mousse dans le bain", "#b27cad", "deTyMcthKg0"),
+    Video("Doucement s'en va le jour", "#999184", "W5uLg-Fd4jQ"),
+    Video("Y avait des gros crocodiles", "#19713e", "5oLDMJeEQ1w"),
+    Video("La citrouille", "#bf6a7f", "CTAIt3ymli8"),
+    Video("Une fourmi m'a piqué la main", "#817dc9", "VvMk0zGq1ew"),
+    Video("Le Clown", "#3494e1", "poMHPAM_Sbk"),
+]
+
+
 def init() -> None:
     @WEB.get("/music", response_class=HTMLResponse)
     async def get_music(request: Request, album: str = "", song: str = ""):
@@ -41,5 +66,16 @@ def init() -> None:
                     "album": album,
                     "song": song,
                 },
+            },
+        )
+
+    @WEB.get("/video", response_class=HTMLResponse)
+    async def get_video(request: Request):
+        return TEMPLATES.TemplateResponse(
+            "video.html.jinja",
+            {
+                "request": request,
+                "page": "Video",
+                "videos": VIDEOS,
             },
         )

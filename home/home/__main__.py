@@ -14,7 +14,7 @@ from pydantic import BaseModel
 import home.air
 import home.lawn
 import home.mqtt
-import home.music
+import home.media
 import home.prometheus
 import home.valves
 import home.weapons
@@ -54,7 +54,7 @@ home.valves.init()
 home.weapons.init()
 home.lawn.init()
 home.prometheus.init()
-home.music.init()
+home.media.init()
 home.air.init()
 home.mqtt.init()
 
