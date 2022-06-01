@@ -42,3 +42,5 @@ devices:
     friendly_name: valve_frontyard
   '0x00124b0025906bb7':
     friendly_name: repeater_garage
+  '0x00158d00080688a0':
+    friendly_name: contact_mower_back
