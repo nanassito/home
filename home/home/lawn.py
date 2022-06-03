@@ -53,10 +53,10 @@ class Irrigation:
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=4), timedelta(days=1)),
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=8), timedelta(days=1)),
         VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=7), timedelta(days=1)),
-        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=8), timedelta(days=1)),
+        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=10), timedelta(days=1)),
         VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),
-        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=8), timedelta(days=1)),
-        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=15), timedelta(days=2)),
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=10), timedelta(days=1)),
+        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=10), timedelta(days=1)),
     }
 
     async def run_forever(self: "Irrigation") -> None:
