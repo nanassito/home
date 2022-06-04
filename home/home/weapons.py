@@ -73,7 +73,6 @@ async def snooze_on_door_opening(msg: MQTTMessage) -> None:
 SOAKER_SIDE = Soaker(VALVE_BACKYARD_SIDE)
 SOAKER_SCHOOL = Soaker(VALVE_BACKYARD_SCHOOL)
 SOAKER_DECK = Soaker(VALVE_BACKYARD_DECK)
-SOAKER_PLANTER = Soaker(VALVE_FRONTYARD_PLANTER)
 
 
 def init():
@@ -88,9 +87,6 @@ def init():
         )
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak)
-        )
-        asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/motion_planter", SOAKER_PLANTER.soak)
         )
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/contact_livingroom", snooze_on_door_opening)
