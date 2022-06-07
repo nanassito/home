@@ -19,3 +19,7 @@ groups:
       - alert: Le controle d'une valve a été perdu
         expr: sum(valve_should_be_running) - sum({__name__=~"mqtt_state_l."}) > 1
         for: 30m
+      - alert: Echec de détection du jour
+        expr: max_over_time(mqtt_illuminance[24h]) < 900
+      - alert: Echec de détection de la nuit
+        expr: min_over_time(mqtt_illuminance[24h]) > 100
