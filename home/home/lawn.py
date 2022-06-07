@@ -61,11 +61,7 @@ class Irrigation:
 
     async def run_forever(self: "Irrigation") -> None:
         while True:
-            if await facts.is_night_time():
-                # Sigmoid tuned to that we water every day during drought and water half as often when super humid
-                promql = '2 / (1 + 2.71828 ^ -( avg_over_time(mqtt_humidity{topic="zigbee2mqtt_air_outside"}[7d]) * 0.05 -2.5) )'
-                dryness_factor = await prom_query_one(promql)
-                self.LOG.info(f"Humidity factor is {round(dryness_factor, 3)}")
+            if await facts.is_night_time() or not facts.is_prod():
                 for valve, schedule in Irrigation.SCHEDULE.items():
                     hours = round(schedule.over.days * 24)
                     promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{hours}h]))"
