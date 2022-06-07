@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse
 from pandas import DataFrame
 
 from home import facts
-from home.prometheus import prom_query_one, prom_query_series
+from home.prometheus import COUNTER_NUM_RUNS, prom_query_one, prom_query_series
 from home.utils import FeatureFlag
 from home.valves import (
     VALVE_BACKYARD_DECK,
@@ -52,7 +52,7 @@ class Irrigation:
         VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=1)),
         VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=4), timedelta(days=1)),
         VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=8), timedelta(days=1)),
-        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=7), timedelta(days=1)),
+        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=10), timedelta(days=1)),
         VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=10), timedelta(days=1)),
         VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),
         VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=10), timedelta(days=1)),
@@ -61,6 +61,7 @@ class Irrigation:
 
     async def run_forever(self: "Irrigation") -> None:
         while True:
+            COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
             if await facts.is_night_time() or not facts.is_prod():
                 for valve, schedule in Irrigation.SCHEDULE.items():
                     hours = round(schedule.over.days * 24)
