@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package switch.service;
+option go_package = "github.com/nanassito/home/switches;switches_proto";
+
+message ReqList {}
+message RspList {
+    repeated string SwitchIDs = 1;
+}
+
+message ReqActivate {
+    string SwitchID = 1;
+    int32 DurationSeconds = 2;
+    string ClientID = 3;
+}
+message RspActivate {
+    string SwitchID = 1;
+    int32 ActiveUntil = 2;
+}
+
+message ReqStatus {
+    string SwitchID = 1;
+}
+message RspStatus {
+    message Request {
+        string ClientID = 1;
+        int32 From = 2;
+        int32 To = 3;
+    }
+
+    string SwitchID = 1;
+    bool isActive = 2;
+    optional int32 ActiveUntil = 3;
+    repeated Request Requests = 4;
+}
+
+
+service SwitchSvc {
+    rpc List (ReqList) returns (RspList);
+    rpc Activate(ReqActivate) returns (RspActivate);
+    rpc Status(ReqStatus) returns (RspStatus);
+}
+
+message SwitchConfig{
+    message MqttConfig{
+        string SetTopic = 1;
+        string MsgOn = 2;
+        string MsgOff = 3;
+    }
+
+    message PrometheusConfig{
+        string Metric = 1;
+        map<string, string> Labels = 2;
+    }
+
+    MqttConfig Mqtt = 1;
+    PrometheusConfig Prometheus = 2;
+}

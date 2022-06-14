@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Switches",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "switches/main.go"
+        },
+        {
             "name": "Epa",
             "type": "python",
             "request": "launch",
