@@ -11,7 +11,7 @@ devices:
   '0x00158d0006f7e96e':
     friendly_name: air_zaya
   '0x54ef4410001a07aa':
-    friendly_name: air_livingroom
+    friendly_name: air_indoor
   '0x00158d0006fb03c4':
     friendly_name: leak_bedroom_zaya_hvac
   '0xa4c1382cfb825490':
