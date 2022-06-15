@@ -44,3 +44,5 @@ devices:
     friendly_name: repeater_garage
   '0x00158d00080688a0':
     friendly_name: contact_mower_back
+  '0x00158d0008071da3':
+    friendly_name: air_livingroom
