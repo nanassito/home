@@ -148,16 +148,13 @@ async def infer_general_mode():
         if not room.hvacs:
             continue
         curr = await room.get_current_temp()
-        hvac_temps = [
-            await hvac.get_current_temp() for hvac in room.hvacs
-        ]
         if curr < room.min_temp:
             desired_temp_delta += inf
-        if max(curr, *[t - 3 for t in hvac_temps]) <= min(room.min_temp + 3, room.max_temp):
+        if curr <= min(room.min_temp + 3, room.max_temp):
             desired_temp_delta += room.min_temp + 3 - curr
         if curr > room.max_temp:
             desired_temp_delta -= inf
-        if min(curr, *[t + 3 for t in hvac_temps]) >= max(room.max_temp - 3, room.min_temp):
+        if curr >= max(room.max_temp - 3, room.min_temp):
             desired_temp_delta -= curr - room.max_temp + 3
     if desired_temp_delta > 0:
         return Mode.HEAT
@@ -177,10 +174,9 @@ class HvacController:
                     if hvac.control is HvacControl.AUTO:
                         # Set the running mode
                         curr = await room.get_current_temp()
-                        hvac_temp = await hvac.get_current_temp()
-                        if mode == mode.HEAT and room.min_temp + 3 <= min(curr, hvac_temp):
+                        if mode == mode.HEAT and room.min_temp + 3 <= curr:
                             hvac.desired_state.mode = Mode.OFF  # Room is warm enough
-                        elif mode == mode.COOL and room.max_temp - 3 >= max(curr, hvac_temp):
+                        elif mode == mode.COOL and room.max_temp - 3 >= curr:
                             hvac.desired_state.mode = Mode.OFF  # Room is cold enough
                         else:
                             hvac.desired_state.mode = mode  # Apply whatever the majority needs
@@ -192,7 +188,7 @@ class HvacController:
                             hvac.desired_state.target_temp = room.max_temp
 
                         # Set the fan speed
-                        delta_temp = abs(curr - hvac_temp)
+                        delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
                         if delta_temp > 3:
                             hvac.desired_state.fan = Fan.HIGH
                         elif delta_temp > 1.5:
