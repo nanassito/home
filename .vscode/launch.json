@@ -9,7 +9,10 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "switches/main.go"
+            "program": "switches/main.go",
+            "args": [
+                "-mqtt=127.0.0.1:1883"
+            ]
         },
         {
             "name": "Epa",

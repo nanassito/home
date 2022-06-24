@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
 	pb "github.com/nanassito/home/proto/go/switches"
 	switches "github.com/nanassito/home/switches/packages"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	grpc "google.golang.org/grpc"
 )
 
@@ -16,9 +18,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	http.Handle("/metrics", promhttp.Handler())
+	go http.ListenAndServe(":7002", nil)
+
 	grpcServer := grpc.NewServer()
-	switchesServer := switches.Server{}
+	switchesServer := switches.New()
 	pb.RegisterSwitchSvcServer(grpcServer, switchesServer)
-	fmt.Println("Server started on " + addr)
+	fmt.Println("Switch server started on " + addr)
 	grpcServer.Serve(lis)
 }

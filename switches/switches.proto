@@ -10,12 +10,12 @@ message RspList {
 
 message ReqActivate {
     string SwitchID = 1;
-    int32 DurationSeconds = 2;
+    int64 DurationSeconds = 2;
     string ClientID = 3;
 }
 message RspActivate {
     string SwitchID = 1;
-    int32 ActiveUntil = 2;
+    int64 ActiveUntil = 2;
 }
 
 message ReqStatus {
@@ -24,13 +24,13 @@ message ReqStatus {
 message RspStatus {
     message Request {
         string ClientID = 1;
-        int32 From = 2;
-        int32 To = 3;
+        int64 From = 2;
+        int64 To = 3;
     }
 
     string SwitchID = 1;
     bool isActive = 2;
-    optional int32 ActiveUntil = 3;
+    optional int64 ActiveUntil = 3;
     repeated Request Requests = 4;
 }
 
@@ -41,6 +41,8 @@ service SwitchSvc {
     rpc Status(ReqStatus) returns (RspStatus);
 }
 
+
+// For internal use only. Used to load init data from disk.
 message SwitchConfig{
     message MqttConfig{
         string SetTopic = 1;
