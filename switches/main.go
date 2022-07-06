@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 
-	pb "github.com/nanassito/home/proto/go/switches"
+	pb "github.com/nanassito/home/proto/switches"
 	switches "github.com/nanassito/home/switches/packages"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	grpc "google.golang.org/grpc"

@@ -3,6 +3,7 @@ package switches
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,6 +17,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+var configFile = flag.String("config", "/github/home/switches/switches.json", "Switch configuration file.")
 
 type Request struct {
 	ClientID string
@@ -113,7 +116,8 @@ func New() *Server {
 	}
 
 	var switches map[string]*pb.SwitchConfig
-	data, err := ioutil.ReadFile("./switches.json")
+	flag.Parse()
+	data, err := ioutil.ReadFile(*configFile)
 	if err != nil {
 		log.Fatalf("Failed to read config: %v", err)
 	}

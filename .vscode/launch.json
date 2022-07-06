@@ -11,7 +11,8 @@
             "mode": "auto",
             "program": "switches/main.go",
             "args": [
-                "-mqtt=127.0.0.1:1883"
+                "-mqtt=127.0.0.1:1883",
+                "-config=./switches.json"
             ]
         },
         {
