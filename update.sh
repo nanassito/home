@@ -25,6 +25,7 @@ RAIN_GIT_PREV=$(git_version rain)
 NGINX_GIT_PREV=$(git_version nginx)
 PROMETHEUS_GIT_PREV=$(git_version prometheus)
 ZIGBEE2MQTT_GIT_PREV=$(git_version zigbee2mqtt)
+SWITCHES_GIT_PREV=$(git_version switches)
 
 
 git pull -s recursive -X theirs
@@ -65,4 +66,10 @@ fi
 if [ "${ZIGBEE2MQTT_GIT_PREV}" != "$(git_version zigbee2mqtt)" ]; then
     systemctl daemon-reload
     docker_update "koenkk/zigbee2mqtt"
+fi
+
+
+if [ "${SWITCHES_GIT_PREV}" != "$(git_version switches)" ]; then
+    systemctl daemon-reload
+    systemctl restart switches
 fi

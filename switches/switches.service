@@ -1,0 +1,14 @@
+[Unit]
+Description=switches
+After=network.target
+Requires=mosquitto.service
+
+[Service]
+ExecStart=/github/home/switches/switches.bin
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
