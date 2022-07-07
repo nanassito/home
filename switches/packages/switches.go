@@ -90,6 +90,11 @@ func (s *State) control(mqtt mqtt.MqttIface) {
 				fmt.Printf("Mqtt failure: %v\n", err)
 			}
 		}
+		prom.LoopRunsCounter.With(prometheus.Labels{
+			"domain":   "Switches",
+			"type":     "controlSwitchState",
+			"instance": s.SwitchID,
+		}).Inc()
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -212,7 +217,8 @@ func (s *Server) Status(ctx context.Context, req *pb.ReqStatus) (*pb.RspStatus, 
 
 func (s *Server) ControlLoop() {
 	// Monitor the state of the switch
-	for _, switchState := range s.State.BySwitchID {
+	for switchID, switchState := range s.State.BySwitchID {
+		fmt.Printf("Starting monitoring and control loops for %s\n", switchID)
 		go switchState.monitor()
 		go switchState.control(s.Mqtt)
 	}
