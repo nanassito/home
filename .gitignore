@@ -131,3 +131,6 @@ dmypy.json
 
 # Stores the synoptic key
 rain/rain/config.py
+
+# Golang
+__debug_bin
