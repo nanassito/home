@@ -142,7 +142,6 @@ func (s *Server) List(ctx context.Context, req *pb.ReqList) (*pb.RspList, error)
 }
 
 func (s *Server) Activate(ctx context.Context, req *pb.ReqActivate) (*pb.RspActivate, error) {
-	// TODO: Unit test this because I'm getting bulshit results.
 	if req.GetClientID() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Must specify clientID")
 	}
