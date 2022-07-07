@@ -102,31 +102,5 @@
                 "topic": "zigbee2mqtt_valve_frontyard"
             }
         }
-    },
-    "switch_adhoc": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/switch_adhoc/set",
-            "msg_on": "{\"state\": \"ON\"}",
-            "msg_off": "{\"state\": \"OFF\"}"
-        },
-        "prometheus": {
-            "metric": "mqtt_state",
-            "labels": {
-                "topic": "zigbee2mqtt_switch_adhoc"
-            }
-        }
-    },
-    "switch_washer": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/power_adhoc/set",
-            "msg_on": "{\"state\": \"ON\"}",
-            "msg_off": "{\"state\": \"OFF\"}"
-        },
-        "prometheus": {
-            "metric": "mqtt_state",
-            "labels": {
-                "topic": "zigbee2mqtt_power_adhoc"
-            }
-        }
     }
 }

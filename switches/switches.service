@@ -4,7 +4,9 @@ After=network.target
 Requires=mosquitto.service
 
 [Service]
-ExecStart=/github/home/switches/switches.bin
+ExecStart=/github/home/switches/switches.bin \
+        -mqtt="127.0.0.1:1883"
+        -config=/github/home/switches/switches.json"
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
