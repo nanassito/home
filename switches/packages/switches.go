@@ -2,14 +2,13 @@ package switches
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"strings"
 	"time"
 
+	json_strict "github.com/nanassito/home/lib/json"
 	"github.com/nanassito/home/lib/mqtt"
 	prom "github.com/nanassito/home/lib/prometheus"
 	pb "github.com/nanassito/home/proto/switches"
@@ -45,18 +44,19 @@ func (s *State) monitor() {
 	promql := fmt.Sprintf("%s{%s}", s.Config.Prometheus.Metric, labels.String())
 	for {
 		stateAsNum, err := prom.QueryOne(promql, "state_"+s.SwitchID)
+		fmt.Printf("monitorSwitchState | %s | %s = %f\n", s.SwitchID, promql, stateAsNum)
 		if err == nil {
 			switch stateAsNum {
-			case 0:
+			case float64(s.Config.Prometheus.ValueActive):
 				s.ReportedActive = false
-			case 1:
+			case float64(s.Config.Prometheus.ValueRest):
 				s.ReportedActive = true
 			default:
 				fmt.Printf("monitorSwitchState | %s | Unknown state %f\n", s.SwitchID, stateAsNum)
 				// TODO: Instrument the invalid result
 			}
 		} else {
-			fmt.Printf("monitorSwitchState | %s | %v", s.SwitchID, err)
+			fmt.Printf("monitorSwitchState | %s | %v\n", s.SwitchID, err)
 			// TODO: Instrument the failure
 		}
 		prom.LoopRunsCounter.With(prometheus.Labels{
@@ -66,6 +66,11 @@ func (s *State) monitor() {
 		}).Inc()
 		time.Sleep(1 * time.Minute)
 	}
+}
+
+var bool2Verb = map[bool]string{
+	true:  "active",
+	false: "rest",
 }
 
 func (s *State) control(mqtt mqtt.MqttIface) {
@@ -78,11 +83,11 @@ func (s *State) control(mqtt mqtt.MqttIface) {
 			}
 		}
 		if s.ReportedActive != shouldBeActive {
-			fmt.Printf("ControlLoop | %s | Changing state from %v to %v\n", s.SwitchID, s.ReportedActive, shouldBeActive)
-			msg := s.Config.Mqtt.MsgOff
+			msg := s.Config.Mqtt.MsgRest
 			if shouldBeActive {
-				msg = s.Config.Mqtt.MsgOn
+				msg = s.Config.Mqtt.MsgActive
 			}
+			fmt.Printf("ControlLoop | %s | Changing state from %v to %v\n", s.SwitchID, bool2Verb[s.ReportedActive], bool2Verb[shouldBeActive])
 			err := mqtt.PublishString(s.Config.Mqtt.SetTopic, msg)
 			if err == nil {
 				s.ReportedActive = shouldBeActive
@@ -122,11 +127,7 @@ func New() *Server {
 
 	var switches map[string]*pb.SwitchConfig
 	flag.Parse()
-	data, err := ioutil.ReadFile(*configFile)
-	if err != nil {
-		log.Fatalf("Failed to read config: %v", err)
-	}
-	if err := json.Unmarshal(data, &switches); err != nil {
+	if err := json_strict.UnmarshalFile(*configFile, &switches); err != nil {
 		log.Fatalf("Failed to parse config: %v", err)
 	}
 
@@ -216,9 +217,8 @@ func (s *Server) Status(ctx context.Context, req *pb.ReqStatus) (*pb.RspStatus, 
 }
 
 func (s *Server) ControlLoop() {
-	// Monitor the state of the switch
-	for switchID, switchState := range s.State.BySwitchID {
-		fmt.Printf("Starting monitoring and control loops for %s\n", switchID)
+	for _, switchState := range s.State.BySwitchID {
+		fmt.Printf("Starting monitoring and control loops for %s\n", switchState.SwitchID)
 		go switchState.monitor()
 		go switchState.control(s.Mqtt)
 	}

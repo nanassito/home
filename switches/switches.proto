@@ -46,13 +46,15 @@ service SwitchSvc {
 message SwitchConfig{
     message MqttConfig{
         string SetTopic = 1;
-        string MsgOn = 2;
-        string MsgOff = 3;
+        string MsgRest = 2;
+        string MsgActive = 3;
     }
 
     message PrometheusConfig{
         string Metric = 1;
         map<string, string> Labels = 2;
+        int32 ValueRest = 3;
+        int32 ValueActive = 4;
     }
 
     MqttConfig Mqtt = 1;

@@ -1,132 +1,152 @@
 {
     "valve_backyard_side": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_backyard/set",
-            "msg_on": "{\"state_l1\": \"ON\"}",
-            "msg_off": "{\"state_l1\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "MsgActive": "{\"state_l1\": \"ON\"}",
+            "MsgRest": "{\"state_l1\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l1",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l1",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_backyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_backyard_house": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_backyard/set",
-            "msg_on": "{\"state_l2\": \"ON\"}",
-            "msg_off": "{\"state_l2\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "MsgActive": "{\"state_l2\": \"ON\"}",
+            "MsgRest": "{\"state_l2\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l2",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l2",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_backyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_backyard_school": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_backyard/set",
-            "msg_on": "{\"state_l3\": \"ON\"}",
-            "msg_off": "{\"state_l3\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "MsgActive": "{\"state_l3\": \"ON\"}",
+            "MsgRest": "{\"state_l3\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l3",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l3",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_backyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_backyard_deck": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_backyard/set",
-            "msg_on": "{\"state_l4\": \"ON\"}",
-            "msg_off": "{\"state_l4\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "MsgActive": "{\"state_l4\": \"ON\"}",
+            "MsgRest": "{\"state_l4\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l4",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l4",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_backyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_frontyard_street": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_frontyard/set",
-            "msg_on": "{\"state_l1\": \"ON\"}",
-            "msg_off": "{\"state_l1\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "MsgActive": "{\"state_l1\": \"ON\"}",
+            "MsgRest": "{\"state_l1\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l1",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l1",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_frontyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_frontyard_driveway": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_frontyard/set",
-            "msg_on": "{\"state_l2\": \"ON\"}",
-            "msg_off": "{\"state_l2\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "MsgActive": "{\"state_l2\": \"ON\"}",
+            "MsgRest": "{\"state_l2\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l2",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l2",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_frontyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_frontyard_neighbor": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_frontyard/set",
-            "msg_on": "{\"state_l3\": \"ON\"}",
-            "msg_off": "{\"state_l3\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "MsgActive": "{\"state_l3\": \"ON\"}",
+            "MsgRest": "{\"state_l3\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l3",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l3",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_frontyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "valve_frontyard_planter": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/valve_frontyard/set",
-            "msg_on": "{\"state_l4\": \"ON\"}",
-            "msg_off": "{\"state_l4\": \"OFF\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "MsgActive": "{\"state_l4\": \"ON\"}",
+            "MsgRest": "{\"state_l4\": \"OFF\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state_l4",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state_l4",
+            "Labels": {
                 "topic": "zigbee2mqtt_valve_frontyard"
-            }
+            },
+            "ValueActive": 1,
+            "ValueRest": 0
         }
     },
     "switch_adhoc": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/switch_adhoc/set",
-            "msg_on": "{\"state\": \"OFF\"}",
-            "msg_off": "{\"state\": \"ON\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/switch_adhoc/set",
+            "MsgActive": "{\"state\": \"OFF\"}",
+            "MsgRest": "{\"state\": \"ON\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state",
+            "Labels": {
                 "topic": "zigbee2mqtt_switch_adhoc"
-            }
+            },
+            "ValueActive": 0,
+            "ValueRest": 1
         }
     },
     "switch_washer": {
-        "mqtt": {
-            "set_topic": "zigbee2mqtt/power_adhoc/set",
-            "msg_on": "{\"state\": \"OFF\"}",
-            "msg_off": "{\"state\": \"ON\"}"
+        "Mqtt": {
+            "SetTopic": "zigbee2mqtt/power_adhoc/set",
+            "MsgActive": "{\"state\": \"OFF\"}",
+            "MsgRest": "{\"state\": \"ON\"}"
         },
-        "prometheus": {
-            "metric": "mqtt_state",
-            "labels": {
+        "Prometheus": {
+            "Metric": "mqtt_state",
+            "Labels": {
                 "topic": "zigbee2mqtt_power_adhoc"
-            }
+            },
+            "ValueActive": 0,
+            "ValueRest": 1
         }
     }
 }
