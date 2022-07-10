@@ -56,6 +56,14 @@ type State struct {
 	ReportedActive bool
 }
 
+func boolAsFloat(v bool) float64 {
+	if v {
+		return 1
+	} else {
+		return 0
+	}
+}
+
 func (s *State) monitor() {
 	labels := strings.Builder{}
 	for key, value := range s.Config.Prometheus.Labels {
@@ -66,7 +74,6 @@ func (s *State) monitor() {
 		stateAsNum, err := prom.QueryOne(promql, "state_"+s.SwitchID)
 		fmt.Printf("monitorSwitchState | %s | %s = %f\n", s.SwitchID, promql, stateAsNum)
 		if err == nil {
-			PromReportedState.WithLabelValues(s.SwitchID).Set(stateAsNum)
 			switch int32(stateAsNum) {
 			case s.Config.Prometheus.ValueActive:
 				s.ReportedActive = true
@@ -76,6 +83,7 @@ func (s *State) monitor() {
 				fmt.Printf("monitorSwitchState | %s | Unknown state %f\n", s.SwitchID, stateAsNum)
 				// TODO: Instrument the invalid result
 			}
+			PromReportedState.WithLabelValues(s.SwitchID).Set(boolAsFloat(s.ReportedActive))
 		} else {
 			fmt.Printf("monitorSwitchState | %s | %v\n", s.SwitchID, err)
 			// TODO: Instrument the failure
@@ -97,15 +105,13 @@ var bool2Verb = map[bool]string{
 func (s *State) control(mqtt mqtt.MqttIface) {
 	for {
 		shouldBeActive := false
-		promValue := float64(0)
 		for _, request := range s.Requests {
 			if request.isActive(time.Now()) {
 				shouldBeActive = true
-				promValue = 1
 				break
 			}
 		}
-		PromDesiredState.WithLabelValues(s.SwitchID).Set(promValue)
+		PromDesiredState.WithLabelValues(s.SwitchID).Set(boolAsFloat(shouldBeActive))
 		if s.ReportedActive != shouldBeActive {
 			msg := s.Config.Mqtt.MsgRest
 			if shouldBeActive {
