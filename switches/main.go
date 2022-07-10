@@ -13,8 +13,7 @@ import (
 )
 
 func main() {
-	addr := "localhost:7001"
-	lis, err := net.Listen("tcp", addr)
+	lis, err := net.Listen("tcp", ":7001")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -25,6 +24,6 @@ func main() {
 	grpcServer := grpc.NewServer()
 	switchesServer := switches.New()
 	pb.RegisterSwitchSvcServer(grpcServer, switchesServer)
-	fmt.Println("Switch server started on " + addr)
+	fmt.Println("Switch server started")
 	grpcServer.Serve(lis)
 }
