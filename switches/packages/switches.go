@@ -13,11 +13,31 @@ import (
 	prom "github.com/nanassito/home/lib/prometheus"
 	pb "github.com/nanassito/home/proto/switches"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 var configFile = flag.String("config", "/github/home/switches/switches.json", "Switch configuration file.")
+
+var (
+	PromDesiredState = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "switch",
+			Name:      "desired_state",
+			Help:      "Desired state of a switch.",
+		},
+		[]string{"switchID"},
+	)
+	PromReportedState = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "switch",
+			Name:      "reported_state",
+			Help:      "Reported state of a switch. For convenience only since this is already in prom anyway.",
+		},
+		[]string{"switchID"},
+	)
+)
 
 type Request struct {
 	ClientID string
@@ -46,6 +66,7 @@ func (s *State) monitor() {
 		stateAsNum, err := prom.QueryOne(promql, "state_"+s.SwitchID)
 		fmt.Printf("monitorSwitchState | %s | %s = %f\n", s.SwitchID, promql, stateAsNum)
 		if err == nil {
+			PromReportedState.WithLabelValues(s.SwitchID).Set(stateAsNum)
 			switch int32(stateAsNum) {
 			case s.Config.Prometheus.ValueActive:
 				s.ReportedActive = true
@@ -76,12 +97,15 @@ var bool2Verb = map[bool]string{
 func (s *State) control(mqtt mqtt.MqttIface) {
 	for {
 		shouldBeActive := false
+		promValue := float64(0)
 		for _, request := range s.Requests {
 			if request.isActive(time.Now()) {
 				shouldBeActive = true
+				promValue = 1
 				break
 			}
 		}
+		PromDesiredState.WithLabelValues(s.SwitchID).Set(promValue)
 		if s.ReportedActive != shouldBeActive {
 			msg := s.Config.Mqtt.MsgRest
 			if shouldBeActive {
