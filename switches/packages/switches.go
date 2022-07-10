@@ -46,11 +46,11 @@ func (s *State) monitor() {
 		stateAsNum, err := prom.QueryOne(promql, "state_"+s.SwitchID)
 		fmt.Printf("monitorSwitchState | %s | %s = %f\n", s.SwitchID, promql, stateAsNum)
 		if err == nil {
-			switch stateAsNum {
-			case float64(s.Config.Prometheus.ValueActive):
-				s.ReportedActive = false
-			case float64(s.Config.Prometheus.ValueRest):
+			switch int32(stateAsNum) {
+			case s.Config.Prometheus.ValueActive:
 				s.ReportedActive = true
+			case s.Config.Prometheus.ValueRest:
+				s.ReportedActive = false
 			default:
 				fmt.Printf("monitorSwitchState | %s | Unknown state %f\n", s.SwitchID, stateAsNum)
 				// TODO: Instrument the invalid result
@@ -217,8 +217,9 @@ func (s *Server) Status(ctx context.Context, req *pb.ReqStatus) (*pb.RspStatus, 
 }
 
 func (s *Server) ControlLoop() {
-	for _, switchState := range s.State.BySwitchID {
-		fmt.Printf("Starting monitoring and control loops for %s\n", switchState.SwitchID)
+	for _, switchID := range s.State.SwitchIDs {
+		fmt.Printf("Starting monitoring and control loops for %s\n", switchID)
+		switchState := s.State.BySwitchID[switchID]
 		go switchState.monitor()
 		go switchState.control(s.Mqtt)
 	}
