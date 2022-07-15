@@ -136,7 +136,7 @@ func (s *State) control(mqtt mqtt.MqttIface) {
 
 type ServerState struct {
 	SwitchIDs  []string
-	BySwitchID map[string]State
+	BySwitchID map[string]*State
 }
 
 type Server struct {
@@ -151,7 +151,7 @@ func New() *Server {
 		Mqtt: mqtt.New("switches"),
 		State: &ServerState{
 			SwitchIDs:  []string{},
-			BySwitchID: map[string]State{},
+			BySwitchID: map[string]*State{},
 		},
 	}
 
@@ -163,7 +163,7 @@ func New() *Server {
 
 	for switchID, switchCfg := range switches {
 		server.State.SwitchIDs = append(server.State.SwitchIDs, switchID)
-		server.State.BySwitchID[switchID] = State{
+		server.State.BySwitchID[switchID] = &State{
 			SwitchID: switchID,
 			Config:   switchCfg,
 			Requests: make([]Request, 0),

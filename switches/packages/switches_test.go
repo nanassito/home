@@ -15,7 +15,7 @@ func TestActivate(t *testing.T) {
 	server := switches.Server{
 		State: &switches.ServerState{
 			SwitchIDs: []string{"testValve"},
-			BySwitchID: map[string]switches.State{
+			BySwitchID: map[string]*switches.State{
 				"testValve": {
 					SwitchID:       "testValve",
 					Config:         &switches_proto.SwitchConfig{},
@@ -37,12 +37,40 @@ func TestActivate(t *testing.T) {
 	is.True(after.Add(11 * time.Second).After(time.Unix(resp.GetActiveUntil(), 0)))
 }
 
+func TestPersistence(t *testing.T) {
+	is := is.New(t)
+	server := switches.Server{
+		State: &switches.ServerState{
+			SwitchIDs: []string{"testValve"},
+			BySwitchID: map[string]*switches.State{
+				"testValve": {
+					SwitchID:       "testValve",
+					Config:         &switches_proto.SwitchConfig{},
+					Requests:       []switches.Request{},
+					ReportedActive: false,
+				},
+			},
+		},
+	}
+	_, err := server.Activate(context.Background(), &switches_proto.ReqActivate{
+		SwitchID:        "testValve",
+		DurationSeconds: int64(10),
+		ClientID:        "unitTests",
+	})
+	is.NoErr(err)
+	resp, err := server.Status(context.Background(), &switches_proto.ReqStatus{
+		SwitchID: "testValve",
+	})
+	is.NoErr(err)
+	is.Equal(1, len(resp.Requests))
+}
+
 func TestStatus(t *testing.T) {
 	is := is.New(t)
 	server := switches.Server{
 		State: &switches.ServerState{
 			SwitchIDs: []string{"testValve"},
-			BySwitchID: map[string]switches.State{
+			BySwitchID: map[string]*switches.State{
 				"testActiveValve": {
 					SwitchID: "testActiveValve",
 					Config:   &switches_proto.SwitchConfig{},
