@@ -28,11 +28,11 @@ func New(ClientID string) *Mqtt {
 		},
 		ClientID: ClientID,
 	})
-	client.Connect()
 	return &Mqtt{client: client}
 }
 
 func (m *Mqtt) PublishString(topic string, message string) error {
+	m.client.Connect()
 	t := m.client.Publish(topic, 0, false, message)
 	<-t.Done()
 	return t.Error()
