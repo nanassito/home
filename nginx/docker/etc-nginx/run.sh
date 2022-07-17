@@ -19,7 +19,7 @@ if [ -z "${NGO_TOKEN_SECRET}" ]; then
   exit 1
 fi
 
-# Define some defaults
+# Define some defaults.
 export NGO_CALLBACK_SCHEME=${NGO_CALLBACK_SCHEME:-https}
 export NGO_CALLBACK_URI=${NGO_CALLBACK_URI-/_oauth}
 export NGO_SIGNOUT_URI=${NGO_SIGNOUT_URI-/_signout}
