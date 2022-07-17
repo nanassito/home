@@ -32,7 +32,7 @@ func New(ClientID string) *Mqtt {
 }
 
 func (m *Mqtt) PublishString(topic string, message string) error {
-	m.client.Connect()
+	m.client.Connect() // TODO: Mqtt failure: not Connected  ????
 	t := m.client.Publish(topic, 0, false, message)
 	<-t.Done()
 	return t.Error()

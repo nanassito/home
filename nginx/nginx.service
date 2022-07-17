@@ -7,11 +7,15 @@ Requires=docker.service
 ExecStart=\
         docker run \
         -p 443:443 \
-        --mount type=bind,source=/github/home/nginx/conf.d,target=/etc/nginx/conf.d,readonly \
         --mount source=letsencrypt_etc,target=/etc/letsencrypt,readonly \
         --mount type=bind,source=/home/dorian/static,target=/static,readonly \
         --mount type=bind,source=/home/dorian/openssl-ca/ca.crt,target=/etc/nginx/client_certs/ca.crt,readonly \
-        nginx
+        --env "NGO_CLIENT_ID=..." \
+        --env "NGO_CLIENT_SECRET=..." \
+        --env "NGO_TOKEN_SECRET=..." \
+        --env "NGO_CALLBACK_SCHEME=https" \
+        --env "NGO_WHITELIST=..." \
+        web
 StandardOutput=inherit
 StandardError=inherit
 Restart=always

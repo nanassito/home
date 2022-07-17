@@ -1,7 +1,10 @@
+# This instruction is used for all the other sites
+lua_package_path '/etc/nginx/lua/?.lua;';
+
 server {
     listen       443 ssl;
     listen  [::]:443 ssl;
-    server_name  static.epa.jaminais.fr static.eastpaloalto.jaminais.fr;
+    server_name  epa.jaminais.fr eastpaloalto.jaminais.fr;
 
     access_log /dev/stdout;
     error_log /dev/stdout;
@@ -9,14 +12,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/epa.jaminais.fr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/epa.jaminais.fr/privkey.pem;
 
-    ssl_client_certificate /etc/nginx/client_certs/ca.crt;
-    ssl_verify_client optional;
-
     location / {
-        if ($ssl_client_verify != SUCCESS) {
-            return 403;
-        }
-        root /static;
-        autoindex on;
+        deny all;
     }
 }

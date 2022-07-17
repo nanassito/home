@@ -19,7 +19,6 @@ docker_update(){
 
 
 ALERTMANAGER_GIT_PREV=$(git_version alertmanager)
-GRAFANA_GIT_PREV=$(git_version grafana)
 HOME_GIT_PREV=$(git_version home)
 RAIN_GIT_PREV=$(git_version rain)
 NGINX_GIT_PREV=$(git_version nginx)
@@ -36,11 +35,6 @@ if [ "${ALERTMANAGER_GIT_PREV}" != "$(git_version alertmanager)" ]; then
     docker_update "prom/alertmanager"
 fi
 
-if [ "${GRAFANA_GIT_PREV}" != "$(git_version grafana)" ]; then
-    systemctl daemon-reload
-    docker_update "grafana/grafana"
-fi
-
 if [ "${HOME_GIT_PREV}" != "$(git_version home)" ]; then
     OLD_PROC=$(docker_pid "home:latest")
     docker build -t home home/
@@ -55,7 +49,8 @@ fi
 
 if [ "${NGINX_GIT_PREV}" != "$(git_version nginx)" ]; then
     systemctl daemon-reload
-    docker_update nginx
+    docker build -t web nginx/
+    systemctl restart nginx
 fi
 
 if [ "${PROMETHEUS_GIT_PREV}" != "$(git_version prometheus)" ]; then
