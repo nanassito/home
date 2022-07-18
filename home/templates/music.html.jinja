@@ -14,7 +14,7 @@
     <h1>{{album}}</h1>
     <ul class="list-group">
         {% for song in songs %}
-        <a href="/static/music?album={{album}}&song={{song}}">
+        <a href="/music?album={{album}}&song={{song}}">
             <li class="list-group-item {% if album == listen.album and song == listen.song %}active{% endif %}">{{song}}</li>
         </a>
         {% endfor %}
