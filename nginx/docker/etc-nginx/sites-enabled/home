@@ -39,4 +39,10 @@ server {
     location / {
         proxy_pass http://192.168.1.1:8000;
     }
+
+
+    location /static {
+        root /static;
+        autoindex on;
+    }
 }

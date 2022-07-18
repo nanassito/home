@@ -5,7 +5,7 @@
 <!--  -->
 <section class="container-fluid">
     <audio controls autoplay>
-        <source src="https://static.epa.jaminais.fr/music/{{listen.album}}/{{listen.song}}" type="audio/ogg">
+        <source src="https://home.epa.jaminais.fr/static/music/{{listen.album}}/{{listen.song}}" type="audio/ogg">
     </audio>
 </section>
 
@@ -14,7 +14,7 @@
     <h1>{{album}}</h1>
     <ul class="list-group">
         {% for song in songs %}
-        <a href="/music?album={{album}}&song={{song}}">
+        <a href="/static/music?album={{album}}&song={{song}}">
             <li class="list-group-item {% if album == listen.album and song == listen.song %}active{% endif %}">{{song}}</li>
         </a>
         {% endfor %}
