@@ -123,6 +123,7 @@ func (s *State) control(mqtt mqtt.MqttIface) {
 				s.ReportedActive = shouldBeActive
 			} else {
 				fmt.Printf("Mqtt failure: %v\n", err)
+				mqtt.Reset()
 			}
 		}
 		prom.LoopRunsCounter.With(prometheus.Labels{
