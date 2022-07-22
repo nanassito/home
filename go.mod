@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.0
 	github.com/prometheus/client_golang v1.12.2
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.0

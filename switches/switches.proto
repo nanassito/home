@@ -3,6 +3,8 @@ syntax = "proto3";
 package switch.service;
 option go_package = "github.com/nanassito/home/switches;switches_proto";
 
+import "google/api/annotations.proto";
+
 message ReqList {}
 message RspList {
     repeated string SwitchIDs = 1;
@@ -36,9 +38,21 @@ message RspStatus {
 
 
 service SwitchSvc {
-    rpc List (ReqList) returns (RspList);
-    rpc Activate(ReqActivate) returns (RspActivate);
-    rpc Status(ReqStatus) returns (RspStatus);
+    rpc List (ReqList) returns (RspList) {
+        option (google.api.http) = {
+            get: "/list"
+        };
+    };
+    rpc Activate(ReqActivate) returns (RspActivate) {
+        option (google.api.http) = {
+            post: "/activate"
+        };
+    };
+    rpc Status(ReqStatus) returns (RspStatus) {
+        option (google.api.http) = {
+            get: "/status"
+        };
+    };
 }
 
 
