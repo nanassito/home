@@ -44,7 +44,7 @@ class Valve:
                 "http://192.168.1.1:7003/activate",
                 data={
                     "SwitchID": self.switch_id,
-                    "DurationSeconds": duration.total_seconds(),
+                    "DurationSeconds": int(duration.total_seconds()),
                     "ClientID": "home",
                 }
             ) as resp:
