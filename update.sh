@@ -20,7 +20,6 @@ docker_update(){
 
 ALERTMANAGER_GIT_PREV=$(git_version alertmanager)
 HOME_GIT_PREV=$(git_version home)
-RAIN_GIT_PREV=$(git_version rain)
 NGINX_GIT_PREV=$(git_version nginx)
 PROMETHEUS_GIT_PREV=$(git_version prometheus)
 ZIGBEE2MQTT_GIT_PREV=$(git_version zigbee2mqtt)
@@ -38,12 +37,6 @@ fi
 if [ "${HOME_GIT_PREV}" != "$(git_version home)" ]; then
     OLD_PROC=$(docker_pid "home:latest")
     docker build -t home home/
-    docker stop ${OLD_PROC}  # systemd will restart with the new image.
-fi
-
-if [ "${RAIN_GIT_PREV}" != "$(git_version rain)" ]; then
-    OLD_PROC=$(docker_pid "rain:latest")
-    docker build -t rain rain/
     docker stop ${OLD_PROC}  # systemd will restart with the new image.
 fi
 
