@@ -3,6 +3,7 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+import aiohttp
 
 from aioprometheus import Gauge
 from fastapi import HTTPException
@@ -26,61 +27,41 @@ class Valve:
     section: str
     area: str
     line: int
+    switch_id: str
 
     def __post_init__(self: "Valve") -> None:
         self.log = log.getChild("Valve").getChild(self.area)
         self.water_until_requests: list[datetime] = []
         self.request_lock = asyncio.Lock()
-        self.is_running = False
 
     @property
     def prom_query(self: "Valve") -> str:
         return f'mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_{self.section}"}}'
 
     async def water_for(self: "Valve", duration: timedelta) -> None:
-        async with self.request_lock:
-            self.water_until_requests.append(now() + duration)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "http://192.168.1.1:7003/activate",
+                data={
+                    "SwitchID": self.switch_id,
+                    "DurationSeconds": duration.total_seconds(),
+                    "ClientID": "home",
+                }
+            ) as resp:
+                self.log.info(f"{resp.status} - {await resp.text()}")
 
     async def is_really_running(self: "Valve") -> bool:
         return bool(await prom_query_one(self.prom_query))
 
-    async def switch(self: "Valve", should_be_running: bool) -> None:
-        value = "ON" if should_be_running else "OFF"
-        _PROM_VALVE.set(
-            {"area": self.area, "line": str(self.line)}, int(should_be_running)
-        )
-        await mqtt_send(
-            f"zigbee2mqtt/valve_{self.section}/set", {f"state_l{self.line}": value}
-        )
-        self.log.info(f"Switched {value}.")
 
-    async def run_forever(self: "Valve") -> None:
-        await self.switch(False)
-        self.is_running = False
-        while True:
-            for _ in range(60):  # So that we pull external data only once a minute
-                async with self.request_lock:
-                    self.water_until_requests = [
-                        until for until in self.water_until_requests if until > now()
-                    ]
-                should_run = bool(self.water_until_requests)
-                if should_run != self.is_running:
-                    await self.switch(should_run)
-                    self.is_running = should_run
-                await asyncio.sleep(1)
-            self.is_running = await self.is_really_running()
-            outstanding = [rq - now() for rq in self.water_until_requests]
-            self.log.debug(f"Outstanding watering requests: {outstanding}")
-
-
-VALVE_BACKYARD_SIDE = Valve("backyard", "side", 1)
-VALVE_BACKYARD_HOUSE = Valve("backyard", "house", 2)
-VALVE_BACKYARD_SCHOOL = Valve("backyard", "school", 3)
-VALVE_BACKYARD_DECK = Valve("backyard", "deck", 4)
-VALVE_FRONTYARD_STREET = Valve("frontyard", "street", 1)
-VALVE_FRONTYARD_DRIVEWAY = Valve("frontyard", "driveway", 2)
-VALVE_FRONTYARD_NEIGHBOR = Valve("frontyard", "neighbor", 3)
-VALVE_FRONTYARD_PLANTER = Valve("frontyard", "planter", 4)
+VALVE_BACKYARD_SIDE = Valve("backyard", "side", 1, "valve_backyard_side")
+VALVE_BACKYARD_HOUSE = Valve("backyard", "house", 2, "valve_backyard_house")
+VALVE_BACKYARD_SCHOOL = Valve("backyard", "school", 3, "valve_backyard_school")
+VALVE_BACKYARD_DECK = Valve("backyard", "deck", 4, "valve_backyard_deck")
+VALVE_FRONTYARD_STREET = Valve("frontyard", "street", 1, "valve_frontyard_street")
+VALVE_FRONTYARD_DRIVEWAY = Valve("frontyard", "driveway", 2, "valve_frontyard_driveway")
+VALVE_FRONTYARD_NEIGHBOR = Valve("frontyard", "neighbor", 3, "valve_frontyard_neighbor")
+VALVE_FRONTYARD_PLANTER = Valve("frontyard", "planter", 4, "valve_frontyard_planter")
 
 
 class _HttpValveRequest(BaseModel):
@@ -113,18 +94,6 @@ async def recover_frontyard_valve(msg: MQTTMessage):
 def init():
     @WEB.on_event("startup")
     def start_valves_controllers():
-        all_valves = (
-            VALVE_BACKYARD_DECK,
-            VALVE_BACKYARD_HOUSE,
-            VALVE_BACKYARD_SCHOOL,
-            VALVE_BACKYARD_SIDE,
-            VALVE_FRONTYARD_STREET,
-            VALVE_FRONTYARD_DRIVEWAY,
-            VALVE_FRONTYARD_NEIGHBOR,
-            VALVE_FRONTYARD_PLANTER,
-        )
-        for valve in all_valves:
-            asyncio.create_task(valve.run_forever())
         asyncio.create_task(
             watch_mqtt_topic("zigbee2mqtt/bridge/log", recover_frontyard_valve)
         )

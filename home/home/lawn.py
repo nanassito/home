@@ -76,7 +76,7 @@ class Irrigation:
                         )
                         await valve.water_for(schedule.water_time)
                         break
-                    if valve.is_running:
+                    if await valve.is_really_running():
                         break  # If the valve is running we don't want to start another one.
             await asyncio.sleep(60)
 
