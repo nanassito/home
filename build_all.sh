@@ -17,6 +17,8 @@ do
 done
 
 
+GOOS="linux"
+GOARCH="amd64"
 for target in switches ;
 do
     go build -o ./${target}/${target}.bin ./${target}/
