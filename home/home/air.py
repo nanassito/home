@@ -246,10 +246,10 @@ def init():
                             f'mqtt_temperature{{topic="{room.sensor_topic}"}}'
                         ),
                         "min_1d": await get_temp(
-                            f'min_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d])'
+                            f'min(min_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d]))'
                         ),
                         "max_1d": await get_temp(
-                            f'max_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d])'
+                            f'max(max_over_time(mqtt_temperature{{topic="{room.sensor_topic}"}}[1d]))'
                         ),
                         "min_temp": room.min_temp,
                         "max_temp": room.max_temp,
