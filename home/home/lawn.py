@@ -65,7 +65,7 @@ class Irrigation:
             if await facts.is_night_time() or not facts.is_prod():
                 for valve, schedule in Irrigation.SCHEDULE.items():
                     hours = round(schedule.over.days * 24) - 1
-                    promql = f"sum without(instance) (sum_over_time({valve.prom_query}[{hours}h]))"
+                    promql = f"sum without(instance, job) (sum_over_time({valve.prom_query}[{hours}h]))"
                     runtime = timedelta(minutes=await prom_query_one(promql))
                     self.LOG.debug(
                         f"{valve} has had {runtime} of water out of {schedule.water_time}"
