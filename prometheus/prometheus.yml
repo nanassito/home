@@ -14,6 +14,12 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+  - job_name: 'server'
+    static_configs:
+      - targets: ['192.168.1.1:9558']
+  - job_name: 'raspi'
+    static_configs:
+      - targets: ['192.168.1.3:9558']
   - job_name: 'home'
     static_configs:
       - targets: ['192.168.1.1:8000']
