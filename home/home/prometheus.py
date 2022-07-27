@@ -56,7 +56,10 @@ async def prom_query_labels(query: str) -> list[dict[str, str]]:
 
 @n_tries(3)
 async def prom_query_series(
-    query: str, duration: timedelta, tz: BaseTzInfo | TimeZone = TimeZone.UTC
+    query: str,
+    duration: timedelta,
+    tz: BaseTzInfo | TimeZone = TimeZone.UTC,
+    step: timedelta = timedelta(minutes=1),
 ) -> list[tuple[datetime, float]]:
     tz = tz.value if isinstance(tz, TimeZone) else tz
     end = now()
@@ -68,7 +71,7 @@ async def prom_query_series(
                     "query": query,
                     "start": (end - duration).isoformat(),
                     "end": end.isoformat(),
-                    "step": 60,
+                    "step": int(step.total_seconds()),
                 },
             ) as response:
                 rs = await response.json()

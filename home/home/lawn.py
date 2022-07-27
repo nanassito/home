@@ -91,7 +91,11 @@ def init() -> None:
     async def get_irrigation(request: Request):
         async def get_valve_history(valve: Valve) -> DataFrame:
             df = DataFrame(
-                await prom_query_series(valve.prom_query, timedelta(days=7)),
+                await prom_query_series(
+                    f"sum by (topic)(sum_over_time({valve.prom_query}[1d]))",
+                    timedelta(days=7),
+                    step=timedelta(days=1),
+                ),
                 columns=("ts", valve.area),
             ).set_index("ts")
             df["date"] = df.index.date

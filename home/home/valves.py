@@ -3,15 +3,15 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import aiohttp
 
+import aiohttp
 from aioprometheus import Gauge
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+from home.facts import is_prod
 from home.mqtt import MQTTMessage, mqtt_send, watch_mqtt_topic
 from home.prometheus import prom_query_one
-from home.time import now
 from home.web import WEB
 
 log = logging.getLogger(__name__)
@@ -36,19 +36,20 @@ class Valve:
 
     @property
     def prom_query(self: "Valve") -> str:
-        return f'sum by (topic)(mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_{self.section}"}})'
+        return f'mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_{self.section}"}}'
 
     async def water_for(self: "Valve", duration: timedelta) -> None:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "http://192.168.1.1:7003/activate",
-                data={
-                    "SwitchID": self.switch_id,
-                    "DurationSeconds": int(duration.total_seconds()),
-                    "ClientID": "home",
-                }
-            ) as resp:
-                self.log.info(f"{resp.status} - {await resp.text()}")
+        if is_prod():
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "http://192.168.1.1:7003/activate",
+                    data={
+                        "SwitchID": self.switch_id,
+                        "DurationSeconds": int(duration.total_seconds()),
+                        "ClientID": "home",
+                    }
+                ) as resp:
+                    self.log.info(f"{resp.status} - {await resp.text()}")
 
     async def is_really_running(self: "Valve") -> bool:
         return bool(await prom_query_one(self.prom_query))
