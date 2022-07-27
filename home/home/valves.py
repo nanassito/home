@@ -36,7 +36,7 @@ class Valve:
 
     @property
     def prom_query(self: "Valve") -> str:
-        return f'mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_{self.section}"}}'
+        return f'sum by (topic)(mqtt_state_l{self.line}{{topic="zigbee2mqtt_valve_{self.section}"}})'
 
     async def water_for(self: "Valve", duration: timedelta) -> None:
         async with aiohttp.ClientSession() as session:
