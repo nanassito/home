@@ -30,40 +30,34 @@ from home.web import TEMPLATES, WEB
 log = logging.getLogger(__name__)
 
 
-class ScheduleModifiers(Enum):
-    HUMIDITY = "humidity"
-
-
 @dataclass
 class Schedule:
     water_time: timedelta
     over: timedelta
-    modifiers: set[ScheduleModifiers] = field(
-        default_factory=lambda: {
-            ScheduleModifiers.HUMIDITY,
-        }
-    )
+    run_at_night: bool
 
 
 class Irrigation:
     FEATURE_FLAG = FeatureFlag("Irrigation")
     LOG = log.getChild("Irrigation")
     SCHEDULE = {
-        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=1)),
-        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=4), timedelta(days=1)),
-        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=8), timedelta(days=1)),
-        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=10), timedelta(days=1)),
-        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=10), timedelta(days=1)),
-        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1)),
-        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=10), timedelta(days=1)),
-        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=10), timedelta(days=1)),
+        VALVE_BACKYARD_SIDE: Schedule(timedelta(minutes=5), timedelta(days=1), run_at_night=True),
+        VALVE_BACKYARD_SCHOOL: Schedule(timedelta(minutes=4), timedelta(days=1), run_at_night=True),
+        VALVE_BACKYARD_HOUSE: Schedule(timedelta(minutes=8), timedelta(days=1), run_at_night=True),
+        VALVE_BACKYARD_DECK: Schedule(timedelta(minutes=10), timedelta(days=1), run_at_night=True),
+        VALVE_FRONTYARD_STREET: Schedule(timedelta(minutes=10), timedelta(days=1), run_at_night=True),
+        VALVE_FRONTYARD_DRIVEWAY: Schedule(timedelta(minutes=5), timedelta(days=1), run_at_night=True),
+        VALVE_FRONTYARD_NEIGHBOR: Schedule(timedelta(minutes=10), timedelta(days=1), run_at_night=True),
+        VALVE_FRONTYARD_PLANTER: Schedule(timedelta(minutes=10), timedelta(days=1), run_at_night=False),
     }
 
     async def run_forever(self: "Irrigation") -> None:
         while True:
             COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
-            if await facts.is_night_time() or not facts.is_prod():
+            if not facts.is_prod():
                 for valve, schedule in Irrigation.SCHEDULE.items():
+                    if await facts.is_night_time() != schedule.run_at_night:
+                        continue
                     hours = round(schedule.over.days * 24) - 1
                     promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
                     runtime = timedelta(minutes=await prom_query_one(promql))
