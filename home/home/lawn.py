@@ -54,9 +54,11 @@ class Irrigation:
     async def run_forever(self: "Irrigation") -> None:
         while True:
             COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
+            is_night = await facts.is_night_time()
             if not facts.is_prod():
                 for valve, schedule in Irrigation.SCHEDULE.items():
-                    if await facts.is_night_time() != schedule.run_at_night:
+                    if is_night != schedule.run_at_night:
+                        self.LOG.debug(f"Can't run because {(is_night != schedule.run_at_night)=}")
                         continue
                     hours = round(schedule.over.days * 24) - 1
                     promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
