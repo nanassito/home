@@ -55,25 +55,25 @@ class Irrigation:
         while True:
             COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
             is_night = await facts.is_night_time()
-            if not facts.is_prod():
-                for valve, schedule in Irrigation.SCHEDULE.items():
-                    if is_night != schedule.run_at_night:
-                        self.LOG.debug(f"Can't run because {(is_night != schedule.run_at_night)=}")
-                        continue
-                    hours = round(schedule.over.days * 24) - 1
-                    promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
-                    runtime = timedelta(minutes=await prom_query_one(promql))
-                    self.LOG.debug(
-                        f"{valve} has had {runtime} of water out of {schedule.water_time}"
+            for valve, schedule in Irrigation.SCHEDULE.items():
+                if is_night != schedule.run_at_night:
+                    self.LOG.debug(f"Can't run because {(is_night != schedule.run_at_night)=}")
+                    continue
+                hours = round(schedule.over.days * 24) - 1
+                promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
+                runtime = timedelta(minutes=await prom_query_one(promql))
+                self.LOG.debug(
+                    f"{valve} has had {runtime} of water out of {schedule.water_time}"
+                )
+                if runtime < schedule.water_time / 2:
+                    self.LOG.info(
+                        f"Requesting {schedule.water_time} of water from {valve}"
                     )
-                    if runtime < schedule.water_time / 2:
-                        self.LOG.info(
-                            f"Requesting {schedule.water_time} of water from {valve}"
-                        )
+                    if facts.is_prod():
                         await valve.water_for(schedule.water_time)
-                        break
-                    if await valve.is_really_running():
-                        break  # If the valve is running we don't want to start another one.
+                    break
+                if await valve.is_really_running():
+                    break  # If the valve is running we don't want to start another one.
             await asyncio.sleep(60)
 
 
