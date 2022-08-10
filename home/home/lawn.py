@@ -59,7 +59,7 @@ class Irrigation:
                 if is_night != schedule.run_at_night:
                     self.LOG.debug(f"Can't run because {(is_night != schedule.run_at_night)=}")
                     continue
-                hours = round(schedule.over.days * 24) - 1
+                hours = round(schedule.over.days * 24) - 6
                 promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
                 runtime = timedelta(minutes=await prom_query_one(promql))
                 self.LOG.debug(
