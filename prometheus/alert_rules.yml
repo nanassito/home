@@ -23,3 +23,5 @@ groups:
         expr: max_over_time(mqtt_illuminance[24h]) < 500
       - alert: Echec de détection de la nuit
         expr: min_over_time(mqtt_illuminance[24h]) > 100
+      - alert: La machine est terminée
+        expr: deriv(mqtt_power[5m]) < -1

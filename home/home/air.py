@@ -184,16 +184,15 @@ class HvacController:
                         # Set the temperature target
                         if mode is Mode.HEAT:
                             hvac.desired_state.target_temp = room.min_temp
+                            delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
+                            if delta_temp > 3:
+                                hvac.desired_state.fan = Fan.HIGH
+                            elif delta_temp > 1.5:
+                                hvac.desired_state.fan = Fan.MEDIUM
+                            else:
+                                hvac.desired_state.fan = Fan.AUTO
                         if mode is Mode.COOL:
                             hvac.desired_state.target_temp = room.max_temp
-
-                        # Set the fan speed
-                        delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
-                        if delta_temp > 3:
-                            hvac.desired_state.fan = Fan.HIGH
-                        elif delta_temp > 1.5:
-                            hvac.desired_state.fan = Fan.MEDIUM
-                        else:
                             hvac.desired_state.fan = Fan.AUTO
 
 
