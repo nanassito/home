@@ -171,12 +171,13 @@ class HvacController:
             mode = await infer_general_mode()
             for room in ALL_ROOMS:
                 for hvac in room.hvacs:
+                    hvac_curr = await hvac.get_current_temp()
                     if hvac.control is HvacControl.AUTO:
                         # Set the running mode
                         curr = await room.get_current_temp()
-                        if mode == mode.HEAT and room.min_temp + 3 <= curr:
+                        if mode == mode.HEAT and room.min_temp + 3 <= max(curr, hvac_curr):
                             hvac.desired_state.mode = Mode.OFF  # Room is warm enough
-                        elif mode == mode.COOL and room.max_temp - 3 >= curr:
+                        elif mode == mode.COOL and room.max_temp - 3 >= min(curr, hvac_curr):
                             hvac.desired_state.mode = Mode.OFF  # Room is cold enough
                         else:
                             hvac.desired_state.mode = mode  # Apply whatever the majority needs
@@ -184,7 +185,7 @@ class HvacController:
                         # Set the temperature target
                         if mode is Mode.HEAT:
                             hvac.desired_state.target_temp = room.min_temp
-                            delta_temp = abs(await room.get_current_temp() - await hvac.get_current_temp())
+                            delta_temp = abs(curr - hvac_curr)
                             if delta_temp > 3:
                                 hvac.desired_state.fan = Fan.HIGH
                             elif delta_temp > 1.5:
