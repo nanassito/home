@@ -47,7 +47,7 @@ class Valve:
                         "SwitchID": self.switch_id,
                         "DurationSeconds": int(duration.total_seconds()),
                         "ClientID": "home",
-                    }
+                    },
                 ) as resp:
                     self.log.info(f"{resp.status} - {await resp.text()}")
 

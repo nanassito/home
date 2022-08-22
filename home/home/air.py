@@ -1,15 +1,16 @@
 import asyncio
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-import logging
 from math import inf
 
+from aioprometheus.collectors import Gauge
 from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from home.mqtt import mqtt_send, watch_mqtt_topic, MQTTMessage
 
+from home.mqtt import MQTTMessage, mqtt_send, watch_mqtt_topic
 from home.prometheus import prom_query_one
 from home.time import now
 from home.web import TEMPLATES, WEB
@@ -25,6 +26,12 @@ class Mode(Enum):
     HEAT = "heat"
     FAN = "fan_only"
     DRY = "dry"
+
+
+MODE_TO_INT = {k: v for (v, k) in enumerate(Mode)}
+PROM_GAUGE_HVAC_STATE = Gauge(
+    "hvac_reported_state", f"Reported state of the HVAC unit. {MODE_TO_INT}"
+)
 
 
 class Fan(Enum):
@@ -65,19 +72,24 @@ class Hvac:
 
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
-    
+
     @property
     def esp_topic(self: "Room") -> str:
         return f"esphome_{self.esp_name}"
 
     async def get_current_temp(self: "Room") -> float:
-        return await prom_query_one(f'mqtt_current_temperature_state{{topic="{self.esp_topic}"}}')
+        return await prom_query_one(
+            f'mqtt_current_temperature_state{{topic="{self.esp_topic}"}}'
+        )
 
     async def on_mqtt(self: "Hvac", msg: MQTTMessage):
         changed = True
         match msg.topic.rsplit("/", 1)[-1]:
             case "mode_state":
-                self.reported_state.mode = Mode(msg.payload.decode())
+                mode = self.reported_state.mode = Mode(msg.payload.decode())
+                PROM_GAUGE_HVAC_STATE.set(
+                    {"unit": self.esp_name}, MODE_TO_INT.get(mode, -1)
+                )
             case "target_temperature_low_state":
                 self.reported_state.target_temp = int(float(msg.payload))
             case "fan_mode_state":
@@ -86,30 +98,30 @@ class Hvac:
                 changed = False
         if changed:
             self.log.debug(self)
-    
+
     async def protect_against_uart(self: "Hvac") -> None:
         delay = self.last_command + timedelta(milliseconds=500) - now()
         await asyncio.sleep(delay.total_seconds())
         self.last_command = now()
-    
+
     async def enforce_mode(self: "Hvac") -> None:
         mode = self.desired_state.mode
         if mode != self.reported_state.mode and mode is not Mode.INVALID:
             await mqtt_send(f"esphome/{self.esp_name}/mode_command", mode.value)
             await self.protect_against_uart()
-    
+
     async def enforce_fan(self: "Hvac") -> None:
         fan = self.desired_state.fan
         if fan != self.reported_state.fan and fan is not Fan.INVALID:
             await mqtt_send(f"esphome/{self.esp_name}/fan_mode_command", fan.value)
             await self.protect_against_uart()
-    
+
     async def enforce_temp(self: "Hvac") -> None:
         temp = self.desired_state.target_temp
         if temp != self.reported_state.target_temp and temp != -1:
             await mqtt_send(f"esphome/{self.esp_name}/target_temperature_command", temp)
             await self.protect_against_uart()
-    
+
     async def control_loop(self: "Hvac") -> None:
         while True:
             await asyncio.sleep(1)
@@ -118,7 +130,6 @@ class Hvac:
             await self.enforce_mode()
             await self.enforce_temp()
             await self.enforce_fan()
-            
 
 
 @dataclass
@@ -175,12 +186,18 @@ class HvacController:
                     if hvac.control is HvacControl.AUTO:
                         # Set the running mode
                         curr = await room.get_current_temp()
-                        if mode == mode.HEAT and room.min_temp + 3 <= max(curr, hvac_curr):
+                        if mode == mode.HEAT and room.min_temp + 3 <= max(
+                            curr, hvac_curr
+                        ):
                             hvac.desired_state.mode = Mode.OFF  # Room is warm enough
-                        elif mode == mode.COOL and room.max_temp - 3 >= min(curr, hvac_curr):
+                        elif mode == mode.COOL and room.max_temp - 3 >= min(
+                            curr, hvac_curr
+                        ):
                             hvac.desired_state.mode = Mode.OFF  # Room is cold enough
                         else:
-                            hvac.desired_state.mode = mode  # Apply whatever the majority needs
+                            hvac.desired_state.mode = (
+                                mode  # Apply whatever the majority needs
+                            )
 
                         # Set the temperature target
                         if mode is Mode.HEAT:
@@ -253,20 +270,23 @@ def init():
                         ),
                         "min_temp": room.min_temp,
                         "max_temp": room.max_temp,
-                        "link": f"https://prometheus.epa.jaminais.fr/graph?" + "&".join([
-                            f'g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=1d',
-                            *[
-                                f'g{idx}.expr=mqtt_current_temperature_state{{topic%3D"{hvac.esp_topic}"}}&g{idx}.tab=0&g{idx}.range_input=1d'
-                                for idx, hvac in enumerate(room.hvacs, 1)
-                            ],
-                        ]),
+                        "link": f"https://prometheus.epa.jaminais.fr/graph?"
+                        + "&".join(
+                            [
+                                f'g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=1d',
+                                *[
+                                    f'g{idx}.expr=mqtt_current_temperature_state{{topic%3D"{hvac.esp_topic}"}}&g{idx}.tab=0&g{idx}.range_input=1d'
+                                    for idx, hvac in enumerate(room.hvacs, 1)
+                                ],
+                            ]
+                        ),
                         "hvacs": room.hvacs,
                     }
                     for room in ALL_ROOMS
                 ],
             },
         )
-    
+
     @WEB.post("/api/room")
     async def http_room(rq: _HttpRoomRequest):
         for room in ALL_ROOMS:
@@ -277,7 +297,7 @@ def init():
                 room.max_temp = rq.max_temp
                 return
         return HTTPException(400, f"No room named {rq.room}.")
-    
+
     @WEB.post("/api/hvac/app")
     async def http_hvac_app(rq: _HttpHvacAppRequest):
         for room in ALL_ROOMS:
@@ -289,7 +309,7 @@ def init():
                     hvac.desired_state.target_temp = rq.target_temp
                     return
         return HTTPException(400, f"No hvac named {rq.hvac}.")
-    
+
     @WEB.post("/api/hvac/remote")
     async def http_hvac_remote(rq: _HttpHvacRemoteRequest):
         for room in ALL_ROOMS:
