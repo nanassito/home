@@ -3,8 +3,9 @@ import logging
 from base64 import b64encode
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import date, timedelta
 from enum import Enum
+import math
 
 import plotly.express as px
 from fastapi import Request
@@ -70,6 +71,7 @@ class Irrigation:
     async def run_forever(self: "Irrigation") -> None:
         while True:
             COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
+            sun_factor = (math.cos(((date.today().timetuple().tm_yday + 10 % 365) / 182 - 1) * math.pi) + 1) / 2
             is_night = await facts.is_night_time()
             for valve, schedule in Irrigation.SCHEDULE.items():
                 if is_night != schedule.run_at_night:
@@ -77,18 +79,23 @@ class Irrigation:
                         f"Can't run because {(is_night != schedule.run_at_night)=}"
                     )
                     continue
-                hours = round(schedule.over.days * 24) - 6
+                water_time = schedule.water_time * sun_factor
+                num_days = schedule.over.days
+                while water_time < timedelta(minutes=3):
+                    water_time *= 2
+                    num_days *= 2
+                hours = num_days - 6
                 promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
                 runtime = timedelta(minutes=await prom_query_one(promql))
                 self.LOG.debug(
-                    f"{valve} has had {runtime} of water out of {schedule.water_time}"
+                    f"{valve} has had {runtime} of water out of {water_time}"
                 )
-                if runtime < schedule.water_time / 2:
+                if runtime < water_time / 2:
                     self.LOG.info(
-                        f"Requesting {schedule.water_time} of water from {valve}"
+                        f"Requesting {water_time} of water from {valve}"
                     )
                     if facts.is_prod():
-                        await valve.water_for(schedule.water_time)
+                        await valve.water_for(water_time)
                     break
                 if await valve.is_really_running():
                     break  # If the valve is running we don't want to start another one.
