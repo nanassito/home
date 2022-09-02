@@ -19,7 +19,7 @@ done
 
 GOOS="linux"
 GOARCH="amd64"
-for target in switches ;
+for target in switches netscan;
 do
     go build -o ./${target}/${target}.bin ./${target}/
 done
