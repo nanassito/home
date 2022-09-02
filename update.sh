@@ -24,6 +24,7 @@ NGINX_GIT_PREV=$(git_version nginx)
 PROMETHEUS_GIT_PREV=$(git_version prometheus)
 ZIGBEE2MQTT_GIT_PREV=$(git_version zigbee2mqtt)
 SWITCHES_GIT_PREV=$(git_version switches)
+NETSCAN_GIT_PREV=$(git_version netscan)
 
 
 git pull -s recursive -X theirs
@@ -60,4 +61,10 @@ fi
 if [ "${SWITCHES_GIT_PREV}" != "$(git_version switches)" ]; then
     systemctl daemon-reload
     systemctl restart switches
+fi
+
+
+if [ "${NETSCAN_GIT_PREV}" != "$(git_version netscan)" ]; then
+    systemctl daemon-reload
+    systemctl restart netscan
 fi
