@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -60,5 +61,6 @@ func main() {
 
 	for {
 		pollNetwork("192.168.1.0/24")
+		time.Sleep(1 * time.Minute) // nmap is super expensive !
 	}
 }
