@@ -276,9 +276,9 @@ def init():
                         "link": f"https://prometheus.epa.jaminais.fr/graph?"
                         + "&".join(
                             [
-                                f'g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=1d',
+                                f'g0.expr=mqtt_temperature{{topic%3D"{room.sensor_topic}"}}&g0.tab=0&g0.range_input=6h',
                                 *[
-                                    f'g{idx}.expr=mqtt_current_temperature_state{{topic%3D"{hvac.esp_topic}"}}&g{idx}.tab=0&g{idx}.range_input=1d'
+                                    f'g{idx}.expr=mqtt_current_temperature_state{{topic%3D"{hvac.esp_topic}"}}&g{idx}.tab=0&g{idx}.range_input=6h'
                                     for idx, hvac in enumerate(room.hvacs, 1)
                                 ],
                             ]
