@@ -165,7 +165,7 @@ async def infer_general_mode():
             desired_temp_delta += room.min_temp + 3 - curr
         if curr > room.max_temp:
             desired_temp_delta -= inf
-        if curr >= max(room.max_temp - 3, room.min_temp):
+        if curr >= max(room.max_temp - 5, room.min_temp):
             desired_temp_delta -= curr - room.max_temp + 3
     if desired_temp_delta > 0:
         return Mode.HEAT
@@ -190,7 +190,7 @@ class HvacController:
                             curr, hvac_curr
                         ):
                             hvac.desired_state.mode = Mode.OFF  # Room is warm enough
-                        elif mode == mode.COOL and room.max_temp - 3 >= min(
+                        elif mode == mode.COOL and room.max_temp - 5 >= min(
                             curr, hvac_curr
                         ):
                             hvac.desired_state.mode = Mode.OFF  # Room is cold enough
@@ -200,9 +200,9 @@ class HvacController:
                             )
 
                         # Set the temperature target
+                        delta_temp = abs(curr - hvac_curr)
                         if mode is Mode.HEAT:
                             hvac.desired_state.target_temp = room.min_temp
-                            delta_temp = abs(curr - hvac_curr)
                             if delta_temp > 3:
                                 hvac.desired_state.fan = Fan.HIGH
                             elif delta_temp > 1.5:
@@ -211,7 +211,10 @@ class HvacController:
                                 hvac.desired_state.fan = Fan.AUTO
                         if mode is Mode.COOL:
                             hvac.desired_state.target_temp = room.max_temp
-                            hvac.desired_state.fan = Fan.AUTO
+                            if delta_temp > 1.5:
+                                hvac.desired_state.fan = Fan.MEDIUM
+                            else:
+                                hvac.desired_state.fan = Fan.AUTO
 
 
 class _HttpRoomRequest(BaseModel):
