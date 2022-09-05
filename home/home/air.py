@@ -213,7 +213,7 @@ class HvacController:
                                 hvac.desired_state.fan = Fan.AUTO
                         if mode is Mode.COOL:
                             if outside_temp >= room.max_temp + 5:
-                                offset += 2
+                                offset = 2
                                 hvac.desired_state.fan = Fan.MEDIUM
                             else:
                                 offset = 0
