@@ -29,7 +29,7 @@ STARTUP = now()
 _PROM_ASYNCIO_LATENCY = Histogram(
     "asyncio_latency_ns",
     "ns level deviance between the asyncio event loop and the wall clock.",
-    buckets=[10 ** i for i in range(3, 9)],
+    buckets=[10**i for i in range(3, 9)],
 )
 
 

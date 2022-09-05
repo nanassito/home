@@ -1,11 +1,11 @@
 import asyncio
 import logging
+import math
 from base64 import b64encode
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import Enum
-import math
 
 import plotly.express as px
 from fastapi import Request
@@ -71,7 +71,12 @@ class Irrigation:
     async def run_forever(self: "Irrigation") -> None:
         while True:
             COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
-            sun_factor = (math.cos(((date.today().timetuple().tm_yday + 10 % 365) / 182 - 1) * math.pi) + 1) / 2
+            sun_factor = (
+                math.cos(
+                    ((date.today().timetuple().tm_yday + 10 % 365) / 182 - 1) * math.pi
+                )
+                + 1
+            ) / 2
             is_night = await facts.is_night_time()
             for valve, schedule in Irrigation.SCHEDULE.items():
                 if is_night != schedule.run_at_night:
@@ -91,9 +96,7 @@ class Irrigation:
                     f"{valve} has had {runtime} of water out of {water_time}"
                 )
                 if runtime < water_time / 2:
-                    self.LOG.info(
-                        f"Requesting {water_time} of water from {valve}"
-                    )
+                    self.LOG.info(f"Requesting {water_time} of water from {valve}")
                     if facts.is_prod():
                         await valve.water_for(water_time)
                     break
