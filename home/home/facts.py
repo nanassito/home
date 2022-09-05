@@ -36,3 +36,8 @@ def is_prod() -> bool:
                 if "docker" in line:
                     return True
     return False
+
+
+async def get_outside_temp() -> float:
+    promql = 'max(mqtt_temperature{topic="zigbee2mqtt_air_outside"})'
+    return await prom_query_one(promql)

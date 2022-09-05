@@ -10,6 +10,7 @@ from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
+from home.facts import get_outside_temp
 from home.mqtt import MQTTMessage, mqtt_send, watch_mqtt_topic
 from home.prometheus import prom_query_one
 from home.time import now
@@ -179,6 +180,7 @@ class HvacController:
     async def run():
         while True:
             await asyncio.sleep(60)
+            outside_temp = await get_outside_temp()
             mode = await infer_general_mode()
             for room in ALL_ROOMS:
                 for hvac in room.hvacs:
@@ -210,11 +212,13 @@ class HvacController:
                             else:
                                 hvac.desired_state.fan = Fan.AUTO
                         if mode is Mode.COOL:
-                            hvac.desired_state.target_temp = room.max_temp
-                            if delta_temp > 1.5:
+                            if outside_temp >= room.max_temp + 5:
+                                offset += 2
                                 hvac.desired_state.fan = Fan.MEDIUM
                             else:
+                                offset = 0
                                 hvac.desired_state.fan = Fan.AUTO
+                            hvac.desired_state.target_temp = room.max_temp + offset
 
 
 class _HttpRoomRequest(BaseModel):
