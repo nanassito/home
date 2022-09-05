@@ -287,7 +287,7 @@ def init():
                                 ' or '
                                 f'label_replace(mqtt_target_temperature_low_state{{topic%3D"{hvac.esp_topic}"}},"metric","Target","","")'
                                 f")&g{idx}.tab=0&g{idx}.range_input=6h"
-                                for idx, hvac in enumerate(room.hvacs, 1)
+                                for idx, hvac in enumerate(room.hvacs)
                             ]
                         ),
                         "hvacs": room.hvacs,
