@@ -43,6 +43,16 @@ devices:
   '0x00124b0025906bb7':
     friendly_name: repeater_garage
   '0x00158d00080688a0':
-    friendly_name: contact_mower_back
+    friendly_name: frontyard/contact/mower
   '0x00158d0008071da3':
     friendly_name: air_livingroom
+  '0x00124b002445524c':
+    friendly_name: livingroom/contact/window_terrace
+  '0x00124b0024456fa1':
+    friendly_name: contact/livingroom/window/side
+  '0x00124b0025195e9e':
+    friendly_name: outside/contact/trash_gate
+  '0x00124b0025175d24':
+    friendly_name: outside/contact/front_gate
+  '0x00124b00244555a0':
+    friendly_name: backyard/contact/mower
