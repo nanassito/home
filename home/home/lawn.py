@@ -71,12 +71,8 @@ class Irrigation:
     async def run_forever(self: "Irrigation") -> None:
         while True:
             COUNTER_NUM_RUNS.inc({"item": "Irrigation"})
-            sun_factor = (
-                math.cos(
-                    ((date.today().timetuple().tm_yday + 10 % 365) / 182 - 1) * math.pi
-                )
-                + 1
-            ) / 2
+            sun_day = (date.today().timetuple().tm_yday + 10) % 365
+            sun_factor = ((math.cos((sun_day / 182 - 1) * math.pi) + 1) / 2) ** 1.5
             is_night = await facts.is_night_time()
             for valve, schedule in Irrigation.SCHEDULE.items():
                 if is_night != schedule.run_at_night:
