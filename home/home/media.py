@@ -46,7 +46,8 @@ VIDEOS = [
     Video("Y avait des gros crocodiles", "#19713e", "5oLDMJeEQ1w"),
     Video("La citrouille", "#bf6a7f", "CTAIt3ymli8"),
     Video("Une fourmi m'a piqué la main", "#817dc9", "VvMk0zGq1ew"),
-    Video("Le Clown", "#3494e1", "poMHPAM_Sbk"),
+    Video("Le clown", "#3494e1", "poMHPAM_Sbk"),
+    Video("J'fais pipi sur l'gazon", "#eba134", "???")
 ]
 
 
