@@ -31,23 +31,21 @@ else:
 class Video:
     title: str
     color: str
-    id: str
-    start: int = 4
 
 
 VIDEOS = [
-    Video("Un éléphant qui se balançait", "#4c85ba", "SQHmmlliuEc"),
-    Video("Mon petit lapin a du chagrin", "#9ab360", "jYKPpizdqQo"),
-    Video("Petit escargot", "#b3b92b", "7R7Aoc7sC0A"),
-    Video("L'araignée Gipsy", "#0091bf", "H5BcoZgpaI4"),
-    Video("Il pleut, il mouille", "#e87256", "XRCQnGaNHy0"),
-    Video("Mousse mousse dans le bain", "#b27cad", "deTyMcthKg0"),
-    Video("Doucement s'en va le jour", "#999184", "W5uLg-Fd4jQ"),
-    Video("Y avait des gros crocodiles", "#19713e", "5oLDMJeEQ1w"),
-    Video("La citrouille", "#bf6a7f", "CTAIt3ymli8"),
-    Video("Une fourmi m'a piqué la main", "#817dc9", "VvMk0zGq1ew"),
-    Video("Le clown", "#3494e1", "poMHPAM_Sbk"),
-    Video("J'fais pipi sur l'gazon", "#eba134", "???")
+    Video("Un éléphant qui se balançait", "#4c85ba"),
+    Video("Mon petit lapin a du chagrin", "#9ab360"),
+    Video("Petit escargot", "#b3b92b"),
+    Video("L'araignée Gipsy", "#0091bf"),
+    Video("Il pleut, il mouille", "#e87256"),
+    Video("Mousse mousse dans le bain", "#b27cad"),
+    Video("Doucement s'en va le jour", "#999184"),
+    Video("Y avait des gros crocodiles", "#19713e"),
+    Video("La citrouille", "#bf6a7f"),
+    Video("Une fourmi m'a piqué la main", "#817dc9"),
+    Video("Le clown", "#3494e1"),
+    Video("J'fais pipi sur l'gazon", "#eba134"),
 ]
 
 
