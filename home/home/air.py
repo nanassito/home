@@ -95,7 +95,7 @@ class Hvac:
                 )
                 for m in Mode:
                     PROM_GAUGE_HVAC_MODE.set(
-                        {"unit": self.esp_name, "mode": m},
+                        {"unit": self.esp_name, "mode": m.name},
                         bool(mode == m),
                     )
             case "target_temperature_low_state":
@@ -104,7 +104,7 @@ class Hvac:
                 fan = self.reported_state.fan = Fan(msg.payload.decode())
                 for f in Fan:
                     PROM_GAUGE_HVAC_FAN.set(
-                        {"unit": self.esp_name, "fan": f},
+                        {"unit": self.esp_name, "fan": f.name},
                         bool(fan == f),
                     )
             case _:
