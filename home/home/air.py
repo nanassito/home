@@ -188,9 +188,7 @@ class HvacController:
                     if hvac.control is HvacControl.AUTO:
                         # Set the running mode
                         curr = await room.get_current_temp()
-                        if mode == mode.HEAT and room.min_temp + 3 <= max(
-                            curr, hvac_curr
-                        ):
+                        if mode == mode.HEAT and room.min_temp + 3 <= curr:
                             hvac.desired_state.mode = Mode.OFF  # Room is warm enough
                         elif mode == mode.COOL and room.max_temp - 5 >= min(
                             curr, hvac_curr
