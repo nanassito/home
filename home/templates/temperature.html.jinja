@@ -91,6 +91,7 @@
                                 <option value="off" {% if hvac.desired_state.mode.name == "OFF" %}selected="selected"{% endif %}>Off</option>
                                 <option value="heat" {% if hvac.desired_state.mode.name == "HEAT" %}selected="selected"{% endif %}>Chaud</option>
                                 <option value="cool" {% if hvac.desired_state.mode.name == "COOL" %}selected="selected"{% endif %}>Froid</option>
+                                <option value="fan_only" {% if hvac.desired_state.mode.name == "FAN" %}selected="selected"{% endif %}>Vent</option>
                             </select>
                         </div>
                         <div class="form-group row container">
