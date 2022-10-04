@@ -26,4 +26,6 @@ groups:
       - alert: La machine est terminée
         expr: max_over_time(mqtt_power{topic="zigbee2mqtt_power_adhoc"}[10m]) < 1 and max_over_time(mqtt_power[1h]) > 100
       - alert: Le robot tondeuse est coincé
-        expr: max_over_time(mqtt_contact{topic=~"zigbee2mqtt_.+_contact_mower"}[1h30m]) < 1
+        expr: max_over_time(mqtt_contact{topic=~"zigbee2mqtt_.+_contact_mower"}[2h15m]) < 1
+      - alert: Component downtime
+        expr: systemd_unit_state{state="active", name=~"(home|mosquitto|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
