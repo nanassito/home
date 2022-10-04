@@ -33,6 +33,8 @@ MODE_TO_INT = {k: v for (v, k) in enumerate(Mode)}
 PROM_GAUGE_HVAC_STATE = Gauge(
     "hvac_reported_state", f"Reported state of the HVAC unit. {MODE_TO_INT}"
 )
+PROM_GAUGE_HVAC_FAN = Gauge("hvac_reported_fan", "reported fan of each HVAC unit.")
+PROM_GAUGE_HVAC_MODE = Gauge("hvac_reported_mode", "reported mode of each HVAC unit.")
 
 
 class Fan(Enum):
@@ -91,10 +93,20 @@ class Hvac:
                 PROM_GAUGE_HVAC_STATE.set(
                     {"unit": self.esp_name}, MODE_TO_INT.get(mode, -1)
                 )
+                for m in Mode:
+                    PROM_GAUGE_HVAC_MODE.set(
+                        {"unit": self.esp_name, "mode": m},
+                        bool(mode == m),
+                    )
             case "target_temperature_low_state":
                 self.reported_state.target_temp = int(float(msg.payload))
             case "fan_mode_state":
-                self.reported_state.fan = Fan(msg.payload.decode())
+                fan = self.reported_state.fan = Fan(msg.payload.decode())
+                for f in Fan:
+                    PROM_GAUGE_HVAC_FAN.set(
+                        {"unit": self.esp_name, "fan": f},
+                        bool(fan == f),
+                    )
             case _:
                 changed = False
         if changed:
@@ -278,11 +290,11 @@ def init():
                         "link": f"https://prometheus.epa.jaminais.fr/graph?"
                         + "&".join(
                             [
-                                f'g{idx}.expr=sum by (metric)('
+                                f"g{idx}.expr=sum by (metric)("
                                 f'label_replace(mqtt_temperature{{topic%3D"{room.sensor_topic}"}},"metric","Actual","","")'
-                                ' or '
+                                " or "
                                 f'label_replace(mqtt_current_temperature_state{{topic%3D"{hvac.esp_topic}"}},"metric","Reported","","")'
-                                ' or '
+                                " or "
                                 f'label_replace(mqtt_target_temperature_low_state{{topic%3D"{hvac.esp_topic}"}},"metric","Target","","")'
                                 f")&g{idx}.tab=0&g{idx}.range_input=6h"
                                 for idx, hvac in enumerate(room.hvacs)

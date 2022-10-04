@@ -98,7 +98,9 @@ def init():
             watch_mqtt_topic("zigbee2mqtt/contact_garage", snooze_on_door_opening)
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/raspi/backyard/contact/mower", snooze_on_door_opening)
+            watch_mqtt_topic(
+                "zigbee2mqtt/raspi/backyard/contact/mower", snooze_on_door_opening
+            )
         )
 
     @WEB.get("/soaker", response_class=HTMLResponse)
