@@ -96,7 +96,7 @@ class Hvac:
                 for m in Mode:
                     PROM_GAUGE_HVAC_MODE.set(
                         {"unit": self.esp_name, "mode": m.name},
-                        bool(mode == m),
+                        int(mode == m),
                     )
             case "target_temperature_low_state":
                 self.reported_state.target_temp = int(float(msg.payload))
@@ -105,7 +105,7 @@ class Hvac:
                 for f in Fan:
                     PROM_GAUGE_HVAC_FAN.set(
                         {"unit": self.esp_name, "fan": f.name},
-                        bool(fan == f),
+                        int(fan == f),
                     )
             case _:
                 changed = False
