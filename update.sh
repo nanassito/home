@@ -13,7 +13,7 @@ docker_pid(){
 
 docker_update(){
     OLD_PROC=$(docker_pid "$1")
-    docker pull "$1"
+    docker pull $(docker ps --format="{{.Image}}" | grep "$1")
     docker stop ${OLD_PROC}
 }
 
