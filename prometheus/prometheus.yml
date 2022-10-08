@@ -31,6 +31,7 @@ scrape_configs:
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_[a-z]+_0x[0-9a-f]+'
       action: drop
+    relabel_configs:
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_[a-z]+_(.*)'
       replacement: '$1'
@@ -51,6 +52,8 @@ scrape_configs:
       replacement: 'esp'
       action: replace
       target_label: "network"
+    - regex: topic
+      action: labeldrop
   - job_name: switches
     static_configs:
       - targets: ['192.168.1.1:7002']
