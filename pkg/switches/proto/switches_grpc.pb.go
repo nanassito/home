@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: proto/switches.proto
+// source: switches.proto
 
 package switches_proto
 
@@ -173,5 +173,5 @@ var SwitchSvc_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/switches.proto",
+	Metadata: "switches.proto",
 }
