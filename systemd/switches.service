@@ -1,0 +1,16 @@
+[Unit]
+Description=switches
+After=network.target
+Requires=mosquitto.service
+
+[Service]
+ExecStart=/github/home/bin/switches \
+        -mqtt="127.0.0.1:1883"
+        -config=/github/home/switches/switches.json"
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
