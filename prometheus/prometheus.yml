@@ -29,7 +29,7 @@ scrape_configs:
       - targets: ['192.168.1.1:9000']
     metric_relabel_configs:
     - source_labels: [ topic ]
-      regex: '0x[0-9a-f]+'
+      regex: 'zigbee2mqtt_[a-z]+_0x[0-9a-f]+'
       action: drop
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_[a-z]+_(.*)'
