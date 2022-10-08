@@ -1,14 +1,14 @@
 {
     "valve_backyard_side": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "SetTopic": "zigbee2mqtt/server/backyard/valve/set",
             "MsgActive": "{\"state_l1\": \"ON\"}",
             "MsgRest": "{\"state_l1\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l1",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_backyard"
+                "topic": "valve_backyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -16,14 +16,14 @@
     },
     "valve_backyard_house": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "SetTopic": "zigbee2mqtt/server/backyard/valve/set",
             "MsgActive": "{\"state_l2\": \"ON\"}",
             "MsgRest": "{\"state_l2\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l2",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_backyard"
+                "topic": "valve_backyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -31,14 +31,14 @@
     },
     "valve_backyard_school": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "SetTopic": "zigbee2mqtt/server/backyard/valve/set",
             "MsgActive": "{\"state_l3\": \"ON\"}",
             "MsgRest": "{\"state_l3\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l3",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_backyard"
+                "topic": "valve_backyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -46,14 +46,14 @@
     },
     "valve_backyard_deck": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_backyard/set",
+            "SetTopic": "zigbee2mqtt/server/backyard/valve/set",
             "MsgActive": "{\"state_l4\": \"ON\"}",
             "MsgRest": "{\"state_l4\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l4",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_backyard"
+                "topic": "valve_backyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -61,14 +61,14 @@
     },
     "valve_frontyard_street": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "SetTopic": "zigbee2mqtt/server/frontyard/valve/set",
             "MsgActive": "{\"state_l1\": \"ON\"}",
             "MsgRest": "{\"state_l1\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l1",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_frontyard"
+                "topic": "valve_frontyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -76,14 +76,14 @@
     },
     "valve_frontyard_driveway": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "SetTopic": "zigbee2mqtt/server/frontyard/valve/set",
             "MsgActive": "{\"state_l2\": \"ON\"}",
             "MsgRest": "{\"state_l2\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l2",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_frontyard"
+                "topic": "valve_frontyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -91,14 +91,14 @@
     },
     "valve_frontyard_neighbor": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "SetTopic": "zigbee2mqtt/server/frontyard/valve/set",
             "MsgActive": "{\"state_l3\": \"ON\"}",
             "MsgRest": "{\"state_l3\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l3",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_frontyard"
+                "topic": "valve_frontyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -106,14 +106,14 @@
     },
     "valve_frontyard_planter": {
         "Mqtt": {
-            "SetTopic": "zigbee2mqtt/valve_frontyard/set",
+            "SetTopic": "zigbee2mqtt/server/frontyard/valve/set",
             "MsgActive": "{\"state_l4\": \"ON\"}",
             "MsgRest": "{\"state_l4\": \"OFF\"}"
         },
         "Prometheus": {
             "Metric": "mqtt_state_l4",
             "Labels": {
-                "topic": "zigbee2mqtt_valve_frontyard"
+                "topic": "valve_frontyard"
             },
             "ValueActive": 1,
             "ValueRest": 0
@@ -128,7 +128,7 @@
         "Prometheus": {
             "Metric": "mqtt_state",
             "Labels": {
-                "topic": "zigbee2mqtt_switch_adhoc"
+                "topic": "switch_adhoc"
             },
             "ValueActive": 0,
             "ValueRest": 1
@@ -143,7 +143,7 @@
         "Prometheus": {
             "Metric": "mqtt_state",
             "Labels": {
-                "topic": "zigbee2mqtt_power_adhoc"
+                "topic": "power_adhoc"
             },
             "ValueActive": 0,
             "ValueRest": 1
