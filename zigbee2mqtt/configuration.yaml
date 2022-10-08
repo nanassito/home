@@ -5,3 +5,48 @@ mqtt:
   server: mqtt://192.168.1.1
 serial:
   port: /dev/ttyUSB0
+devices:
+  '0x00124b0022ee4a71':
+    friendly_name: device/adhoc/switch
+  '0x00158d0006fb03c4':
+    friendly_name: device/adhoc/leak
+  '0x54ef4410001a07aa':
+    friendly_name: device/adhoc/air
+  '0x00124b0025906bb7':
+    friendly_name: device/adhoc/repeater
+  '0x847127fffe90de4a':
+    friendly_name: device/backyard/valve
+  '0xa4c1382cfb825490':
+    friendly_name: device/backyard/air
+  '0x00158d0007d4c500':
+    friendly_name: device/backyard/fence/motion
+  '0x00158d0006f101ce':
+    friendly_name: device/backyard/side/motion
+  '0x00158d0006f1316c':
+    friendly_name: device/backyard/back/motion
+  '0x00158d0008071da3':
+    friendly_name: device/livingroom/air
+  '0x00158d0007e1137a':
+    friendly_name: device/livingroom/door/back/contact
+  '0x00124b002445524c':
+    friendly_name: device/livingroom/window/back/contact
+  '0x00124b0024456fa1':
+    friendly_name: device/livingroom/windowside/contact
+  '0x00124b00244555a0':
+    friendly_name: device/kitchen/window/front/contact
+  '0x00124b00244556db':
+    friendly_name: device/kitchen/window/side/contact
+  '0x00158d0006f7e96e':
+    friendly_name: device/zaya/air
+  '0x00158d0007087c1a':
+    friendly_name: device/parent/air
+  '0x00158d0007d11ff1':
+    friendly_name: device/parent/door/contact
+  '0x00124b00244557c9':
+    friendly_name: device/parent/windowleft/contact
+  '0x00124b0024455289':
+    friendly_name: device/parent/windowright/contact
+  '0x00158d000706885d':
+    friendly_name: device/office/air
+  '0x00124b0025195d6e':
+    friendly_name: device/office/window/left/contact
