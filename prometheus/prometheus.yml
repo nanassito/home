@@ -41,8 +41,6 @@ scrape_configs:
       replacement: '$1'
       action: replace
       target_label: "network"
-    - regex: 'topic'
-      action: labeldrop
   - job_name: switches
     static_configs:
       - targets: ['192.168.1.1:7002']
