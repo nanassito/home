@@ -112,7 +112,7 @@ def init() -> None:
         async def get_valve_history(valve: Valve) -> DataFrame:
             df = DataFrame(
                 await prom_query_series(
-                    f"sum by (topic)(sum_over_time({valve.prom_query}[1d]))",
+                    f"sum by (device)(sum_over_time({valve.prom_query}[1d]))",
                     timedelta(days=7),
                     step=timedelta(days=1),
                 ),

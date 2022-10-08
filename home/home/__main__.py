@@ -12,12 +12,12 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
 import home.air
-import home.lawn
+# import home.lawn
 import home.media
 import home.mqtt
 import home.prometheus
-import home.valves
-import home.weapons
+# import home.valves
+# import home.weapons
 from home.time import now
 from home.web import WEB
 
@@ -50,13 +50,13 @@ def _():
     asyncio.create_task(monitor_event_loop_latency())
 
 
-home.valves.init()
-home.weapons.init()
-home.lawn.init()
+# home.valves.init()
+# home.weapons.init()
+# home.lawn.init()
 home.prometheus.init()
 home.media.init()
 home.air.init()
-home.mqtt.init()
+# home.mqtt.init()
 
 
 @WEB.get("/", response_class=RedirectResponse)
@@ -69,19 +69,19 @@ class _HttpFeatureFlag(BaseModel):
     target: str
 
 
-@WEB.post("/api/feature_flag")
-async def http_post_feature_flag(settings: _HttpFeatureFlag):
-    targets = {
-        "soaker": home.weapons.Soaker,
-        "irrigation": home.lawn.Irrigation,
-    }
-    if settings.target.lower() not in targets:
-        return HTTPException(400, f"Invalid target: {settings.target}.")
-    target = targets[settings.target.lower()]
-    if settings.enabled:
-        target.FEATURE_FLAG.enable()  # type: ignore
-    else:
-        target.FEATURE_FLAG.disable()  # type: ignore
+# @WEB.post("/api/feature_flag")
+# async def http_post_feature_flag(settings: _HttpFeatureFlag):
+#     targets = {
+#         "soaker": home.weapons.Soaker,
+#         "irrigation": home.lawn.Irrigation,
+#     }
+#     if settings.target.lower() not in targets:
+#         return HTTPException(400, f"Invalid target: {settings.target}.")
+#     target = targets[settings.target.lower()]
+#     if settings.enabled:
+#         target.FEATURE_FLAG.enable()  # type: ignore
+#     else:
+#         target.FEATURE_FLAG.disable()  # type: ignore
 
 
 uvicorn.run(WEB, host="0.0.0.0", port=8000, log_config=logging_cfg)
