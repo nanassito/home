@@ -3,6 +3,8 @@ devices:
     friendly_name: device/adhoc/switch
   '0x00124b0024451249':
     friendly_name: device/zaya/window/left/contact
+  '0x00124b0024452373':
+    friendly_name: device/livingroom/door/front/contact
   '0x00124b002445524c':
     friendly_name: device/livingroom/window/back/contact
   '0x00124b0024455289':
@@ -16,7 +18,7 @@ devices:
   '0x00124b00244557c9':
     friendly_name: device/parent/window/left/contact
   '0x00124b0024456fa1':
-    friendly_name: device/livingroom/windowside/contact
+    friendly_name: device/livingroom/window/side/contact
   '0x00124b0025195d6e':
     friendly_name: device/office/window/left/contact
   '0x00124b0025906bb7':
