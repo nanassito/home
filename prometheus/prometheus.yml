@@ -32,10 +32,15 @@ scrape_configs:
       regex: 'zigbee2mqtt_[a-z]+_0x[0-9a-f]+'
       action: drop
     - source_labels: [ topic ]
-      regex: 'zigbee2mqtt_[a-z]+_(.*)'
+      regex: 'zigbee2mqtt_[a-z]+_(.*)(_get|_set)?'
       replacement: '$1'
       action: replace
       target_label: "device"
+    - source_labels: [ topic ]
+      regex: 'zigbee2mqtt_[a-z]+_.*_([gs]et)'
+      replacement: '$1'
+      action: replace
+      target_label: "mode"
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_([a-z]+)_.*'
       replacement: '$1'
