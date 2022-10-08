@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var configFile = flag.String("config", "/github/home/switches/switches.json", "Switch configuration file.")
+var configFile = flag.String("config", "/github/home/configs/switches.json", "Switch configuration file.")
 
 var (
 	PromDesiredState = promauto.NewGaugeVec(

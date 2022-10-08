@@ -6,7 +6,7 @@ Requires=mosquitto.service
 [Service]
 ExecStart=/github/home/bin/switches \
         -mqtt="127.0.0.1:1883"
-        -config=/github/home/switches/switches.json"
+        -config=/github/home/configs/switches.json"
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
