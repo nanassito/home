@@ -78,11 +78,11 @@ class Hvac:
 
     @property
     def prom_device(self: "Room") -> str:
-        return f"esphome_{self.esp_name}"
+        return f"{self.esp_name}_hvac"
 
     async def get_current_temp(self: "Room") -> float:
         return await prom_query_one(
-            f'max(mqtt_current_temperature_state{{topic="{self.prom_device}"}})'
+            f'max(mqtt_current_temperature_state{{device="{self.prom_device}"}})'
         )
 
     async def on_mqtt(self: "Hvac", msg: MQTTMessage):
@@ -293,9 +293,9 @@ def init():
                                 f"g{idx}.expr=sum by (metric)("
                                 f'label_replace(mqtt_temperature{{device%3D"{room.prom_device}"}},"metric","Actual","","")'
                                 " or "
-                                f'label_replace(mqtt_current_temperature_state{{topic%3D"{hvac.prom_device}"}},"metric","Reported","","")'
+                                f'label_replace(mqtt_current_temperature_state{{device%3D"{hvac.prom_device}"}},"metric","Reported","","")'
                                 " or "
-                                f'label_replace(mqtt_target_temperature_low_state{{topic%3D"{hvac.prom_device}"}},"metric","Target","","")'
+                                f'label_replace(mqtt_target_temperature_low_state{{device%3D"{hvac.prom_device}"}},"metric","Target","","")'
                                 f")&g{idx}.tab=0&g{idx}.range_input=6h"
                                 for idx, hvac in enumerate(room.hvacs)
                             ]
