@@ -11,54 +11,73 @@ rule_files:
   - "/etc/prometheus/alert_rules.yml"
 
 scrape_configs:
+
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+
   - job_name: 'server'
     static_configs:
       - targets: ['192.168.1.1:9558']
+
   - job_name: 'raspi'
     static_configs:
       - targets: ['192.168.1.96:9558']
+
   - job_name: 'home'
     static_configs:
       - targets: ['192.168.1.1:8000']
+
   - job_name: mqtt-exporter
     metrics_path: '/'
     static_configs:
       - targets: ['192.168.1.1:9000']
+
     metric_relabel_configs:
+
+  - job_name: mqtt-exporter
+    metrics_path: '/'
+    static_configs:
+      - targets: ['192.168.1.1:9000']
+
+    metric_relabel_configs:
+    
     - source_labels: [ topic ]
-      regex: 'zigbee2mqtt_[a-z]+_device_0x[0-9a-f]+'
+      regex: 'zigbee2mqtt_[a-z]+_0x[0-9a-f]+'
       action: drop
+    
+    - source_labels: [ topic ]
+      regex: 'homeassistant_.+'
+      action: drop
+
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_[a-z]+_device_(.*)(_get|_set)?'
       replacement: '$1'
       action: replace
       target_label: "device"
-    - source_labels: [ topic ]
-      regex: 'zigbee2mqtt_[a-z]+_device_.*_([gs]et)'
-      replacement: '$1'
-      action: replace
-      target_label: "mode"
+
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_([a-z]+)_device_.*'
       replacement: '$1'
       action: replace
       target_label: "network"
+
     - source_labels: [ topic ]
       regex: 'esphome_(.*)'
-      replacement: '$1_hvac'
+      replacement: '${1}_hvac'
       action: replace
       target_label: "device"
+
     - source_labels: [ topic ]
       regex: 'esphome_.*'
-      replacement: 'esp'
+      replacement: 'esphome'
       action: replace
       target_label: "network"
+
   - job_name: switches
     static_configs:
       - targets: ['192.168.1.1:7002']
+
   - job_name: netscan
     static_configs:
       - targets: ['192.168.1.1:7004']
