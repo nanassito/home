@@ -76,13 +76,9 @@ class Hvac:
     def __post_init__(self: "Hvac") -> None:
         self.log = log.getChild("Hvac").getChild(self.esp_name)
 
-    @property
-    def prom_device(self: "Room") -> str:
-        return f"{self.esp_name}_hvac"
-
     async def get_current_temp(self: "Room") -> float:
         return await prom_query_one(
-            f'max(mqtt_current_temperature_state{{device="{self.prom_device}"}})'
+            f'max(mqtt_current_temperature_state{{location="{self.esp_name}", sensor_type="hvac"}})'
         )
 
     async def on_mqtt(self: "Hvac", msg: MQTTMessage):
@@ -148,21 +144,21 @@ class Hvac:
 @dataclass
 class Room:
     name: str
-    prom_device: str
+    prom_location: str
     hvacs: list[Hvac]
     min_temp: int = 19
     max_temp: int = 33
 
     async def get_current_temp(self: "Room") -> float:
-        return await prom_query_one(f'mqtt_temperature{{device="{self.prom_device}"}}')
+        return await prom_query_one(f'mqtt_temperature{{location="{self.prom_location}", sensor_type="air"}}')
 
 
 ALL_ROOMS = [
-    Room("Zaya", "zaya_air", [Hvac("zaya")]),
-    Room("Parent", "parent_air", [Hvac("parent")]),
-    Room("Salon", "livingroom_air", [Hvac("living"), Hvac("kitchen")]),
-    Room("Office", "office_air", [Hvac("office")]),
-    Room("Outside", "backyard_air", []),
+    Room("Zaya", "zaya", [Hvac("zaya")]),
+    Room("Parent", "parent", [Hvac("parent")]),
+    Room("Salon", "livingroom", [Hvac("living"), Hvac("kitchen")]),
+    Room("Office", "office", [Hvac("office")]),
+    Room("Outside", "backyard", []),
 ]
 
 
@@ -277,13 +273,13 @@ def init():
                     {
                         "name": room.name,
                         "current": await get_temp(
-                            f'max(mqtt_temperature{{device="{room.prom_device}"}})'
+                            f'max(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}})'
                         ),
                         "min_1d": await get_temp(
-                            f'min(min_over_time(mqtt_temperature{{device="{room.prom_device}"}}[1d]))'
+                            f'min(min_over_time(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}}[1d]))'
                         ),
                         "max_1d": await get_temp(
-                            f'max(max_over_time(mqtt_temperature{{device="{room.prom_device}"}}[1d]))'
+                            f'max(max_over_time(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}}[1d]))'
                         ),
                         "min_temp": room.min_temp,
                         "max_temp": room.max_temp,
@@ -291,11 +287,11 @@ def init():
                         + "&".join(
                             [
                                 f"g{idx}.expr=sum by (metric)("
-                                f'label_replace(mqtt_temperature{{device%3D"{room.prom_device}"}},"metric","Actual","","")'
+                                f'label_replace(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}},"metric","Actual","","")'
                                 " or "
-                                f'label_replace(mqtt_current_temperature_state{{device%3D"{hvac.prom_device}"}},"metric","Reported","","")'
+                                f'label_replace(mqtt_current_temperature_state{{"location="{hvac.esp_name}", sensor_type="hvac"}},"metric","Reported","","")'
                                 " or "
-                                f'label_replace(mqtt_target_temperature_low_state{{device%3D"{hvac.prom_device}"}},"metric","Target","","")'
+                                f'label_replace(mqtt_target_temperature_low_state{{"location="{hvac.esp_name}", sensor_type="hvac"}},"metric","Target","","")'
                                 f")&g{idx}.tab=0&g{idx}.range_input=6h"
                                 for idx, hvac in enumerate(room.hvacs)
                             ]
