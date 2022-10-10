@@ -78,7 +78,7 @@ class Hvac:
 
     async def get_current_temp(self: "Room") -> float:
         return await prom_query_one(
-            f'max(mqtt_current_temperature_state{{location="{self.esp_name}", sensor_type="hvac"}})'
+            f'max(mqtt_current_temperature_state{{location="{self.esp_name}", type="hvac"}})'
         )
 
     async def on_mqtt(self: "Hvac", msg: MQTTMessage):
@@ -150,7 +150,7 @@ class Room:
     max_temp: int = 33
 
     async def get_current_temp(self: "Room") -> float:
-        return await prom_query_one(f'mqtt_temperature{{location="{self.prom_location}", sensor_type="air"}}')
+        return await prom_query_one(f'mqtt_temperature{{location="{self.prom_location}", type="air"}}')
 
 
 ALL_ROOMS = [
@@ -273,13 +273,13 @@ def init():
                     {
                         "name": room.name,
                         "current": await get_temp(
-                            f'max(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}})'
+                            f'max(mqtt_temperature{{location="{room.prom_location}", type="air"}})'
                         ),
                         "min_1d": await get_temp(
-                            f'min(min_over_time(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}}[1d]))'
+                            f'min(min_over_time(mqtt_temperature{{location="{room.prom_location}", type="air"}}[1d]))'
                         ),
                         "max_1d": await get_temp(
-                            f'max(max_over_time(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}}[1d]))'
+                            f'max(max_over_time(mqtt_temperature{{location="{room.prom_location}", type="air"}}[1d]))'
                         ),
                         "min_temp": room.min_temp,
                         "max_temp": room.max_temp,
@@ -287,11 +287,11 @@ def init():
                         + "&".join(
                             [
                                 f"g{idx}.expr=sum by (metric)("
-                                f'label_replace(mqtt_temperature{{location="{room.prom_location}", sensor_type="air"}},"metric","Actual","","")'
+                                f'label_replace(mqtt_temperature{{location="{room.prom_location}", type="air"}},"metric","Actual","","")'
                                 " or "
-                                f'label_replace(mqtt_current_temperature_state{{"location="{hvac.esp_name}", sensor_type="hvac"}},"metric","Reported","","")'
+                                f'label_replace(mqtt_current_temperature_state{{"location="{hvac.esp_name}", type="hvac"}},"metric","Reported","","")'
                                 " or "
-                                f'label_replace(mqtt_target_temperature_low_state{{"location="{hvac.esp_name}", sensor_type="hvac"}},"metric","Target","","")'
+                                f'label_replace(mqtt_target_temperature_low_state{{"location="{hvac.esp_name}", type="hvac"}},"metric","Target","","")'
                                 f")&g{idx}.tab=0&g{idx}.range_input=6h"
                                 for idx, hvac in enumerate(room.hvacs)
                             ]

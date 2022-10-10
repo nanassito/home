@@ -53,7 +53,7 @@ scrape_configs:
       regex: 'zigbee2mqtt_[a-z]+_device_.*_([a-z]+)(_get|_set)?'
       replacement: '$1'
       action: replace
-      target_label: "sensor_type"
+      target_label: "type"
 
     - source_labels: [ topic ]
       regex: 'zigbee2mqtt_([a-z]+)_device_.*'
@@ -77,7 +77,7 @@ scrape_configs:
       regex: 'esphome_.*'
       replacement: 'hvac'
       action: replace
-      target_label: "sensor_type"
+      target_label: "type"
 
   - job_name: switches
     static_configs:
