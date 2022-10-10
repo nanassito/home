@@ -36,5 +36,5 @@ def is_prod() -> bool:
 
 
 async def get_outside_temp() -> float:
-    promql = 'max(mqtt_temperature{device="backyard_air"})'
+    promql = 'max(mqtt_temperature{location="backyard", type="air"})'
     return await prom_query_one(promql)
