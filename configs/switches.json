@@ -3,7 +3,7 @@
         "Mqtt": {
             "MsgActive": "{\"state\": \"OFF\"}",
             "MsgRest": "{\"state\": \"ON\"}",
-            "SetTopic": "zigbee2mqtt/server/adhoc/valve/set"
+            "SetTopic": "zigbee2mqtt/server/device/adhoc/switch/set"
         },
         "Prometheus": {
             "Labels": {
@@ -19,7 +19,7 @@
         "Mqtt": {
             "MsgActive": "{\"state\": \"OFF\"}",
             "MsgRest": "{\"state\": \"ON\"}",
-            "SetTopic": "zigbee2mqtt/raspi/garage/washer/valve/set"
+            "SetTopic": "zigbee2mqtt/raspi/device/garage/washer/power/set"
         },
         "Prometheus": {
             "Labels": {
@@ -35,7 +35,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l4\": \"ON\"}",
             "MsgRest": "{\"state_l4\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/server/backyard/valve/set"
+            "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -51,7 +51,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l2\": \"ON\"}",
             "MsgRest": "{\"state_l2\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/server/backyard/valve/set"
+            "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -67,7 +67,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l3\": \"ON\"}",
             "MsgRest": "{\"state_l3\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/server/backyard/valve/set"
+            "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -83,7 +83,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l1\": \"ON\"}",
             "MsgRest": "{\"state_l1\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/server/backyard/valve/set"
+            "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -99,7 +99,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l2\": \"ON\"}",
             "MsgRest": "{\"state_l2\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/raspi/frontyard/valve/set"
+            "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -115,7 +115,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l3\": \"ON\"}",
             "MsgRest": "{\"state_l3\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/raspi/frontyard/valve/set"
+            "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -131,7 +131,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l4\": \"ON\"}",
             "MsgRest": "{\"state_l4\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/raspi/frontyard/valve/set"
+            "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
         },
         "Prometheus": {
             "Labels": {
@@ -147,7 +147,7 @@
         "Mqtt": {
             "MsgActive": "{\"state_l1\": \"ON\"}",
             "MsgRest": "{\"state_l1\": \"OFF\"}",
-            "SetTopic": "zigbee2mqtt/raspi/frontyard/valve/set"
+            "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
         },
         "Prometheus": {
             "Labels": {

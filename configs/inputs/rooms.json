@@ -1,0 +1,23 @@
+{
+    "zaya": {
+        "hvacs": [
+            "esphome/hvac-zaya.yaml"
+        ]
+    },
+    "parent": {
+        "hvacs": [
+            "esphome/hvac-parent.yaml"
+        ]
+    },
+    "office": {
+        "hvacs": [
+            "esphome/hvac-office.yaml"
+        ]
+    },
+    "livingroom": {
+        "hvacs": [
+            "esphome/hvac-kitchen.yaml",
+            "esphome/hvac-living.yaml"
+        ]
+    }
+}

@@ -1,0 +1,351 @@
+{
+    "server": {
+        "0x00124b0022ee4a71": {
+            "prometheus": {
+                "location": [
+                    "adhoc"
+                ],
+                "type": "switch"
+            },
+            "switches": {
+                "switch_adhoc": {
+                    "default_open": false,
+                    "line": "state"
+                }
+            }
+        },
+        "0x00158d0006fb03c4": {
+            "prometheus": {
+                "location": [
+                    "adhoc"
+                ],
+                "type": "leak"
+            }
+        },
+        "0x54ef4410001a07aa": {
+            "prometheus": {
+                "location": [
+                    "adhoc"
+                ],
+                "type": "air"
+            }
+        },
+        "0x00124b0025906bb7": {
+            "prometheus": {
+                "location": [
+                    "adhoc"
+                ],
+                "type": "repeater"
+            }
+        },
+        "0x847127fffe90de4a": {
+            "prometheus": {
+                "location": [
+                    "backyard"
+                ],
+                "type": "valve"
+            },
+            "switches": {
+                "valve_backyard_side": {
+                    "default_open": true,
+                    "line": "state_l1"
+                },
+                "valve_backyard_house": {
+                    "default_open": true,
+                    "line": "state_l2"
+                },
+                "valve_backyard_school": {
+                    "default_open": true,
+                    "line": "state_l3"
+                },
+                "valve_backyard_deck": {
+                    "default_open": true,
+                    "line": "state_l4"
+                }
+            }
+        },
+        "0xa4c1382cfb825490": {
+            "prometheus": {
+                "location": [
+                    "backyard"
+                ],
+                "type": "air"
+            }
+        },
+        "0x00158d0007d4c500": {
+            "prometheus": {
+                "location": [
+                    "backyard",
+                    "fence"
+                ],
+                "type": "motion"
+            }
+        },
+        "0x00158d0006f101ce": {
+            "prometheus": {
+                "location": [
+                    "backyard",
+                    "side"
+                ],
+                "type": "motion"
+            }
+        },
+        "0x00158d0006f1316c": {
+            "prometheus": {
+                "location": [
+                    "backyard",
+                    "back"
+                ],
+                "type": "motion"
+            }
+        },
+        "0x00158d0008071da3": {
+            "prometheus": {
+                "location": [
+                    "livingroom"
+                ],
+                "type": "air"
+            }
+        },
+        "0x00124b0024452373": {
+            "prometheus": {
+                "location": [
+                    "livingroom",
+                    "door",
+                    "front"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d0007e1137a": {
+            "prometheus": {
+                "location": [
+                    "livingroom",
+                    "door",
+                    "back"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b002445524c": {
+            "prometheus": {
+                "location": [
+                    "livingroom",
+                    "window",
+                    "back"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b0024456fa1": {
+            "prometheus": {
+                "location": [
+                    "livingroom",
+                    "window",
+                    "side"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b00244555a0": {
+            "prometheus": {
+                "location": [
+                    "kitchen",
+                    "window",
+                    "front"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b00244556db": {
+            "prometheus": {
+                "location": [
+                    "kitchen",
+                    "window",
+                    "side"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d0006f7e96e": {
+            "prometheus": {
+                "location": [
+                    "zaya"
+                ],
+                "type": "air"
+            }
+        },
+        "0x00124b0024451249": {
+            "prometheus": {
+                "location": [
+                    "zaya",
+                    "window",
+                    "left"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b00244552d0": {
+            "prometheus": {
+                "location": [
+                    "zaya",
+                    "window",
+                    "right"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d0007087c1a": {
+            "prometheus": {
+                "location": [
+                    "parent"
+                ],
+                "type": "air"
+            }
+        },
+        "0x00158d0007d11ff1": {
+            "prometheus": {
+                "location": [
+                    "parent",
+                    "door"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b00244557c9": {
+            "prometheus": {
+                "location": [
+                    "parent",
+                    "window",
+                    "left"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b0024455289": {
+            "prometheus": {
+                "location": [
+                    "parent",
+                    "window",
+                    "right"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d000706885d": {
+            "prometheus": {
+                "location": [
+                    "office"
+                ],
+                "type": "air"
+            }
+        },
+        "0x00124b0025195d6e": {
+            "prometheus": {
+                "location": [
+                    "office",
+                    "window",
+                    "left"
+                ],
+                "type": "contact"
+            }
+        }
+    },
+    "raspi": {
+        "0xa4c138cb26b19b8a": {
+            "prometheus": {
+                "location": [
+                    "frontyard"
+                ],
+                "type": "valve"
+            },
+            "switches": {
+                "valve_frontyard_street": {
+                    "default_open": true,
+                    "line": "state_l1"
+                },
+                "valve_frontyard_driveway": {
+                    "default_open": true,
+                    "line": "state_l2"
+                },
+                "valve_frontyard_neighbor": {
+                    "default_open": true,
+                    "line": "state_l3"
+                },
+                "valve_frontyard_planter": {
+                    "default_open": true,
+                    "line": "state_l4"
+                }
+            }
+        },
+        "0x00158d00080688a0": {
+            "prometheus": {
+                "location": [
+                    "frontyard",
+                    "mower"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b0025175d24": {
+            "prometheus": {
+                "location": [
+                    "frontyard",
+                    "gate"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d0007dcbfa7": {
+            "prometheus": {
+                "location": [
+                    "frontyard",
+                    "planter"
+                ],
+                "type": "motion"
+            }
+        },
+        "0x00124b00244555a0": {
+            "prometheus": {
+                "location": [
+                    "backyard",
+                    "mower"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00124b0025195e9e": {
+            "prometheus": {
+                "location": [
+                    "trash",
+                    "gate"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d000800b65b": {
+            "prometheus": {
+                "location": [
+                    "garage",
+                    "door"
+                ],
+                "type": "contact"
+            }
+        },
+        "0x00158d0002ab2f3a": {
+            "prometheus": {
+                "location": [
+                    "garage",
+                    "washer"
+                ],
+                "type": "power"
+            },
+            "switches": {
+                "switch_washer": {
+                    "default_open": false,
+                    "line": "state"
+                }
+            }
+        }
+    }
+}
