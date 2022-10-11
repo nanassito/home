@@ -1,7 +1,7 @@
 groups:
   - name: EPA2617
     rules:
-      - alert: "Fuite d'eau"
+      - alert: "Fuite d eau"
       #   expr: mqtt_water_leak > 0.5
       # - alert: Un capteur a planté
       #   expr: (rate(mqtt_message_total{type="air"}[1h])) * on() group_left() absent(6 <= hour() <= 14) == 0
