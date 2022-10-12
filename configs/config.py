@@ -15,6 +15,13 @@ def mqtt(device):
     return f"device/{'/'.join(device['prometheus']['location'])}/{device['prometheus']['type']}"
 
 
+def promLabels(device):
+    return {
+        "location": "_".join(device["prometheus"]["location"]),
+        "type": device["prometheus"]["type"],
+    }
+
+
 print("Update `devices` in the Zigbee2mqtt configurations")
 ZIGBEE2MQTT = (REPO / "zigbee2mqtt" / "configuration.yaml")
 with ZIGBEE2MQTT.open() as fd:
@@ -39,10 +46,7 @@ cfg = {
         },
         "Prometheus": {
             "Metric": f"mqtt_{switch['line']}",
-            "Labels": {
-                "location": "_".join(device["prometheus"]["location"]),
-                "type": device["prometheus"]["type"],
-            },
+            "Labels": promLabels(device),
             "ValueActive": 1 if switch["default_open"] else 0,
             "ValueRest": 0 if switch["default_open"] else 1,
         }
@@ -57,7 +61,7 @@ with (REPO / "configs" / "switches.json").open("w") as fd:
 
 print("Update air/HVAC configuration")
 sensors = {
-    device["prometheus"]["location"][0]: device["prometheus"]
+    device["prometheus"]["location"][0]: promLabels(device)
     for _, devices in zigbee.items()
     for device in devices.values()
     if device["prometheus"]["type"] == "air"

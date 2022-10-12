@@ -1,8 +1,6 @@
 {
     "outsideSensorPromLabels": {
-        "location": [
-            "backyard"
-        ],
+        "location": "backyard",
         "type": "air"
     },
     "rooms": {
@@ -28,9 +26,7 @@
                 }
             },
             "sensorPromLabels": {
-                "location": [
-                    "livingroom"
-                ],
+                "location": "livingroom",
                 "type": "air"
             }
         },
@@ -48,9 +44,7 @@
                 }
             },
             "sensorPromLabels": {
-                "location": [
-                    "office"
-                ],
+                "location": "office",
                 "type": "air"
             }
         },
@@ -68,9 +62,7 @@
                 }
             },
             "sensorPromLabels": {
-                "location": [
-                    "parent"
-                ],
+                "location": "parent",
                 "type": "air"
             }
         },
@@ -88,9 +80,7 @@
                 }
             },
             "sensorPromLabels": {
-                "location": [
-                    "zaya"
-                ],
+                "location": "zaya",
                 "type": "air"
             }
         }

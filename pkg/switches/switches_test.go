@@ -7,7 +7,7 @@ import (
 
 	"github.com/matryer/is"
 	"github.com/nanassito/home/pkg/switches"
-	switches_proto "github.com/nanassito/home/pkg/switches/proto"
+	"github.com/nanassito/home/pkg/switches_proto"
 )
 
 func TestActivate(t *testing.T) {

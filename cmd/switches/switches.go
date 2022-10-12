@@ -9,7 +9,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/nanassito/home/pkg/switches"
-	pb "github.com/nanassito/home/pkg/switches/proto"
+	"github.com/nanassito/home/pkg/switches_proto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,7 +28,7 @@ func main() {
 	}
 	grpcServer := grpc.NewServer()
 	switchesServer := switches.New()
-	pb.RegisterSwitchSvcServer(grpcServer, switchesServer)
+	switches_proto.RegisterSwitchSvcServer(grpcServer, switchesServer)
 	go grpcServer.Serve(lis)
 
 	// Serve Http Proxy for the API
@@ -42,7 +42,7 @@ func main() {
 		log.Fatalln("Failed to dial grpc server:", err)
 	}
 	gwmux := runtime.NewServeMux()
-	err = pb.RegisterSwitchSvcHandler(context.Background(), gwmux, conn)
+	err = switches_proto.RegisterSwitchSvcHandler(context.Background(), gwmux, conn)
 	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
 	}

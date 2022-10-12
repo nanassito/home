@@ -11,7 +11,7 @@ import (
 	"github.com/nanassito/home/pkg/json_strict"
 	"github.com/nanassito/home/pkg/mqtt"
 	"github.com/nanassito/home/pkg/prom"
-	pb "github.com/nanassito/home/pkg/switches/proto"
+	"github.com/nanassito/home/pkg/switches_proto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc/codes"
@@ -51,7 +51,7 @@ func (r *Request) isActive(at time.Time) bool {
 
 type State struct {
 	SwitchID       string
-	Config         *pb.SwitchConfig
+	Config         *switches_proto.SwitchConfig
 	Requests       []Request
 	ReportedActive bool
 }
@@ -141,7 +141,7 @@ type ServerState struct {
 }
 
 type Server struct {
-	pb.UnimplementedSwitchSvcServer
+	switches_proto.UnimplementedSwitchSvcServer
 
 	Mqtt  mqtt.MqttIface
 	State *ServerState
@@ -156,7 +156,7 @@ func New() *Server {
 		},
 	}
 
-	var switches map[string]*pb.SwitchConfig
+	var switches map[string]*switches_proto.SwitchConfig
 	flag.Parse()
 	if err := json_strict.UnmarshalFile(*configFile, &switches); err != nil {
 		log.Fatalf("Failed to parse config: %v", err)
@@ -174,11 +174,11 @@ func New() *Server {
 	return &server
 }
 
-func (s *Server) List(ctx context.Context, req *pb.ReqList) (*pb.RspList, error) {
-	return &pb.RspList{SwitchIDs: s.State.SwitchIDs}, nil
+func (s *Server) List(ctx context.Context, req *switches_proto.ReqList) (*switches_proto.RspList, error) {
+	return &switches_proto.RspList{SwitchIDs: s.State.SwitchIDs}, nil
 }
 
-func (s *Server) Activate(ctx context.Context, req *pb.ReqActivate) (*pb.RspActivate, error) {
+func (s *Server) Activate(ctx context.Context, req *switches_proto.ReqActivate) (*switches_proto.RspActivate, error) {
 	if req.GetClientID() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Must specify clientID")
 	}
@@ -205,13 +205,13 @@ func (s *Server) Activate(ctx context.Context, req *pb.ReqActivate) (*pb.RspActi
 			}
 		}
 	}
-	return &pb.RspActivate{
+	return &switches_proto.RspActivate{
 		SwitchID:    req.GetSwitchID(),
 		ActiveUntil: activeUntil.Unix(),
 	}, nil
 }
 
-func (s *Server) Status(ctx context.Context, req *pb.ReqStatus) (*pb.RspStatus, error) {
+func (s *Server) Status(ctx context.Context, req *switches_proto.ReqStatus) (*switches_proto.RspStatus, error) {
 	switchState, ok := s.State.BySwitchID[req.GetSwitchID()]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "Not switch with ID "+req.GetSwitchID())
@@ -220,14 +220,14 @@ func (s *Server) Status(ctx context.Context, req *pb.ReqStatus) (*pb.RspStatus, 
 	now := time.Now()
 	isActive := false
 	var activeUntil time.Time
-	outstandingRequests := make([]*pb.RspStatus_Request, 0, len(switchState.Requests))
+	outstandingRequests := make([]*switches_proto.RspStatus_Request, 0, len(switchState.Requests))
 	for _, request := range switchState.Requests {
 		if request.isActive(now) {
 			isActive = true
 			if request.Until.After(activeUntil) {
 				activeUntil = request.Until
 			}
-			outstandingRequests = append(outstandingRequests, &pb.RspStatus_Request{
+			outstandingRequests = append(outstandingRequests, &switches_proto.RspStatus_Request{
 				ClientID: request.ClientID,
 				From:     request.From.Unix(),
 				To:       request.Until.Unix(),
@@ -239,7 +239,7 @@ func (s *Server) Status(ctx context.Context, req *pb.ReqStatus) (*pb.RspStatus, 
 		a := activeUntil.Unix()
 		activeUntilUnix = &a
 	}
-	return &pb.RspStatus{
+	return &switches_proto.RspStatus{
 		SwitchID:    req.GetSwitchID(),
 		IsActive:    isActive,
 		ActiveUntil: activeUntilUnix,
