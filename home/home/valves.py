@@ -48,10 +48,7 @@ class Valve:
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 "http://192.168.1.1:7003/status",
-                data={
-                    "SwitchID": self.switch_id,
-                    "ClientID": "home",
-                },
+                params={"SwitchID": self.switch_id},
             ) as resp:
                 return (await resp.json())["isActive"]
 
