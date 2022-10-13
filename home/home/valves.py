@@ -10,16 +10,9 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 
 from home.facts import is_prod
-from home.mqtt import MQTTMessage, mqtt_send, watch_mqtt_topic
-from home.prometheus import prom_query_one
 from home.web import WEB
 
 log = logging.getLogger(__name__)
-
-_PROM_VALVE = Gauge(
-    "valve_should_be_running",
-    "0 the valve should be closed, 1 the valve should be opened.",
-)
 
 
 @dataclass(unsafe_hash=True)
@@ -52,7 +45,15 @@ class Valve:
                     self.log.info(f"{resp.status} - {await resp.text()}")
 
     async def is_really_running(self: "Valve") -> bool:
-        return bool(await prom_query_one(self.prom_query))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "http://192.168.1.1:7003/status",
+                data={
+                    "SwitchID": self.switch_id,
+                    "ClientID": "home",
+                },
+            ) as resp:
+                return (await resp.json())["isActive"]
 
 
 VALVE_BACKYARD_SIDE = Valve("backyard", "side", 1, "valve_backyard_side")
