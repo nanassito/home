@@ -36,7 +36,7 @@ class Valve:
 
     @property
     def prom_query(self: "Valve") -> str:
-        return f'mqtt_state_l{self.line}{{location="{self.section}", type"valve"}}'
+        return f'mqtt_state_l{self.line}{{location="{self.section}", type="valve"}}'
 
     async def water_for(self: "Valve", duration: timedelta) -> None:
         if is_prod():
