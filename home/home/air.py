@@ -1,9 +1,12 @@
 import asyncio
+from collections import defaultdict
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from math import inf
+from textwrap import dedent
+from urllib.parse import urlencode
 
 from aioprometheus.collectors import Gauge
 from fastapi import HTTPException, Request
@@ -264,6 +267,23 @@ def init():
                 log.error(err)
                 return "--.-"
 
+        graphs = defaultdict(dict)
+        for room in ALL_ROOMS:
+            for idx, hvac in enumerate(room.hvacs):
+                graphs[room.name].update({
+                    f"g{idx}.expr": dedent(f"""
+                        sum by (metric)(
+                            label_replace(mqtt_temperature{{location="{room.prom_location}", type="air"}}, "metric", "Actual", "", "")
+                        or
+                            label_replace(mqtt_current_temperature_state{{location="{hvac.esp_name}", type="hvac"}}, "metric", "Reported", "", "")
+                        or
+                            label_replace(mqtt_target_temperature_low_state{{location="{hvac.esp_name}", type="hvac"}}, "metric", "Target", "", "")
+                        )
+                    """).strip(),
+                    f"g{idx}.tab": 0,
+                    f"g{idx}.range_input":"6h",
+                })
+
         return TEMPLATES.TemplateResponse(
             "temperature.html.jinja",
             {
@@ -283,19 +303,7 @@ def init():
                         ),
                         "min_temp": room.min_temp,
                         "max_temp": room.max_temp,
-                        "link": f"https://prometheus.epa.jaminais.fr/graph?"
-                        + "&".join(
-                            [
-                                f"g{idx}.expr=sum by (metric)("
-                                f'label_replace(mqtt_temperature{{location="{room.prom_location}", type="air"}},"metric","Actual","","")'
-                                " or "
-                                f'label_replace(mqtt_current_temperature_state{{"location="{hvac.esp_name}", type="hvac"}},"metric","Reported","","")'
-                                " or "
-                                f'label_replace(mqtt_target_temperature_low_state{{"location="{hvac.esp_name}", type="hvac"}},"metric","Target","","")'
-                                f")&g{idx}.tab=0&g{idx}.range_input=6h"
-                                for idx, hvac in enumerate(room.hvacs)
-                            ]
-                        ),
+                        "link": f"https://prometheus.epa.jaminais.fr/graph?" + urlencode(graphs[room.name]),
                         "hvacs": room.hvacs,
                     }
                     for room in ALL_ROOMS
