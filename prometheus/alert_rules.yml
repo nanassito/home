@@ -1,4 +1,18 @@
 groups:
+  - name: helpers
+    rules:
+      - record: is_pacific_summer_time
+        expr: |
+          (vector(1) and (
+              (month() > 3 and month() < 11)
+            or (month() == 3 and (((day_of_month() - day_of_week()) >= 9) or (day_of_week() == 6 and day_of_month() > 7 and hour(vector(time())) > 9 )))
+            or (month() == 11 and (((day_of_month() - day_of_week()) <= 2) or (day_of_week() == 0 and day_of_month() < 13 and hour(vector(time())) < 10 )))
+          )) or vector(0)
+      - record: pacific_hour
+        expr: hour(time() - 3600 * (8 - is_pacific_summer_time))
+      - record: pacific_day
+        expr: day_of_week(time() - 3600 * (8 - is_pacific_summer_time))
+
   - name: EPA2617
     rules:
       - alert: "Fuite d'eau"
