@@ -15,7 +15,6 @@ from home.valves import (
     VALVE_BACKYARD_DECK,
     VALVE_BACKYARD_SCHOOL,
     VALVE_BACKYARD_SIDE,
-    VALVE_FRONTYARD_PLANTER,
     Valve,
 )
 from home.web import TEMPLATES, WEB
@@ -49,8 +48,9 @@ class Soaker:
         if self.last_activation + Soaker.ANTI_REBOUND > now():
             self.log.info("Anti-rebound, ignoring the trigger.")
             return
-        if await prom_query_one("min(mqtt_contact)") == 0:
-            self.log.info("A door is opened, ignoring the trigger.")
+        hold_promql = 'min(mqtt_contact{location=~".*door.*"} or mqtt_contact{type="contact", location="backyard_mower"})'
+        if await prom_query_one(hold_promql) == 0:
+            self.log.info("A door is opened or the mower is running, ignoring the trigger.")
             return
         self.last_activation = now()
 
@@ -80,22 +80,35 @@ def init():
     def _():
         Soaker.FEATURE_FLAG.enable()
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/motion_side", SOAKER_SIDE.soak)
+            watch_mqtt_topic(
+                "zigbee2mqtt/server/device/backyard/side/motion", SOAKER_SIDE.soak
+            )
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/motion_garage", SOAKER_SIDE.soak)
+            watch_mqtt_topic(
+                "zigbee2mqtt/server/device/backyard/fence/motion", SOAKER_SIDE.soak
+            )
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/motion_back", SOAKER_SCHOOL.soak)
+            watch_mqtt_topic(
+                "zigbee2mqtt/server/device/backyard/back/motion", SOAKER_SCHOOL.soak
+            )
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/contact_livingroom", snooze_on_door_opening)
+            watch_mqtt_topic(
+                "zigbee2mqtt/server/device/livingroom/door/back/contact",
+                snooze_on_door_opening,
+            )
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/contact_bedroom", snooze_on_door_opening)
+            watch_mqtt_topic(
+                "zigbee2mqtt/server/device/parent/door/contact", snooze_on_door_opening
+            )
         )
         asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/contact_garage", snooze_on_door_opening)
+            watch_mqtt_topic(
+                "zigbee2mqtt/raspi/device/garage/door/contact", snooze_on_door_opening
+            )
         )
         asyncio.create_task(
             watch_mqtt_topic(

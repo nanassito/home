@@ -12,12 +12,14 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
 import home.air
-# import home.lawn
+
+import home.lawn
 import home.media
 import home.mqtt
 import home.prometheus
-# import home.valves
-# import home.weapons
+
+import home.valves
+import home.weapons
 from home.time import now
 from home.web import WEB
 
@@ -29,7 +31,7 @@ STARTUP = now()
 _PROM_ASYNCIO_LATENCY = Histogram(
     "asyncio_latency_ns",
     "ns level deviance between the asyncio event loop and the wall clock.",
-    buckets=[10 ** i for i in range(3, 9)],
+    buckets=[10**i for i in range(3, 9)],
 )
 
 
@@ -50,13 +52,13 @@ def _():
     asyncio.create_task(monitor_event_loop_latency())
 
 
-# home.valves.init()
-# home.weapons.init()
-# home.lawn.init()
+home.valves.init()
+home.weapons.init()
+home.lawn.init()
 home.prometheus.init()
 home.media.init()
 home.air.init()
-# home.mqtt.init()
+home.mqtt.init()
 
 
 @WEB.get("/", response_class=RedirectResponse)

@@ -1,6 +1,6 @@
 import asyncio
-from collections import defaultdict
 import logging
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -153,7 +153,9 @@ class Room:
     max_temp: int = 33
 
     async def get_current_temp(self: "Room") -> float:
-        return await prom_query_one(f'mqtt_temperature{{location="{self.prom_location}", type="air"}}')
+        return await prom_query_one(
+            f'mqtt_temperature{{location="{self.prom_location}", type="air"}}'
+        )
 
 
 ALL_ROOMS = [
@@ -270,8 +272,10 @@ def init():
         graphs = defaultdict(dict)
         for room in ALL_ROOMS:
             for idx, hvac in enumerate(room.hvacs):
-                graphs[room.name].update({
-                    f"g{idx}.expr": dedent(f"""
+                graphs[room.name].update(
+                    {
+                        f"g{idx}.expr": dedent(
+                            f"""
                         sum by (metric)(
                             label_replace(mqtt_temperature{{location="{room.prom_location}", type="air"}}, "metric", "Actual", "", "")
                         or
@@ -279,10 +283,12 @@ def init():
                         or
                             label_replace(mqtt_target_temperature_low_state{{location="{hvac.esp_name}", type="hvac"}}, "metric", "Target", "", "")
                         )
-                    """).strip(),
-                    f"g{idx}.tab": 0,
-                    f"g{idx}.range_input":"6h",
-                })
+                    """
+                        ).strip(),
+                        f"g{idx}.tab": 0,
+                        f"g{idx}.range_input": "6h",
+                    }
+                )
 
         return TEMPLATES.TemplateResponse(
             "temperature.html.jinja",
@@ -303,7 +309,8 @@ def init():
                         ),
                         "min_temp": room.min_temp,
                         "max_temp": room.max_temp,
-                        "link": f"https://prometheus.epa.jaminais.fr/graph?" + urlencode(graphs[room.name]),
+                        "link": f"https://prometheus.epa.jaminais.fr/graph?"
+                        + urlencode(graphs[room.name]),
                         "hvacs": room.hvacs,
                     }
                     for room in ALL_ROOMS
