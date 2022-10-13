@@ -3,7 +3,7 @@ import logging
 import math
 from base64 import b64encode
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, timedelta
 from enum import Enum
 

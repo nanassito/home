@@ -71,19 +71,19 @@ class _HttpFeatureFlag(BaseModel):
     target: str
 
 
-# @WEB.post("/api/feature_flag")
-# async def http_post_feature_flag(settings: _HttpFeatureFlag):
-#     targets = {
-#         "soaker": home.weapons.Soaker,
-#         "irrigation": home.lawn.Irrigation,
-#     }
-#     if settings.target.lower() not in targets:
-#         return HTTPException(400, f"Invalid target: {settings.target}.")
-#     target = targets[settings.target.lower()]
-#     if settings.enabled:
-#         target.FEATURE_FLAG.enable()  # type: ignore
-#     else:
-#         target.FEATURE_FLAG.disable()  # type: ignore
+@WEB.post("/api/feature_flag")
+async def http_post_feature_flag(settings: _HttpFeatureFlag):
+    targets = {
+        "soaker": home.weapons.Soaker,
+        "irrigation": home.lawn.Irrigation,
+    }
+    if settings.target.lower() not in targets:
+        return HTTPException(400, f"Invalid target: {settings.target}.")
+    target = targets[settings.target.lower()]
+    if settings.enabled:
+        target.FEATURE_FLAG.enable()  # type: ignore
+    else:
+        target.FEATURE_FLAG.disable()  # type: ignore
 
 
 uvicorn.run(WEB, host="0.0.0.0", port=8000, log_config=logging_cfg)

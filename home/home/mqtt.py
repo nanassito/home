@@ -50,15 +50,15 @@ async def watch_mqtt_topic(topic: str, callback: Callable[[MQTTMessage], None]):
 PROM_LABEL_RX = re.compile(r"[^\w ]")
 
 
-# async def handle_zigbee_error(msg: MQTTMessage) -> None:
-#     msg = json.loads(msg.payload).get("message")
-#     _PROM_ZIGBEE_LOG.inc({"msg": PROM_LABEL_RX.sub("", msg)})
-#     log.error(msg)
+async def handle_zigbee_error(msg: MQTTMessage) -> None:
+    msg = json.loads(msg.payload).get("message")
+    _PROM_ZIGBEE_LOG.inc({"msg": PROM_LABEL_RX.sub("", msg)})
+    log.error(msg)
 
 
-# def init() -> None:
-#     @WEB.on_event("startup")
-#     def _():
-#         asyncio.create_task(
-#             watch_mqtt_topic("zigbee2mqtt/bridge/log", handle_zigbee_error)
-#         )
+def init() -> None:
+    @WEB.on_event("startup")
+    def _():
+        asyncio.create_task(
+            watch_mqtt_topic("zigbee2mqtt/bridge/log", handle_zigbee_error)
+        )

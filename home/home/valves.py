@@ -82,23 +82,7 @@ _HTTP_VALVE_MAPPING = {
 }
 
 
-async def recover_frontyard_valve(msg: MQTTMessage):
-    msg = json.loads(msg.payload).get("message")
-    if "Publish 'set' 'state' to 'valve_frontyard' failed" in msg:
-        log.warning("Attempting to recover the lost frontyard valve")
-        await mqtt_send(f"zigbee2mqtt/switch_adhoc/set", {"state": "OFF"})
-        await asyncio.sleep(60)
-        await mqtt_send(f"zigbee2mqtt/switch_adhoc/set", {"state": "ON"})
-        log.warning("Should have restarted the frontyard valve")
-
-
 def init():
-    @WEB.on_event("startup")
-    def start_valves_controllers():
-        asyncio.create_task(
-            watch_mqtt_topic("zigbee2mqtt/bridge/log", recover_frontyard_valve)
-        )
-
     @WEB.post("/api/valve/activate")
     async def http_valve_activate(rq: _HttpValveRequest):
         if rq.area not in _HTTP_VALVE_MAPPING:
