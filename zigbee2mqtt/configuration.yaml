@@ -27,8 +27,6 @@ devices:
     friendly_name: device/backyard/side/motion
   '0x00158d0006f1316c':
     friendly_name: device/backyard/back/motion
-  '0x00158d0006f7e96e':
-    friendly_name: device/zaya/air
   '0x00158d0006fb03c4':
     friendly_name: device/adhoc/leak
   '0x00158d000706885d':

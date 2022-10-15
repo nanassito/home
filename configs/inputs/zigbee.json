@@ -167,14 +167,6 @@
                 "type": "contact"
             }
         },
-        "0x00158d0006f7e96e": {
-            "prometheus": {
-                "location": [
-                    "zaya"
-                ],
-                "type": "air"
-            }
-        },
         "0x00124b0024451249": {
             "prometheus": {
                 "location": [
@@ -285,6 +277,14 @@
                     "mower"
                 ],
                 "type": "contact"
+            }
+        },
+        "0x00158d0006f7e96e": {
+            "prometheus": {
+                "location": [
+                    "zaya"
+                ],
+                "type": "air"
             }
         },
         "0x00124b0025175d24": {
