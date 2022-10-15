@@ -12,32 +12,36 @@ groups:
         expr: hour(time() - 3600 * (8 - is_pacific_summer_time))
       - record: pacific_day
         expr: day_of_week(time() - 3600 * (8 - is_pacific_summer_time))
+      - record: oncall
+        expr: 8 <= pacific_hour and pacific_hour < 22
 
   - name: EPA2617
     rules:
       - alert: "Fuite d'eau"
-        expr: mqtt_water_leak > 0.5
-      # - alert: Un capteur a planté
-      #   expr: (rate(mqtt_message_total{type="air"}[1h])) * on() group_left() absent(6 <= hour() <= 14) == 0
-      #   for: 1h
-      # - alert: Plusieurs valves fonctionnent en même temps
-      #   expr: 'sum({type="valve", mode="", __name__=~"mqtt_state.*"}) > 1'
-      #   for: 2m
-      # - alert: L arrosage fonctionne depuis trop longtemps
-      #   expr: '{type="valve", mode="", __name__=~"mqtt_state.*"} >= 1'
-      #   for: 30m
+        expr: mqtt_water_leak > 0.5 and on() oncall
+      - alert: Un capteur a planté
+        expr: (rate(mqtt_message_total{type="air"}[1h])) <= 0 and on() oncall
+        for: 1h
+      - alert: Plusieurs valves fonctionnent en même temps
+        expr: 'sum({type="valve", __name__=~"mqtt_state.*"}) > 1 and on() oncall'
+      - alert: L arrosage fonctionne depuis trop longtemps
+        expr: '{type="valve", __name__=~"mqtt_state.*"} >= 1 and on() oncall'
+        for: 30m
       - alert: Batterie faible
-        expr: mqtt_battery{type!="", location!=""} < 30
-      # - alert: Le controle d'une valve a été perdu
-      #   expr: sum(valve_should_be_running) - sum({__name__=~"mqtt_state_l."}) > 1
-      #   for: 30m
+        expr: mqtt_battery{type!="", location!=""} < 30 and on() oncall
+      - alert: Le controle d'une valve a été perdu
+        expr: switch_desired_state != switch_reported_state
+        for: 10m
       - alert: Echec de détection du jour
-        expr: max_over_time(mqtt_illuminance{type!="", location!=""}[24h]) < 500
+        expr: max_over_time(mqtt_illuminance{type!="", location!=""}[24h]) < 500 and on() oncall
       - alert: Echec de détection de la nuit
-        expr: min_over_time(mqtt_illuminance{type!="", location!=""}[24h]) > 100
+        expr: min_over_time(mqtt_illuminance{type!="", location!=""}[24h]) > 100 and on() oncall
       - alert: La machine est terminée
-        expr: max_over_time(mqtt_power{location=~".*washer.*", type="power"}[10m]) < 1 and max_over_time(mqtt_power[1h]) > 100
+        expr: max_over_time(mqtt_power{location=~".*washer.*", type="power"}[10m]) < 1 and max_over_time(mqtt_power[1h]) > 100 and on() oncall
       - alert: Le robot tondeuse est coincé
-        expr: max_over_time(mqtt_contact{location=~".*mower.*", type="contact"}[2h15m]) < 1
+        expr: max_over_time(mqtt_contact{location=~".*mower.*", type="contact"}[2h15m]) < 1 and on() oncall
       - alert: Component downtime
-        expr: systemd_unit_state{state="active", name=~"(home|mosquitto|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
+        expr: systemd_unit_state{state="active", name=~"(home|mosquitto|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0 and on() oncall
+      - alert: Component crash loop
+        expr: rate(systemd_unit_start_time_seconds{name=~"(home|mosquitto|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"}[2m]) > 0 and on() oncall
+        for: 5m
