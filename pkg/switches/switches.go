@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 	"time"
 
@@ -51,11 +50,10 @@ func (r *Request) isActive(at time.Time) bool {
 }
 
 type State struct {
-	SwitchID        string
-	Config          *switches_proto.SwitchConfig
-	Requests        []Request
-	ReportedActive  bool
-	lastMqttMessage time.Time
+	SwitchID       string
+	Config         *switches_proto.SwitchConfig
+	Requests       []Request
+	ReportedActive bool
 }
 
 func boolAsFloat(v bool) float64 {
@@ -137,19 +135,6 @@ func (s *State) control(mqtt mqtt.MqttIface) {
 	}
 }
 
-func (s *State) updateOnMqtt(topic string, payload []byte) {
-	s.lastMqttMessage = time.Now()
-	rx := regexp.MustCompile(s.Config.Mqtt.GetRegex)
-	groups := rx.FindStringSubmatch(string(payload))
-	isActive := groups[rx.SubexpIndex("Active")] != ""
-	isAtRest := groups[rx.SubexpIndex("AtRest")] != ""
-	if isActive == isAtRest {
-		fmt.Printf("updateOnMqtt | %s | Invalid value `%v` in mqtt payload `%v`\n", s.SwitchID, groups[rx.SubexpIndex("State")], payload)
-		return
-	}
-	s.ReportedActive = isActive
-}
-
 type ServerState struct {
 	SwitchIDs  []string
 	BySwitchID map[string]*State
@@ -195,23 +180,16 @@ func (s *Server) List(ctx context.Context, req *switches_proto.ReqList) (*switch
 
 func (s *Server) Activate(ctx context.Context, req *switches_proto.ReqActivate) (*switches_proto.RspActivate, error) {
 	if req.GetClientID() == "" {
-		err := status.Error(codes.InvalidArgument, "Must specify clientID")
-		fmt.Printf("Activate | %v", err)
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, "Must specify clientID")
 	}
 	if req.GetDurationSeconds() <= 0 {
-		err := status.Error(codes.InvalidArgument, "Duration must be greater than 0 seconds")
-		fmt.Printf("Activate | %v", err)
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, "Duration must be greater than 0 seconds")
 	}
 	switchState, ok := s.State.BySwitchID[req.GetSwitchID()]
 	if !ok {
-		err := status.Error(codes.NotFound, "Not switch with ID "+req.GetSwitchID())
-		fmt.Printf("Activate | %v", err)
-		return nil, err
+		return nil, status.Error(codes.NotFound, "Not switch with ID "+req.GetSwitchID())
 	}
 
-	fmt.Printf("Activate | %v", req)
 	now := time.Now()
 	switchState.Requests = append(switchState.Requests, Request{
 		ClientID: req.GetClientID(),
@@ -273,7 +251,6 @@ func (s *Server) ControlLoop() {
 	for _, switchID := range s.State.SwitchIDs {
 		fmt.Printf("Starting monitoring and control loops for %s\n", switchID)
 		switchState := s.State.BySwitchID[switchID]
-		s.Mqtt.Subscribe(switchState.Config.Mqtt.GetTopic, switchState.updateOnMqtt)
 		go switchState.monitor()
 		go switchState.control(s.Mqtt)
 	}

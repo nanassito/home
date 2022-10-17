@@ -40,8 +40,6 @@ print("Update switches configurations")
 cfg = {
     nickname: {
         "Mqtt": {
-            "GetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}",
-            "GetRegex": f'.*"{switch["line"]}": ?"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)".*',
             "SetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}/set",
             "MsgActive": json.dumps({switch["line"]: "ON" if switch["default_open"] else "OFF"}),
             "MsgRest": json.dumps({switch["line"]: "OFF" if switch["default_open"] else "ON"}),

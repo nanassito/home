@@ -59,11 +59,9 @@ service SwitchSvc {
 // For internal use only. Used to load init data from disk.
 message SwitchConfig{
     message MqttConfig{
-        string GetTopic = 1;
-        string GetRegex = 2;
-        string SetTopic = 3;
-        string MsgRest = 4;
-        string MsgActive = 5;
+        string SetTopic = 1;
+        string MsgRest = 2;
+        string MsgActive = 3;
     }
 
     message PrometheusConfig{
