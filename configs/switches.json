@@ -1,6 +1,8 @@
 {
     "switch_adhoc": {
         "Mqtt": {
+            "GetRegex": ".*\"state\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/server/device/adhoc/switch",
             "MsgActive": "{\"state\": \"OFF\"}",
             "MsgRest": "{\"state\": \"ON\"}",
             "SetTopic": "zigbee2mqtt/server/device/adhoc/switch/set"
@@ -17,6 +19,8 @@
     },
     "switch_washer": {
         "Mqtt": {
+            "GetRegex": ".*\"state\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/raspi/device/garage/washer/power",
             "MsgActive": "{\"state\": \"OFF\"}",
             "MsgRest": "{\"state\": \"ON\"}",
             "SetTopic": "zigbee2mqtt/raspi/device/garage/washer/power/set"
@@ -33,6 +37,8 @@
     },
     "valve_backyard_deck": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l4\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/server/device/backyard/valve",
             "MsgActive": "{\"state_l4\": \"ON\"}",
             "MsgRest": "{\"state_l4\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
@@ -49,6 +55,8 @@
     },
     "valve_backyard_house": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l2\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/server/device/backyard/valve",
             "MsgActive": "{\"state_l2\": \"ON\"}",
             "MsgRest": "{\"state_l2\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
@@ -65,6 +73,8 @@
     },
     "valve_backyard_school": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l3\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/server/device/backyard/valve",
             "MsgActive": "{\"state_l3\": \"ON\"}",
             "MsgRest": "{\"state_l3\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
@@ -81,6 +91,8 @@
     },
     "valve_backyard_side": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l1\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/server/device/backyard/valve",
             "MsgActive": "{\"state_l1\": \"ON\"}",
             "MsgRest": "{\"state_l1\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/server/device/backyard/valve/set"
@@ -97,6 +109,8 @@
     },
     "valve_frontyard_driveway": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l2\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/raspi/device/frontyard/valve",
             "MsgActive": "{\"state_l2\": \"ON\"}",
             "MsgRest": "{\"state_l2\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
@@ -113,6 +127,8 @@
     },
     "valve_frontyard_neighbor": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l3\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/raspi/device/frontyard/valve",
             "MsgActive": "{\"state_l3\": \"ON\"}",
             "MsgRest": "{\"state_l3\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
@@ -129,6 +145,8 @@
     },
     "valve_frontyard_planter": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l4\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/raspi/device/frontyard/valve",
             "MsgActive": "{\"state_l4\": \"ON\"}",
             "MsgRest": "{\"state_l4\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
@@ -145,6 +163,8 @@
     },
     "valve_frontyard_street": {
         "Mqtt": {
+            "GetRegex": ".*\"state_l1\": ?\"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)\".*",
+            "GetTopic": "zigbee2mqtt/raspi/device/frontyard/valve",
             "MsgActive": "{\"state_l1\": \"ON\"}",
             "MsgRest": "{\"state_l1\": \"OFF\"}",
             "SetTopic": "zigbee2mqtt/raspi/device/frontyard/valve/set"
