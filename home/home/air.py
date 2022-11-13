@@ -214,11 +214,12 @@ class HvacController:
 
                         # Set the temperature target
                         delta_temp = abs(curr - hvac_curr)
+                        too_cold = room.min_temp >= curr
                         if mode is Mode.HEAT:
                             hvac.desired_state.target_temp = room.min_temp
-                            if delta_temp > 3:
+                            if delta_temp > 3 and too_cold:
                                 hvac.desired_state.fan = Fan.HIGH
-                            elif delta_temp > 1.5:
+                            elif delta_temp > 1.5 and too_cold:
                                 hvac.desired_state.fan = Fan.MEDIUM
                             else:
                                 hvac.desired_state.fan = Fan.AUTO
