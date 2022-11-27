@@ -6,155 +6,86 @@ option go_package = "github.com/nanassito/home/pkg/proto/air;air_proto";
 import "google/api/annotations.proto";
 
 
-enum Control {
-    CONTROL_UNKNOWN = 0;
-    CONTROL_AUTO = 1;
-    CONTROL_APP = 2;
-    CONTROL_REMOTE = 3;
+message TemperatureRange {
+    double min = 1;
+    double max = 2;
 }
 
-
-enum HvacMode {
-    MODE_UNKNOWN = 0;
-    MODE_OFF = 1;
-    MODE_FAN_ONLY = 2;
-    MODE_COOL = 3;
-    MODE_HEAT = 4;
-    MODE_AUTO = 5;
+message Sensor {
+    string location = 1;
+    double temperature = 2;
+    int64 lastReportedAtTs = 3;
 }
 
+message Hvac {
 
-enum HvacFan {
-    FAN_UNKNOWN = 0;
-    FAN_AUTO = 1;
-    FAN_MEDIUM = 2;
-    FAN_HIGH = 3;
-}
-
-
-message ReqListRooms {}
-message RspListRooms {
+    enum Mode {
+        MODE_UNKNOWN = 0;
+        MODE_OFF = 1;
+        MODE_FAN_ONLY = 2;
+        MODE_COOL = 3;
+        MODE_HEAT = 4;
+        MODE_AUTO = 5;
+        MODE_DRY = 6;
+    }
     
-}
-
-message ReqListHvacs {
-    string room = 1;
-}
-message RspListHvacs {
-    string room = 1;
-    repeated string hvacs = 2;
-}
-
-message ReqListSensors {
-    string room = 1;
-}
-message RspListSensors {
-    message Sensor {
-        enum Type {
-            UNDEFINED = 0;
-            STANDALONE = 1;
-            IN_UNIT = 2;
-        }
-
-        Type sensorType = 1;
-        map<string, string> promLabels = 2;
+    enum Fan {
+        FAN_UNKNOWN = 0;
+        FAN_AUTO = 1;
+        FAN_LOW = 2;
+        FAN_MEDIUM = 3;
+        FAN_HIGH = 4;
+    }
+    
+    enum Control {
+        CONTROL_UNKNOWN = 0;
+        CONTROL_ROOM = 1;
+        CONTROL_HVAC = 2;
+        CONTROL_NONE = 3;
     }
 
-    string room = 1;
-    repeated Sensor sensors = 2;
+    message State {
+        double temperature = 1;
+        Mode mode = 2;
+        Fan fan = 3;
+    }
+
+    string hvacName = 1;
+    Control control = 2;
+    State reportedState = 3;
+    State desiredState = 4;
+    int64 TemperatureOffset = 5;
 }
 
-message ReqCheckRoom {
-    string room = 1;
-}
-message RspCheckRoom {
-    string room = 1;
-    double actualTemperature = 2;
-    map<string, double> inUnitTemperatures = 3;
-    optional double minDesiredTemperature = 4;
-    optional double maxDesiredTemperature = 5;
-    Control control = 6;
-    optional HvacMode mode = 7;
-    optional HvacFan fan = 8;
+message RoomState {
+    string roomName = 1;
+    TemperatureRange desiredTemperatureRange = 2;
+    Sensor sensor = 3;
+    map<string, Hvac> hvacs = 4;
 }
 
-message ReqCheckHvac {
-    string hvac = 1;
-}
-message RspCheckHvac {
-    string hvac = 1;
-    double targetTemperature = 2;
-    HvacMode mode = 3;
-    HvacFan fan = 4;
+message ServerState {
+    map<string, RoomState> rooms = 1;
+    Sensor outsideSensor = 2;
 }
 
+message ReqGetAllStates {}
 message ReqConfigureRoom {
     string room = 1;
-    Control control = 2;
-    optional HvacMode mode = 3;
-    optional HvacFan fan = 4;
-    optional double minDesiredTemperature = 5;
-    optional double maxDesiredTemperature = 6;
-}
-message RspConfigureRoom {
-    string room = 1;
-    Control control = 2;
-    optional HvacMode mode = 3;
-    optional HvacFan fan = 4;
-    optional double minDesiredTemperature = 5;
-    optional double maxDesiredTemperature = 6;
-}
-
-message ReqConfigureHvac {
-    string hvac = 1;
-    HvacMode mode = 2;
-    optional HvacFan fan = 3;
-    optional double targetTemperature = 4;
-}
-message RspConfigureHvac {
-    string hvac = 1;
-    HvacMode mode = 2;
-    optional HvacFan fan = 3;
-    optional double targetTemperature = 4;
+    TemperatureRange desiredTemperatureRange = 2;
 }
 
 
 service AirSvc {
-    rpc ListRooms (ReqListRooms) returns (RspListRooms) {
+    rpc GetAllStates(ReqGetAllStates) returns (ServerState) {
         option (google.api.http) = {
-            get: "/rooms/list"
-        };
-    };
-    rpc ListHvacs (ReqListHvacs) returns (RspListHvacs) {
-        option (google.api.http) = {
-            get: "/hvacs/list"
-        };
-    };
-    rpc ListSensors (ReqListSensors) returns (RspListSensors) {
-        option (google.api.http) = {
-            get: "/sensors/list"
-        };
-    };
-
-    rpc CheckRoom (ReqCheckRoom) returns (RspCheckRoom) {
-        option (google.api.http) = {
-            get: "/room/check"
-        };
-    }
-    rpc CheckHvac (ReqCheckHvac) returns (RspCheckHvac) {
-        option (google.api.http) = {
-            get: "/hvac/check"
+            get: "/states"
         };
     }
 
-    rpc ConfigureRoom (ReqConfigureRoom) returns (RspConfigureRoom) {
+    rpc ConfigureRoom(ReqConfigureRoom) returns (ServerState) {
         option (google.api.http) = {
-            post: "/room/config"
-        };
-    }
-    rpc ConfigureHvac (ReqConfigureHvac) returns (RspConfigureHvac) {
-        option (google.api.http) = {
-            post: "/hvac/config"
+            post: "/configure/room"
         };
     }
 }
@@ -162,6 +93,10 @@ service AirSvc {
 
 // For internal use only. Used to load init data from disk.
 message AirConfig {
+    message Sensor {
+        map<string, string> prometheusLabels = 1;
+        string mqttTopic = 2;
+    }
     message Room {
         message Hvac {
             string SetModeMqttTopic = 1;
@@ -170,14 +105,15 @@ message AirConfig {
             string reportFanMqttTopic = 4;
             string SetTemperatureMqttTopic = 5;
             string reportTemperatureMqttTopic = 6;
+            map<string, string> prometheusLabels = 7;
         }
         
         map<string, Hvac> hvacs = 1;
         double defaultMinTemperature = 2;
         double defaultMaxTemperature = 3;
-        map<string, string> sensorPromLabels = 5;
+        Sensor sensor = 5;
     }
 
     map<string, Room> rooms = 1;
-    map<string, string> outsideSensorPromLabels = 2;
+    Sensor outsideSensor = 2;
 }

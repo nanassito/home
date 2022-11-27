@@ -22,13 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AirSvcClient interface {
-	ListRooms(ctx context.Context, in *ReqListRooms, opts ...grpc.CallOption) (*RspListRooms, error)
-	ListHvacs(ctx context.Context, in *ReqListHvacs, opts ...grpc.CallOption) (*RspListHvacs, error)
-	ListSensors(ctx context.Context, in *ReqListSensors, opts ...grpc.CallOption) (*RspListSensors, error)
-	CheckRoom(ctx context.Context, in *ReqCheckRoom, opts ...grpc.CallOption) (*RspCheckRoom, error)
-	CheckHvac(ctx context.Context, in *ReqCheckHvac, opts ...grpc.CallOption) (*RspCheckHvac, error)
-	ConfigureRoom(ctx context.Context, in *ReqConfigureRoom, opts ...grpc.CallOption) (*RspConfigureRoom, error)
-	ConfigureHvac(ctx context.Context, in *ReqConfigureHvac, opts ...grpc.CallOption) (*RspConfigureHvac, error)
+	GetAllStates(ctx context.Context, in *ReqGetAllStates, opts ...grpc.CallOption) (*ServerState, error)
+	ConfigureRoom(ctx context.Context, in *ReqConfigureRoom, opts ...grpc.CallOption) (*ServerState, error)
 }
 
 type airSvcClient struct {
@@ -39,63 +34,18 @@ func NewAirSvcClient(cc grpc.ClientConnInterface) AirSvcClient {
 	return &airSvcClient{cc}
 }
 
-func (c *airSvcClient) ListRooms(ctx context.Context, in *ReqListRooms, opts ...grpc.CallOption) (*RspListRooms, error) {
-	out := new(RspListRooms)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ListRooms", in, out, opts...)
+func (c *airSvcClient) GetAllStates(ctx context.Context, in *ReqGetAllStates, opts ...grpc.CallOption) (*ServerState, error) {
+	out := new(ServerState)
+	err := c.cc.Invoke(ctx, "/air.service.AirSvc/GetAllStates", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *airSvcClient) ListHvacs(ctx context.Context, in *ReqListHvacs, opts ...grpc.CallOption) (*RspListHvacs, error) {
-	out := new(RspListHvacs)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ListHvacs", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *airSvcClient) ListSensors(ctx context.Context, in *ReqListSensors, opts ...grpc.CallOption) (*RspListSensors, error) {
-	out := new(RspListSensors)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ListSensors", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *airSvcClient) CheckRoom(ctx context.Context, in *ReqCheckRoom, opts ...grpc.CallOption) (*RspCheckRoom, error) {
-	out := new(RspCheckRoom)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/CheckRoom", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *airSvcClient) CheckHvac(ctx context.Context, in *ReqCheckHvac, opts ...grpc.CallOption) (*RspCheckHvac, error) {
-	out := new(RspCheckHvac)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/CheckHvac", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *airSvcClient) ConfigureRoom(ctx context.Context, in *ReqConfigureRoom, opts ...grpc.CallOption) (*RspConfigureRoom, error) {
-	out := new(RspConfigureRoom)
+func (c *airSvcClient) ConfigureRoom(ctx context.Context, in *ReqConfigureRoom, opts ...grpc.CallOption) (*ServerState, error) {
+	out := new(ServerState)
 	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ConfigureRoom", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *airSvcClient) ConfigureHvac(ctx context.Context, in *ReqConfigureHvac, opts ...grpc.CallOption) (*RspConfigureHvac, error) {
-	out := new(RspConfigureHvac)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ConfigureHvac", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,13 +56,8 @@ func (c *airSvcClient) ConfigureHvac(ctx context.Context, in *ReqConfigureHvac, 
 // All implementations must embed UnimplementedAirSvcServer
 // for forward compatibility
 type AirSvcServer interface {
-	ListRooms(context.Context, *ReqListRooms) (*RspListRooms, error)
-	ListHvacs(context.Context, *ReqListHvacs) (*RspListHvacs, error)
-	ListSensors(context.Context, *ReqListSensors) (*RspListSensors, error)
-	CheckRoom(context.Context, *ReqCheckRoom) (*RspCheckRoom, error)
-	CheckHvac(context.Context, *ReqCheckHvac) (*RspCheckHvac, error)
-	ConfigureRoom(context.Context, *ReqConfigureRoom) (*RspConfigureRoom, error)
-	ConfigureHvac(context.Context, *ReqConfigureHvac) (*RspConfigureHvac, error)
+	GetAllStates(context.Context, *ReqGetAllStates) (*ServerState, error)
+	ConfigureRoom(context.Context, *ReqConfigureRoom) (*ServerState, error)
 	mustEmbedUnimplementedAirSvcServer()
 }
 
@@ -120,26 +65,11 @@ type AirSvcServer interface {
 type UnimplementedAirSvcServer struct {
 }
 
-func (UnimplementedAirSvcServer) ListRooms(context.Context, *ReqListRooms) (*RspListRooms, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRooms not implemented")
+func (UnimplementedAirSvcServer) GetAllStates(context.Context, *ReqGetAllStates) (*ServerState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllStates not implemented")
 }
-func (UnimplementedAirSvcServer) ListHvacs(context.Context, *ReqListHvacs) (*RspListHvacs, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListHvacs not implemented")
-}
-func (UnimplementedAirSvcServer) ListSensors(context.Context, *ReqListSensors) (*RspListSensors, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListSensors not implemented")
-}
-func (UnimplementedAirSvcServer) CheckRoom(context.Context, *ReqCheckRoom) (*RspCheckRoom, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckRoom not implemented")
-}
-func (UnimplementedAirSvcServer) CheckHvac(context.Context, *ReqCheckHvac) (*RspCheckHvac, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckHvac not implemented")
-}
-func (UnimplementedAirSvcServer) ConfigureRoom(context.Context, *ReqConfigureRoom) (*RspConfigureRoom, error) {
+func (UnimplementedAirSvcServer) ConfigureRoom(context.Context, *ReqConfigureRoom) (*ServerState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConfigureRoom not implemented")
-}
-func (UnimplementedAirSvcServer) ConfigureHvac(context.Context, *ReqConfigureHvac) (*RspConfigureHvac, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConfigureHvac not implemented")
 }
 func (UnimplementedAirSvcServer) mustEmbedUnimplementedAirSvcServer() {}
 
@@ -154,92 +84,20 @@ func RegisterAirSvcServer(s grpc.ServiceRegistrar, srv AirSvcServer) {
 	s.RegisterService(&AirSvc_ServiceDesc, srv)
 }
 
-func _AirSvc_ListRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqListRooms)
+func _AirSvc_GetAllStates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReqGetAllStates)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AirSvcServer).ListRooms(ctx, in)
+		return srv.(AirSvcServer).GetAllStates(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/air.service.AirSvc/ListRooms",
+		FullMethod: "/air.service.AirSvc/GetAllStates",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).ListRooms(ctx, req.(*ReqListRooms))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AirSvc_ListHvacs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqListHvacs)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AirSvcServer).ListHvacs(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/air.service.AirSvc/ListHvacs",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).ListHvacs(ctx, req.(*ReqListHvacs))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AirSvc_ListSensors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqListSensors)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AirSvcServer).ListSensors(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/air.service.AirSvc/ListSensors",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).ListSensors(ctx, req.(*ReqListSensors))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AirSvc_CheckRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqCheckRoom)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AirSvcServer).CheckRoom(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/air.service.AirSvc/CheckRoom",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).CheckRoom(ctx, req.(*ReqCheckRoom))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AirSvc_CheckHvac_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqCheckHvac)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AirSvcServer).CheckHvac(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/air.service.AirSvc/CheckHvac",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).CheckHvac(ctx, req.(*ReqCheckHvac))
+		return srv.(AirSvcServer).GetAllStates(ctx, req.(*ReqGetAllStates))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -262,24 +120,6 @@ func _AirSvc_ConfigureRoom_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AirSvc_ConfigureHvac_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqConfigureHvac)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AirSvcServer).ConfigureHvac(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/air.service.AirSvc/ConfigureHvac",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).ConfigureHvac(ctx, req.(*ReqConfigureHvac))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // AirSvc_ServiceDesc is the grpc.ServiceDesc for AirSvc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -288,32 +128,12 @@ var AirSvc_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AirSvcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListRooms",
-			Handler:    _AirSvc_ListRooms_Handler,
-		},
-		{
-			MethodName: "ListHvacs",
-			Handler:    _AirSvc_ListHvacs_Handler,
-		},
-		{
-			MethodName: "ListSensors",
-			Handler:    _AirSvc_ListSensors_Handler,
-		},
-		{
-			MethodName: "CheckRoom",
-			Handler:    _AirSvc_CheckRoom_Handler,
-		},
-		{
-			MethodName: "CheckHvac",
-			Handler:    _AirSvc_CheckHvac_Handler,
+			MethodName: "GetAllStates",
+			Handler:    _AirSvc_GetAllStates_Handler,
 		},
 		{
 			MethodName: "ConfigureRoom",
 			Handler:    _AirSvc_ConfigureRoom_Handler,
-		},
-		{
-			MethodName: "ConfigureHvac",
-			Handler:    _AirSvc_ConfigureHvac_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

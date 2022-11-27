@@ -1,7 +1,10 @@
 {
-    "outsideSensorPromLabels": {
-        "location": "backyard",
-        "type": "air"
+    "outsideSensor": {
+        "mqttTopic": "zigbee2mqtt/server/device/backyard/air",
+        "prometheusLabels": {
+            "location": "backyard",
+            "type": "air"
+        }
     },
     "rooms": {
         "livingroom": {
@@ -9,6 +12,10 @@
             "defaultMinTemperature": 19,
             "hvacs": {
                 "kitchen": {
+                    "prometheusLabels": {
+                        "location": "kitchen",
+                        "type": "hvac"
+                    },
                     "reportFanMqttTopic": "esphome/kitchen/fan_mode_state",
                     "reportModeMqttTopic": "esphome/kitchen/mode_state",
                     "reportTemperatureMqttTopic": "esphome/kitchen/target_temperature_state",
@@ -17,6 +24,10 @@
                     "setTemperatureMqttTopic": "esphome/kitchen/target_temperature_command"
                 },
                 "living": {
+                    "prometheusLabels": {
+                        "location": "living",
+                        "type": "hvac"
+                    },
                     "reportFanMqttTopic": "esphome/living/fan_mode_state",
                     "reportModeMqttTopic": "esphome/living/mode_state",
                     "reportTemperatureMqttTopic": "esphome/living/target_temperature_state",
@@ -25,9 +36,12 @@
                     "setTemperatureMqttTopic": "esphome/living/target_temperature_command"
                 }
             },
-            "sensorPromLabels": {
-                "location": "livingroom",
-                "type": "air"
+            "sensor": {
+                "mqttTopic": "zigbee2mqtt/server/device/livingroom/air",
+                "prometheusLabels": {
+                    "location": "livingroom",
+                    "type": "air"
+                }
             }
         },
         "office": {
@@ -35,6 +49,10 @@
             "defaultMinTemperature": 19,
             "hvacs": {
                 "office": {
+                    "prometheusLabels": {
+                        "location": "office",
+                        "type": "hvac"
+                    },
                     "reportFanMqttTopic": "esphome/office/fan_mode_state",
                     "reportModeMqttTopic": "esphome/office/mode_state",
                     "reportTemperatureMqttTopic": "esphome/office/target_temperature_state",
@@ -43,9 +61,12 @@
                     "setTemperatureMqttTopic": "esphome/office/target_temperature_command"
                 }
             },
-            "sensorPromLabels": {
-                "location": "office",
-                "type": "air"
+            "sensor": {
+                "mqttTopic": "zigbee2mqtt/server/device/office/air",
+                "prometheusLabels": {
+                    "location": "office",
+                    "type": "air"
+                }
             }
         },
         "parent": {
@@ -53,6 +74,10 @@
             "defaultMinTemperature": 19,
             "hvacs": {
                 "parent": {
+                    "prometheusLabels": {
+                        "location": "parent",
+                        "type": "hvac"
+                    },
                     "reportFanMqttTopic": "esphome/parent/fan_mode_state",
                     "reportModeMqttTopic": "esphome/parent/mode_state",
                     "reportTemperatureMqttTopic": "esphome/parent/target_temperature_state",
@@ -61,9 +86,12 @@
                     "setTemperatureMqttTopic": "esphome/parent/target_temperature_command"
                 }
             },
-            "sensorPromLabels": {
-                "location": "parent",
-                "type": "air"
+            "sensor": {
+                "mqttTopic": "zigbee2mqtt/server/device/parent/air",
+                "prometheusLabels": {
+                    "location": "parent",
+                    "type": "air"
+                }
             }
         },
         "zaya": {
@@ -71,6 +99,10 @@
             "defaultMinTemperature": 19,
             "hvacs": {
                 "zaya": {
+                    "prometheusLabels": {
+                        "location": "zaya",
+                        "type": "hvac"
+                    },
                     "reportFanMqttTopic": "esphome/zaya/fan_mode_state",
                     "reportModeMqttTopic": "esphome/zaya/mode_state",
                     "reportTemperatureMqttTopic": "esphome/zaya/target_temperature_state",
@@ -79,9 +111,12 @@
                     "setTemperatureMqttTopic": "esphome/zaya/target_temperature_command"
                 }
             },
-            "sensorPromLabels": {
-                "location": "zaya",
-                "type": "air"
+            "sensor": {
+                "mqttTopic": "zigbee2mqtt/raspi/device/zaya/air",
+                "prometheusLabels": {
+                    "location": "zaya",
+                    "type": "air"
+                }
             }
         }
     }

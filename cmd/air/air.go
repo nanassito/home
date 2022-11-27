@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/nanassito/home/pkg/air"
@@ -14,6 +14,8 @@ import (
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+var logger = log.New(os.Stderr, "", log.Lshortfile)
 
 func main() {
 	// Serve Prometheus metrics
@@ -24,10 +26,10 @@ func main() {
 	grpcAddr := ":7006"
 	lis, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	airServer := air.New()
+	airServer := air.NewServer()
 	air_proto.RegisterAirSvcServer(grpcServer, airServer)
 	go grpcServer.Serve(lis)
 
@@ -39,14 +41,14 @@ func main() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Fatalln("Failed to dial grpc server:", err)
+		logger.Fatalln("Failed to dial grpc server:", err)
 	}
 	gwmux := runtime.NewServeMux()
 	err = air_proto.RegisterAirSvcHandler(context.Background(), gwmux, conn)
 	if err != nil {
-		log.Fatalln("Failed to register gateway:", err)
+		logger.Fatalln("Failed to register gateway:", err)
 	}
 	gwServer := &http.Server{Addr: ":7007", Handler: gwmux}
-	fmt.Println("Air server started")
-	log.Fatalln(gwServer.ListenAndServe())
+	logger.Println("Info| Air server started")
+	logger.Fatalln(gwServer.ListenAndServe())
 }

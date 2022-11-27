@@ -2,15 +2,21 @@ package mqtt
 
 import (
 	"flag"
+	"log"
+	"os"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 )
 
-var server = flag.String("mqtt", "tcp://192.168.1.1:1883", "Address of the mqtt server.")
+var (
+	server = flag.String("mqtt", "tcp://192.168.1.1:1883", "Address of the mqtt server.")
+	logger = log.New(os.Stderr, "", log.Lshortfile)
+)
 
 type MqttIface interface {
 	Reset()
 	PublishString(topic string, message string) error
+	Subscribe(topic string, callback func(topic string, payload []byte)) error
 }
 
 type Mqtt struct {
@@ -39,4 +45,16 @@ func (m *Mqtt) PublishString(topic string, message string) error {
 	t := m.client.Publish(topic, 0, false, message)
 	<-t.Done()
 	return t.Error()
+}
+
+func (m *Mqtt) Subscribe(topic string, callback func(topic string, payload []byte)) error {
+	t := m.client.Subscribe(topic, 1, func(client paho.Client, message paho.Message) {
+		callback(message.Topic(), message.Payload())
+	})
+	<-t.Done()
+	err := t.Error()
+	if err != nil {
+		logger.Printf("Fail| Failed to subscribe to %s\n", topic)
+	}
+	return err
 }

@@ -22,7 +22,7 @@
             "mode": "auto",
             "program": "cmd/air/air.go",
             "args": [
-                "-mqtt=tcp://127.0.0.1:1883",
+                // "-mqtt=tcp://127.0.0.1:1883",
                 "-config=${workspaceFolder}/configs/air.json"
             ]
         },
