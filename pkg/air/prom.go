@@ -3,8 +3,100 @@ package air
 import (
 	"github.com/nanassito/home/pkg/air_proto"
 	"github.com/nanassito/home/pkg/prom"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/model"
 )
+
+type PromCollector struct {
+	Server *Server
+}
+
+var (
+	promRoomDesiredMin = prometheus.NewDesc(
+		"air_room_desired_min_temperature",
+		"Minimum of the desired temperature range.",
+		[]string{"room"},
+		nil,
+	)
+	promRoomDesiredMax = prometheus.NewDesc(
+		"air_room_desired_max_temperature",
+		"Maximum of the desired temperature range.",
+		[]string{"room"},
+		nil,
+	)
+	promHvacDesiredTemp = prometheus.NewDesc(
+		"air_hvac_desired_temperature",
+		"Desired target temperature for the Hvac unit.",
+		[]string{"room", "hvac"},
+		nil,
+	)
+	promHvacReportedTemp = prometheus.NewDesc(
+		"air_hvac_reported_temperature",
+		"Reported target temperature for the Hvac unit.",
+		[]string{"room", "hvac"},
+		nil,
+	)
+	promHvacDesiredMode = prometheus.NewDesc(
+		"air_hvac_desired_mode",
+		"Desired mode for the Hvac unit.",
+		[]string{"room", "hvac", "mode"},
+		nil,
+	)
+	promHvacReportedMode = prometheus.NewDesc(
+		"air_hvac_reported_mode",
+		"Reported mode for the Hvac unit.",
+		[]string{"room", "hvac", "mode"},
+		nil,
+	)
+	promHvacDesiredFan = prometheus.NewDesc(
+		"air_hvac_desired_fan",
+		"Desired fan for the Hvac unit.",
+		[]string{"room", "hvac", "fan"},
+		nil,
+	)
+	promHvacReportedFan = prometheus.NewDesc(
+		"air_hvac_reported_fan",
+		"Reported fan for the Hvac unit.",
+		[]string{"room", "hvac", "fan"},
+		nil,
+	)
+)
+
+func (p *PromCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- promRoomDesiredMin
+	ch <- promRoomDesiredMax
+	ch <- promHvacDesiredTemp
+	ch <- promHvacReportedTemp
+	ch <- promHvacDesiredMode
+	ch <- promHvacReportedMode
+	ch <- promHvacDesiredFan
+	ch <- promHvacReportedFan
+}
+func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
+	b2f := func(b bool) float64 {
+		if b {
+			return 1
+		} else {
+			return 0
+		}
+	}
+	for _, room := range p.Server.State.Rooms {
+		ch <- prometheus.MustNewConstMetric(promRoomDesiredMin, prometheus.GaugeValue, room.DesiredTemperatureRange.Min, room.RoomName)
+		ch <- prometheus.MustNewConstMetric(promRoomDesiredMax, prometheus.GaugeValue, room.DesiredTemperatureRange.Max, room.RoomName)
+		for _, hvac := range room.Hvacs {
+			ch <- prometheus.MustNewConstMetric(promHvacDesiredTemp, prometheus.GaugeValue, hvac.DesiredState.Temperature, room.RoomName, hvac.HvacName)
+			ch <- prometheus.MustNewConstMetric(promHvacReportedTemp, prometheus.GaugeValue, hvac.ReportedState.Temperature, room.RoomName, hvac.HvacName)
+			for _, mode := range air_proto.Hvac_Mode_name {
+				ch <- prometheus.MustNewConstMetric(promHvacDesiredMode, prometheus.GaugeValue, b2f(mode == hvac.DesiredState.Mode.String()), room.RoomName, hvac.HvacName, mode[5:])
+				ch <- prometheus.MustNewConstMetric(promHvacReportedMode, prometheus.GaugeValue, b2f(mode == hvac.ReportedState.Mode.String()), room.RoomName, hvac.HvacName, mode[5:])
+			}
+			for _, fan := range air_proto.Hvac_Fan_name {
+				ch <- prometheus.MustNewConstMetric(promHvacDesiredFan, prometheus.GaugeValue, b2f(fan == hvac.DesiredState.Fan.String()), room.RoomName, hvac.HvacName, fan[4:])
+				ch <- prometheus.MustNewConstMetric(promHvacReportedFan, prometheus.GaugeValue, b2f(fan == hvac.ReportedState.Fan.String()), room.RoomName, hvac.HvacName, fan[4:])
+			}
+		}
+	}
+}
 
 func RegisterGetLast30mHvacsTemperature(s *Server, cfg *air_proto.AirConfig) {
 	matchers := make(map[string]func(model.LabelSet) bool, len(cfg.Rooms)+1)

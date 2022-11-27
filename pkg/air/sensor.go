@@ -2,6 +2,7 @@ package air
 
 import (
 	"encoding/json"
+	"math"
 	"time"
 
 	"github.com/nanassito/home/pkg/air_proto"
@@ -23,7 +24,7 @@ func sensorRefresher(sensor *air_proto.Sensor) func(topic string, payload []byte
 			logger.Printf("Fail| Failed to parse mqtt message from %s (%s): %v\n", topic, string(payload), err)
 			return
 		}
-		if sensor.Temperature != parsed.Temperature {
+		if math.Abs(sensor.Temperature-parsed.Temperature) > 0.25 {
 			logger.Printf("Info| %s sensor reports %.2f°C\n", sensor.Location, parsed.Temperature)
 		}
 		sensor.Temperature = parsed.Temperature

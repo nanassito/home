@@ -10,6 +10,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/nanassito/home/pkg/air"
 	"github.com/nanassito/home/pkg/air_proto"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,10 +19,6 @@ import (
 var logger = log.New(os.Stderr, "", log.Lshortfile)
 
 func main() {
-	// Serve Prometheus metrics
-	http.Handle("/metrics", promhttp.Handler())
-	go http.ListenAndServe(":7005", nil)
-
 	// Serve Grpc API
 	grpcAddr := ":7006"
 	lis, err := net.Listen("tcp", grpcAddr)
@@ -32,6 +29,11 @@ func main() {
 	airServer := air.NewServer()
 	air_proto.RegisterAirSvcServer(grpcServer, airServer)
 	go grpcServer.Serve(lis)
+
+	// Serve Prometheus metrics
+	prometheus.MustRegister(&air.PromCollector{Server: airServer})
+	http.Handle("/metrics", promhttp.Handler())
+	go http.ListenAndServe(":7005", nil)
 
 	// Serve Http Proxy for the API
 	conn, err := grpc.DialContext(
