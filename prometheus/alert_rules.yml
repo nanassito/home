@@ -41,7 +41,7 @@ groups:
       - alert: Le robot tondeuse est coincé
         expr: max_over_time(mqtt_contact{location=~".*mower.*", type="contact"}[2h15m]) < 1 and on() oncall
       - alert: Component downtime
-        expr: systemd_unit_state{state="active", name=~"(home|mosquitto|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
+        expr: systemd_unit_state{state="active", name=~"(home|mosquitto|air|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
       - alert: Component crash loop
-        expr: rate(systemd_unit_start_time_seconds{name=~"(home|mosquitto|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"}[2m]) > 0
+        expr: rate(systemd_unit_start_time_seconds{name=~"(home|mosquitto|air|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"}[2m]) > 0
         for: 5m

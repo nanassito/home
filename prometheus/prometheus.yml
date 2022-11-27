@@ -86,3 +86,7 @@ scrape_configs:
   - job_name: netscan
     static_configs:
       - targets: ['192.168.1.1:7004']
+
+  - job_name: air
+    static_configs:
+      - targets: ['192.168.1.1:7005']
