@@ -2,6 +2,7 @@ package mqtt
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -9,9 +10,18 @@ import (
 )
 
 var (
-	server = flag.String("mqtt", "tcp://192.168.1.1:1883", "Address of the mqtt server.")
-	logger = log.New(os.Stderr, "", log.Lshortfile)
+	server   = flag.String("mqtt", "tcp://192.168.1.1:1883", "Address of the mqtt server.")
+	logger   = log.New(os.Stderr, "", log.Lshortfile)
+	hostname string
 )
+
+func init() {
+	var err error
+	hostname, err = os.Hostname()
+	if err != nil {
+		panic(fmt.Sprintf("Can't figure out the hostname: %v", err))
+	}
+}
 
 type MqttIface interface {
 	Reset()
@@ -25,7 +35,14 @@ type Mqtt struct {
 }
 
 func newClient(clientID string) paho.Client {
-	client := paho.NewClient(paho.NewClientOptions().SetClientID(clientID).AddBroker(*server))
+	opts := paho.NewClientOptions()
+	opts.SetClientID(clientID + "-" + hostname)
+	opts.AddBroker(*server)
+	opts.OnConnectionLost = func(client paho.Client, err error) {
+		logger.Printf("Lost mqtt connection: %v", err)
+	}
+	client := paho.NewClient(opts)
+	logger.Printf("Info| Connecting to Mqtt broker at %s\n", *server)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
@@ -52,6 +69,7 @@ func (m *Mqtt) Subscribe(topic string, callback func(topic string, payload []byt
 		callback(message.Topic(), message.Payload())
 	})
 	<-t.Done()
+	logger.Printf("Info| Subscribing to mqtt://%s\n", topic)
 	err := t.Error()
 	if err != nil {
 		logger.Printf("Fail| Failed to subscribe to %s\n", topic)
