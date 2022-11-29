@@ -25,6 +25,7 @@ PROMETHEUS_GIT_PREV=$(git_version prometheus)
 ZIGBEE2MQTT_GIT_PREV=$(git_version zigbee2mqtt)
 SWITCHES_GIT_PREV=$(git_version bin/switches)
 NETSCAN_GIT_PREV=$(git_version bin/netscan)
+AIR_GIT_PREV=$(git_version bin/air)
 
 
 git pull -s recursive -X theirs
@@ -67,4 +68,10 @@ fi
 if [ "${NETSCAN_GIT_PREV}" != "$(git_version bin/netscan)" ]; then
     systemctl daemon-reload
     systemctl restart netscan
+fi
+
+
+if [ "${AIR_GIT_PREV}" != "$(git_version bin/air)" ]; then
+    systemctl daemon-reload
+    systemctl restart air
 fi
