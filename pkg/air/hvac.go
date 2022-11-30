@@ -42,7 +42,8 @@ var (
 
 func NewHvac(name string, cfg *air_proto.AirConfig_Room_Hvac, mqttClient *mqtt.Mqtt) *air_proto.Hvac {
 	hvac := air_proto.Hvac{
-		HvacName:      name,
+		HvacName: name,
+		// TODO: Needs to initialized to last reported metric.
 		Control:       air_proto.Hvac_CONTROL_ROOM,
 		ReportedState: &air_proto.Hvac_State{},
 		DesiredState:  &air_proto.Hvac_State{},

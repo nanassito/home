@@ -12,12 +12,9 @@ import (
 )
 
 var (
-	configFile = flag.String("config", "/github/home/configs/air.json", "Air configuration file.")
-	logger     = log.New(os.Stderr, "", log.Lshortfile)
-)
-
-const (
-	decideLoopInterval = 5 * time.Minute
+	configFile         = flag.String("config", "/github/home/configs/air.json", "Air configuration file.")
+	decideLoopInterval = flag.Duration("interval", 5*time.Minute, "Interval between two control loops (default 5m).")
+	logger             = log.New(os.Stderr, "", log.Lshortfile)
 )
 
 type Server struct {
@@ -59,7 +56,7 @@ func NewServer() *Server {
 	RegisterGet30mRoomTemperatureDeltas(&server, cfg)
 
 	go func() {
-		time.Sleep(decideLoopInterval)
+		time.Sleep(*decideLoopInterval)
 		server.Decide()
 	}()
 

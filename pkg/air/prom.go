@@ -64,6 +64,12 @@ var (
 		[]string{"room", "hvac", "fan"},
 		nil,
 	)
+	promHvacControl = prometheus.NewDesc(
+		"air_hvac_control",
+		"What controls each Hvac.",
+		[]string{"room", "hvac", "control"},
+		nil,
+	)
 )
 
 func (p *PromCollector) Describe(ch chan<- *prometheus.Desc) {
@@ -75,6 +81,7 @@ func (p *PromCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- promHvacReportedMode
 	ch <- promHvacDesiredFan
 	ch <- promHvacReportedFan
+	ch <- promHvacControl
 }
 func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
 	b2f := func(b bool) float64 {
@@ -97,6 +104,9 @@ func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
 			for _, fan := range air_proto.Hvac_Fan_name {
 				ch <- prometheus.MustNewConstMetric(promHvacDesiredFan, prometheus.GaugeValue, b2f(fan == hvac.DesiredState.Fan.String()), room.RoomName, hvac.HvacName, fan[4:])
 				ch <- prometheus.MustNewConstMetric(promHvacReportedFan, prometheus.GaugeValue, b2f(fan == hvac.ReportedState.Fan.String()), room.RoomName, hvac.HvacName, fan[4:])
+			}
+			for _, control := range air_proto.Hvac_Control_name {
+				ch <- prometheus.MustNewConstMetric(promHvacControl, prometheus.GaugeValue, b2f(control == hvac.Control.String()), room.RoomName, hvac.HvacName, control[8:])
 			}
 		}
 	}
@@ -173,7 +183,7 @@ func getLastDesiredRoomTemperatures(metric string) map[string]float64 {
 
 	results, err := prom.Query(fmt.Sprintf("last_over_time(%s[1w])", metric), "initRoomDesiredTemp")
 	if err != nil {
-		logger.Printf("Fail| Could not fetch the last minimal desired room temperatures: %v", err)
+		logger.Printf("Fail| Failed to initialize desired room temperatures: %v", err)
 		return resp
 	}
 
