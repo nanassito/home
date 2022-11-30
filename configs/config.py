@@ -40,6 +40,8 @@ print("Update switches configurations")
 cfg = {
     nickname: {
         "Mqtt": {
+            "GetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}",
+            "GetRegex": f'.*"{switch["line"]}": ?"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)".*',
             "SetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}/set",
             "MsgActive": json.dumps({switch["line"]: "ON" if switch["default_open"] else "OFF"}),
             "MsgRest": json.dumps({switch["line"]: "OFF" if switch["default_open"] else "ON"}),
@@ -61,14 +63,17 @@ with (REPO / "configs" / "switches.json").open("w") as fd:
 
 print("Update air/HVAC configuration")
 sensors = {
-    device["prometheus"]["location"][0]: promLabels(device)
-    for _, devices in zigbee.items()
+    device["prometheus"]["location"][0]: {
+        "mqttTopic": f"zigbee2mqtt/{network}/{mqtt(device)}",
+        "prometheusLabels": promLabels(device),
+    }
+    for network, devices in zigbee.items()
     for device in devices.values()
     if device["prometheus"]["type"] == "air"
 }
 cfg = {
     "rooms": defaultdict(dict),
-    "outsideSensorPromLabels": sensors["backyard"]
+    "outsideSensor": sensors["backyard"]
 }
 with open(REPO / "configs" / "inputs" / "rooms.json") as fd:
     specs = json.load(fd)
@@ -86,12 +91,11 @@ for room, spec in specs.items():
                 "reportFanMqttTopic": climate["fan_mode_state_topic"],
                 "setTemperatureMqttTopic": climate["target_temperature_command_topic"],
                 "reportTemperatureMqttTopic": climate["target_temperature_state_topic"],
+                "prometheusLabels": {"type": "hvac", "location": climate["name"]},
             }
     cfg["rooms"][room] = {
         "hvacs": hvacs,
-        "defaultMinTemperature": 19,
-        "defaultMaxTemperature": 33,
-        "sensorPromLabels": sensors[room],
+        "sensor": sensors[room],
     }
 with (REPO / "configs" / "air.json").open("w") as fd:
     json.dump(cfg, fd, sort_keys=True, indent=4)

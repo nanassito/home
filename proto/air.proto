@@ -109,8 +109,6 @@ message AirConfig {
         }
         
         map<string, Hvac> hvacs = 1;
-        double defaultMinTemperature = 2;
-        double defaultMaxTemperature = 3;
         Sensor sensor = 5;
     }
 

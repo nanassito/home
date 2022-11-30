@@ -8,8 +8,6 @@
     },
     "rooms": {
         "livingroom": {
-            "defaultMaxTemperature": 33,
-            "defaultMinTemperature": 19,
             "hvacs": {
                 "kitchen": {
                     "prometheusLabels": {
@@ -45,8 +43,6 @@
             }
         },
         "office": {
-            "defaultMaxTemperature": 33,
-            "defaultMinTemperature": 19,
             "hvacs": {
                 "office": {
                     "prometheusLabels": {
@@ -70,8 +66,6 @@
             }
         },
         "parent": {
-            "defaultMaxTemperature": 33,
-            "defaultMinTemperature": 19,
             "hvacs": {
                 "parent": {
                     "prometheusLabels": {
@@ -95,8 +89,6 @@
             }
         },
         "zaya": {
-            "defaultMaxTemperature": 33,
-            "defaultMinTemperature": 19,
             "hvacs": {
                 "zaya": {
                     "prometheusLabels": {

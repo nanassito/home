@@ -1,6 +1,8 @@
 package air
 
 import (
+	"fmt"
+
 	"github.com/nanassito/home/pkg/air_proto"
 	"github.com/nanassito/home/pkg/prom"
 	"github.com/prometheus/client_golang/prometheus"
@@ -12,14 +14,16 @@ type PromCollector struct {
 }
 
 var (
-	promRoomDesiredMin = prometheus.NewDesc(
-		"air_room_desired_min_temperature",
+	metricRoomDesiredMin = "air_room_desired_min_temperature"
+	promRoomDesiredMin   = prometheus.NewDesc(
+		metricRoomDesiredMin,
 		"Minimum of the desired temperature range.",
 		[]string{"room"},
 		nil,
 	)
-	promRoomDesiredMax = prometheus.NewDesc(
-		"air_room_desired_max_temperature",
+	metricRoomDesiredMax = "air_room_desired_max_temperature"
+	promRoomDesiredMax   = prometheus.NewDesc(
+		metricRoomDesiredMax,
 		"Maximum of the desired temperature range.",
 		[]string{"room"},
 		nil,
@@ -162,4 +166,30 @@ func RegisterGet30mRoomTemperatureDeltas(s *Server, cfg *air_proto.AirConfig) {
 		}
 		return resp, nil
 	}
+}
+
+func getLastDesiredRoomTemperatures(metric string) map[string]float64 {
+	resp := make(map[string]float64, 4)
+
+	results, err := prom.Query(fmt.Sprintf("last_over_time(%s[1w])", metric), "initRoomDesiredTemp")
+	if err != nil {
+		logger.Printf("Fail| Could not fetch the last minimal desired room temperatures: %v", err)
+		return resp
+	}
+
+	rows := results.(model.Vector)
+	for _, row := range rows {
+		resp[string(row.Metric["room"])] = float64(row.Value)
+	}
+	return resp
+}
+
+var (
+	LastRunDesiredMinimalRoomTemperatures = map[string]float64{}
+	LastRunDesiredMaximalRoomTemperatures = map[string]float64{}
+)
+
+func init() {
+	LastRunDesiredMaximalRoomTemperatures = getLastDesiredRoomTemperatures(metricRoomDesiredMax)
+	LastRunDesiredMinimalRoomTemperatures = getLastDesiredRoomTemperatures(metricRoomDesiredMin)
 }
