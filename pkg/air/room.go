@@ -25,6 +25,8 @@ func NewRoom(name string, cfg *air_proto.AirConfig_Room, mqttClient *mqtt.Mqtt) 
 	if err == nil {
 		sensor.LastReportedAtTs = time.Now().Unix()
 		sensor.Temperature = lastSensorTemp
+	} else {
+		logger.Printf("Warn| Could not initialize room sensor in %s\n", name)
 	}
 
 	err = mqttClient.Subscribe(cfg.Sensor.MqttTopic, sensorRefresher(&sensor))
@@ -38,11 +40,11 @@ func NewRoom(name string, cfg *air_proto.AirConfig_Room, mqttClient *mqtt.Mqtt) 
 	}
 
 	desiredMin := float64(19)
-	if last, ok := LastRunDesiredMinimalRoomTemperatures[name]; ok {
+	if last, ok := LastRunDesiredMinimalRoomTemperatures[name]; ok && *initFromProm {
 		desiredMin = last
 	}
 	desiredMax := float64(33)
-	if last, ok := LastRunDesiredMinimalRoomTemperatures[name]; ok {
+	if last, ok := LastRunDesiredMaximalRoomTemperatures[name]; ok && *initFromProm {
 		desiredMax = last
 	}
 

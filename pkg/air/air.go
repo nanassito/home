@@ -14,6 +14,7 @@ import (
 var (
 	configFile         = flag.String("config", "/github/home/configs/air.json", "Air configuration file.")
 	decideLoopInterval = flag.Duration("interval", 5*time.Minute, "Interval between two control loops (default 5m).")
+	initFromProm       = flag.Bool("init-from-prom", true, "Whether to initializing from Prometheus data.")
 	logger             = log.New(os.Stderr, "", log.Lshortfile)
 )
 
