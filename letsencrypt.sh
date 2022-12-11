@@ -7,9 +7,8 @@ docker run \
     --mount source=letsencrypt_etc,target=/etc/letsencrypt \
     --mount source=letsencrypt_varlib,target=/var/lib/letencrypt \
     certbot/certbot \
-    # certonly \
-    renew \
+    certonly \
     --manual \
-    # -d "*.epa.jaminais.fr,*.eastpaloalto.jaminais.fr,epa.jaminais.fr,eastpaloalto.jaminais.fr" \
+    -d "*.epa.jaminais.fr,*.eastpaloalto.jaminais.fr,epa.jaminais.fr,eastpaloalto.jaminais.fr" \
     --preferred-challenges=dns
 systemctl restart nginx
