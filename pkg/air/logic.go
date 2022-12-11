@@ -4,46 +4,58 @@ import (
 	"github.com/nanassito/home/pkg/air_proto"
 )
 
-const (
-	DecisionTemp = 23
-)
-
-func (s *Server) InferGeneralMode() air_proto.Hvac_Mode {
-	votes := map[air_proto.Hvac_Mode]int{
-		air_proto.Hvac_MODE_COOL: 0,
-		air_proto.Hvac_MODE_HEAT: 0,
-	}
-	for _, room := range s.State.Rooms {
-		for _, hvac := range room.Hvacs {
-			if hvac.Control == air_proto.Hvac_CONTROL_HVAC && hvac.ReportedState.Mode != air_proto.Hvac_MODE_OFF {
-				logger.Printf("Warn| Hvac %s is in forced %s\n", hvac.HvacName, hvac.ReportedState.Mode.String())
+func (s *Server) InferGeneralHvacMode() air_proto.Hvac_Mode {
+	// If an HVAC is under direct control (control = hvac or none) and is turned on (mode != off)
+	// Then that mode should be used for all Hvacs.
+	for _, hvac := range s.State.Hvacs {
+		if hvac.Control == air_proto.Hvac_CONTROL_HVAC || hvac.Control == air_proto.Hvac_CONTROL_NONE {
+			if hvac.ReportedState.Mode != air_proto.Hvac_MODE_OFF {
 				return hvac.ReportedState.Mode
 			}
 		}
-		if IsSensorAlive(room.Sensor) {
-			if room.Sensor.Temperature > DecisionTemp {
-				votes[air_proto.Hvac_MODE_COOL] += 1
-			}
-			if room.Sensor.Temperature < DecisionTemp {
-				votes[air_proto.Hvac_MODE_HEAT] += 1
-			}
-		} else {
-			logger.Printf("Fail| Stalled sensor in %s\n", room.RoomName)
-		}
 	}
-	if votes[air_proto.Hvac_MODE_COOL] > votes[air_proto.Hvac_MODE_HEAT] {
+
+	// All the rooms vote for the mode they need.
+	// We add the distance between the limit temperature and the reported temperature.
+	// Whichever mode has the lowest score is the one we need to use.
+	votes := map[air_proto.Hvac_Mode]float64{
+		air_proto.Hvac_MODE_COOL: 0,
+		air_proto.Hvac_MODE_HEAT: 0,
+	}
+	for _, roomState := range s.State.Rooms {
+		hasControlledHvac := false
+		for hvacName, hvacCfg := range s.Config.Hvacs {
+			if hvacCfg.Room == roomState.Name {
+				if s.State.Hvacs[hvacName].Control == air_proto.Hvac_CONTROL_ROOM {
+					hasControlledHvac = true
+					break
+				}
+			}
+		}
+		if !hasControlledHvac {
+			logger.Printf("Info| Room %s doesn't have any hvacs under control.\n", roomState.Name)
+			continue
+		}
+		if !IsSensorAlive(roomState.Sensor) {
+			logger.Printf("Fail| Stalled sensor in %s\n", roomState.Name)
+			continue
+		}
+		votes[air_proto.Hvac_MODE_HEAT] += roomState.Sensor.Temperature - roomState.DesiredTemperatureRange.Min
+		votes[air_proto.Hvac_MODE_COOL] += roomState.DesiredTemperatureRange.Max - roomState.Sensor.Temperature
+	}
+	if votes[air_proto.Hvac_MODE_COOL] < votes[air_proto.Hvac_MODE_HEAT] {
 		return air_proto.Hvac_MODE_COOL
 	} else {
 		return air_proto.Hvac_MODE_HEAT
 	}
 }
 
-func (s *Server) Decide() {
-	generalMode := s.InferGeneralMode()
-	logger.Printf("Info| Infered general mode is %s\n", generalMode.String())
+func (s *Server) Control() {
+	generalMode := s.InferGeneralHvacMode()
+	logger.Printf("Info| Inferred general mode is %s\n", generalMode.String())
 	switch generalMode {
 	case air_proto.Hvac_MODE_HEAT:
-		s.DecideHeatUp()
+		s.HeatUp()
 	case air_proto.Hvac_MODE_COOL:
 		s.DecideCoolDown()
 	default:
@@ -51,8 +63,63 @@ func (s *Server) Decide() {
 	}
 }
 
-func (s *Server) DecideHeatUp() {
-	last30mHvacsTemp, err := s.GetLast30mHvacsTemperature()
+func DecideHeatUpMode(room *air_proto.Room, outside *air_proto.Sensor, hvacName string) air_proto.Hvac_Mode {
+	roomWillWarmUp := false
+	if IsSensorAlive(outside) {
+		roomWillWarmUp = outside.Temperature > room.DesiredTemperatureRange.Min
+	}
+
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+2 {
+		logger.Printf("Info| Room %s is more than hot enough, shutting hvac %s down.\n", room.Name, hvacName)
+		return air_proto.Hvac_MODE_OFF
+	}
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min && roomWillWarmUp {
+		logger.Printf("Info| Room %s will continue to warm up, shutting hvac %s down.\n", room.Name, hvacName)
+		return air_proto.Hvac_MODE_OFF
+	}
+	return air_proto.Hvac_MODE_HEAT
+}
+
+func DecideHeatUpFan(room *air_proto.Room, last30mHvacsTemp map[string]float64, hvacName string) air_proto.Hvac_Fan {
+	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
+		if last30mTemp, ok := last30mHvacsTemp[hvacName]; ok {
+			if last30mTemp > room.Sensor.Temperature+3 {
+				return air_proto.Hvac_FAN_HIGH
+			}
+			if last30mTemp > room.Sensor.Temperature+1.5 {
+				return air_proto.Hvac_FAN_MEDIUM
+			}
+		} else {
+			logger.Printf("Fail| Got no historical temperature data for hvac %s\n", hvacName)
+		}
+	}
+	return air_proto.Hvac_FAN_AUTO
+}
+
+func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDeltas map[string]float64) (temperature float64, offset float64) {
+	offset = hvac.TemperatureOffset
+	if hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
+		// The desired temperature changed so we need to reset the offset
+		offset = 0
+	}
+	temperature = room.DesiredTemperatureRange.Min
+
+	if delta, ok := tempDeltas[room.Name]; ok {
+		if delta <= 0 && room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
+			offset += 1
+		}
+		if delta >= 0 && room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
+			offset -= 1
+		}
+	} else {
+		logger.Printf("Fail| Got no historical temperature data for room %s\n", room.Name)
+	}
+
+	return temperature, offset
+}
+
+func (s *Server) HeatUp() {
+	last30mHvacsTemp, err := s.GetLast30mHvacTemperatures()
 	if err != nil {
 		logger.Printf("Fail| Error querying Prometheus (last30mHvacsTemp): %v\n", err)
 	}
@@ -60,62 +127,23 @@ func (s *Server) DecideHeatUp() {
 	if err != nil {
 		logger.Printf("Fail| Error querying Prometheus (tempDeltas): %v\n", err)
 	}
-	for _, room := range s.State.Rooms {
-		if !IsSensorAlive(room.Sensor) {
-			logger.Printf("Fail| Lost temperature sensor in %s. Giving up control.\n", room.RoomName)
+
+	for _, hvac := range s.State.Hvacs {
+		roomName := s.Config.Hvacs[hvac.Name].Room
+
+		if hvac.Control != air_proto.Hvac_CONTROL_ROOM {
+			logger.Printf("Info| Hvac %s is not controlled by the room. Skipping\n", hvac.Name)
 			continue
 		}
-		roomWillWarmUp := false
-		if IsSensorAlive(s.State.OutsideSensor) {
-			roomWillWarmUp = s.State.OutsideSensor.Temperature > room.DesiredTemperatureRange.Min
-		}
-		for _, hvac := range room.Hvacs {
-			// First let's figure out if we run at all or not.
-			if hvac.Control != air_proto.Hvac_CONTROL_ROOM {
-				logger.Printf("Info| Hvac %s is not controlled by the room. Skipping\n", hvac.HvacName)
-				continue
-			}
-			if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+2 {
-				logger.Printf("Info| Room %s is more than hot enough, shutting hvac %s down.\n", room.RoomName, hvac.HvacName)
-				hvac.DesiredState.Mode = air_proto.Hvac_MODE_OFF
-				continue
-			}
-			if room.Sensor.Temperature > room.DesiredTemperatureRange.Min && roomWillWarmUp {
-				logger.Printf("Info| Room %s will continue to warm up, shutting hvac %s down.\n", room.RoomName, hvac.HvacName)
-				hvac.DesiredState.Mode = air_proto.Hvac_MODE_OFF
-				continue
-			}
-			hvac.DesiredState.Mode = air_proto.Hvac_MODE_HEAT
 
-			// Then at what speed to we run the fan
-			fan := air_proto.Hvac_FAN_AUTO
-			if room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
-				if last30mTemp, ok := last30mHvacsTemp[hvac.HvacName]; ok {
-					if last30mTemp > room.Sensor.Temperature+1.5 {
-						fan = air_proto.Hvac_FAN_MEDIUM
-					}
-					if last30mTemp > room.Sensor.Temperature+3 {
-						fan = air_proto.Hvac_FAN_HIGH
-					}
-				} else {
-					logger.Printf("Fail| Got no historical temperature data for hvac %s\n", hvac.HvacName)
-				}
-			}
-			hvac.DesiredState.Fan = fan
-
-			// And finally how much do we need to offset the temperature.
-			hvac.DesiredState.Temperature = room.DesiredTemperatureRange.Min
-			if delta, ok := tempDeltas[room.RoomName]; ok {
-				if delta <= 0 && room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
-					hvac.TemperatureOffset += 1
-				}
-				if delta >= 0 && room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
-					hvac.TemperatureOffset -= 1
-				}
-			} else {
-				logger.Printf("Fail| Got no historical temperature data for room %s\n", room.RoomName)
-			}
+		if !IsSensorAlive(s.State.Rooms[roomName].Sensor) {
+			logger.Printf("Fail| Lost temperature sensor in %s. Giving up control.\n", roomName)
+			continue
 		}
+
+		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], s.State.Outside, hvac.Name)
+		hvac.DesiredState.Fan = DecideHeatUpFan(s.State.Rooms[roomName], last30mHvacsTemp, hvac.Name)
+		hvac.DesiredState.Temperature, hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac, tempDeltas)
 	}
 }
 

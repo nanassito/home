@@ -1,6 +1,7 @@
 package air
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/nanassito/home/pkg/air_proto"
@@ -71,12 +72,6 @@ var (
 		[]string{"room", "hvac", "control"},
 		nil,
 	)
-	promHvacOffset = prometheus.NewDesc(
-		"air_hvac_offset",
-		"Offset temperature for the Hvac.",
-		[]string{"room", "hvac"},
-		nil,
-	)
 )
 
 func (p *PromCollector) Describe(ch chan<- *prometheus.Desc) {
@@ -89,7 +84,6 @@ func (p *PromCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- promHvacDesiredFan
 	ch <- promHvacReportedFan
 	ch <- promHvacControl
-	ch <- promHvacOffset
 }
 func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
 	b2f := func(b bool) float64 {
@@ -100,66 +94,38 @@ func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 	}
 	for _, room := range p.Server.State.Rooms {
-		ch <- prometheus.MustNewConstMetric(promRoomDesiredMin, prometheus.GaugeValue, room.DesiredTemperatureRange.Min, room.RoomName)
-		ch <- prometheus.MustNewConstMetric(promRoomDesiredMax, prometheus.GaugeValue, room.DesiredTemperatureRange.Max, room.RoomName)
-		for _, hvac := range room.Hvacs {
-			ch <- prometheus.MustNewConstMetric(promHvacDesiredTemp, prometheus.GaugeValue, hvac.DesiredState.Temperature, room.RoomName, hvac.HvacName)
-			ch <- prometheus.MustNewConstMetric(promHvacReportedTemp, prometheus.GaugeValue, hvac.ReportedState.Temperature, room.RoomName, hvac.HvacName)
-			ch <- prometheus.MustNewConstMetric(promHvacOffset, prometheus.GaugeValue, float64(hvac.TemperatureOffset), room.RoomName, hvac.HvacName)
-			for _, mode := range air_proto.Hvac_Mode_name {
-				ch <- prometheus.MustNewConstMetric(promHvacDesiredMode, prometheus.GaugeValue, b2f(mode == hvac.DesiredState.Mode.String()), room.RoomName, hvac.HvacName, mode[5:])
-				ch <- prometheus.MustNewConstMetric(promHvacReportedMode, prometheus.GaugeValue, b2f(mode == hvac.ReportedState.Mode.String()), room.RoomName, hvac.HvacName, mode[5:])
-			}
-			for _, fan := range air_proto.Hvac_Fan_name {
-				ch <- prometheus.MustNewConstMetric(promHvacDesiredFan, prometheus.GaugeValue, b2f(fan == hvac.DesiredState.Fan.String()), room.RoomName, hvac.HvacName, fan[4:])
-				ch <- prometheus.MustNewConstMetric(promHvacReportedFan, prometheus.GaugeValue, b2f(fan == hvac.ReportedState.Fan.String()), room.RoomName, hvac.HvacName, fan[4:])
-			}
-			for _, control := range air_proto.Hvac_Control_name {
-				ch <- prometheus.MustNewConstMetric(promHvacControl, prometheus.GaugeValue, b2f(control == hvac.Control.String()), room.RoomName, hvac.HvacName, control[8:])
-			}
+		ch <- prometheus.MustNewConstMetric(promRoomDesiredMin, prometheus.GaugeValue, room.DesiredTemperatureRange.Min, room.Name)
+		ch <- prometheus.MustNewConstMetric(promRoomDesiredMax, prometheus.GaugeValue, room.DesiredTemperatureRange.Max, room.Name)
+
+	}
+	for _, hvac := range p.Server.State.Hvacs {
+		hvacCfg, ok := p.Server.Config.Hvacs[hvac.Name]
+		if !ok {
+			panic(fmt.Sprintf("Can't find config for hvac %v", hvac.Name))
+		}
+		roomName := hvacCfg.Room
+
+		ch <- prometheus.MustNewConstMetric(promHvacDesiredTemp, prometheus.GaugeValue, hvac.DesiredState.Temperature, roomName, hvac.Name)
+		ch <- prometheus.MustNewConstMetric(promHvacReportedTemp, prometheus.GaugeValue, hvac.ReportedState.Temperature, roomName, hvac.Name)
+		for _, mode := range air_proto.Hvac_Mode_name {
+			ch <- prometheus.MustNewConstMetric(promHvacDesiredMode, prometheus.GaugeValue, b2f(mode == hvac.DesiredState.Mode.String()), roomName, hvac.Name, mode[5:])
+			ch <- prometheus.MustNewConstMetric(promHvacReportedMode, prometheus.GaugeValue, b2f(mode == hvac.ReportedState.Mode.String()), roomName, hvac.Name, mode[5:])
+		}
+		for _, fan := range air_proto.Hvac_Fan_name {
+			ch <- prometheus.MustNewConstMetric(promHvacDesiredFan, prometheus.GaugeValue, b2f(fan == hvac.DesiredState.Fan.String()), roomName, hvac.Name, fan[4:])
+			ch <- prometheus.MustNewConstMetric(promHvacReportedFan, prometheus.GaugeValue, b2f(fan == hvac.ReportedState.Fan.String()), roomName, hvac.Name, fan[4:])
+		}
+		for _, control := range air_proto.Hvac_Control_name {
+			ch <- prometheus.MustNewConstMetric(promHvacControl, prometheus.GaugeValue, b2f(control == hvac.Control.String()), roomName, hvac.Name, control[8:])
 		}
 	}
 }
 
-func RegisterGetLast30mHvacsTemperature(s *Server, cfg *air_proto.AirConfig) {
-	matchers := make(map[string]func(model.LabelSet) bool, len(cfg.Rooms)+1)
-	for _, roomCfg := range cfg.Rooms {
-		for hvacName, hvacCfg := range roomCfg.Hvacs {
-			matchers[hvacName] = func(labels model.LabelSet) bool {
-				for k, v := range hvacCfg.PrometheusLabels {
-					if labels[model.LabelName(k)] != model.LabelValue(v) {
-						return false
-					}
-				}
-				return true
-			}
-		}
-	}
-	s.GetLast30mHvacsTemperature = func() (map[string]float64, error) {
-		resp := make(map[string]float64, len(s.State.Rooms)+1)
-
-		results, err := prom.Query("avg_over_time(mqtt_current_temperature_state[30m])", "last30mHvacsTemps")
-		if err != nil {
-			return resp, err
-		}
-
-		rows := results.(model.Vector)
-		for _, row := range rows {
-			for hvacName, matcher := range matchers {
-				if matcher(model.LabelSet(row.Metric)) {
-					resp[hvacName] = float64(row.Value)
-				}
-			}
-		}
-		return resp, nil
-	}
-}
-
-func RegisterGet30mRoomTemperatureDeltas(s *Server, cfg *air_proto.AirConfig) {
-	matchers := make(map[string]func(model.LabelSet) bool, len(cfg.Rooms))
-	for roomName, roomCfg := range cfg.Rooms {
-		matchers[roomName] = func(labels model.LabelSet) bool {
-			for k, v := range roomCfg.Sensor.PrometheusLabels {
+func (s *Server) initHvacMatchers() {
+	HvacMatchers = make(map[string]func(model.LabelSet) bool, 5)
+	for hvacName, hvacCfg := range s.Config.Hvacs {
+		HvacMatchers[hvacName] = func(labels model.LabelSet) bool {
+			for k, v := range hvacCfg.PrometheusLabels {
 				if labels[model.LabelName(k)] != model.LabelValue(v) {
 					return false
 				}
@@ -167,28 +133,62 @@ func RegisterGet30mRoomTemperatureDeltas(s *Server, cfg *air_proto.AirConfig) {
 			return true
 		}
 	}
-	s.Get30mRoomTemperatureDeltas = func() (map[string]float64, error) {
-		resp := make(map[string]float64, len(s.State.Rooms)+1)
+}
 
-		results, err := prom.Query("delta(mqtt_temperature{type=\"air\"}[30m])", "30mTempDeltas")
-		if err != nil {
-			return resp, err
-		}
+func (s *Server) GetLast30mHvacTemperatures() (map[string]float64, error) {
+	resp := make(map[string]float64, len(HvacMatchers))
 
-		rows := results.(model.Vector)
-		for _, row := range rows {
-			for hvacName, matcher := range matchers {
-				if matcher(model.LabelSet(row.Metric)) {
-					resp[hvacName] = float64(row.Value)
-				}
+	results, err := prom.Query("avg_over_time(mqtt_current_temperature_state[30m])", "last30mHvacsTemps")
+	if err != nil {
+		return resp, err
+	}
+
+	rows := results.(model.Vector)
+	for _, row := range rows {
+		for hvacName, matcher := range HvacMatchers {
+			if matcher(model.LabelSet(row.Metric)) {
+				resp[hvacName] = float64(row.Value)
 			}
 		}
-		return resp, nil
+	}
+	return resp, nil
+}
+
+func (s *Server) initRoomMatchers() {
+	RoomMatchers = make(map[string]func(model.LabelSet) bool, len(s.State.Rooms))
+	for roomName, roomCfg := range s.Config.Sensors {
+		RoomMatchers[roomName] = func(labels model.LabelSet) bool {
+			for k, v := range roomCfg.PrometheusLabels {
+				if labels[model.LabelName(k)] != model.LabelValue(v) {
+					return false
+				}
+			}
+			return true
+		}
 	}
 }
 
+func (s *Server) Get30mRoomTemperatureDeltas() (map[string]float64, error) {
+	resp := make(map[string]float64, len(RoomMatchers))
+
+	results, err := prom.Query("delta(mqtt_temperature[30m])", "30mTempDeltas")
+	if err != nil {
+		return resp, err
+	}
+
+	rows := results.(model.Vector)
+	for _, row := range rows {
+		for hvacName, matcher := range RoomMatchers {
+			if matcher(model.LabelSet(row.Metric)) {
+				resp[hvacName] = float64(row.Value)
+			}
+		}
+	}
+	return resp, nil
+}
+
 func getLastDesiredRoomTemperatures(metric string) map[string]float64 {
-	resp := make(map[string]float64, 4)
+	resp := map[string]float64{}
 
 	results, err := prom.Query(fmt.Sprintf("last_over_time(%s[1w])", metric), "initRoomDesiredTemp")
 	if err != nil {
@@ -204,7 +204,7 @@ func getLastDesiredRoomTemperatures(metric string) map[string]float64 {
 }
 
 func getLastHvacControls() map[string]air_proto.Hvac_Control {
-	resp := make(map[string]air_proto.Hvac_Control, 4)
+	resp := map[string]air_proto.Hvac_Control{}
 
 	results, err := prom.Query(fmt.Sprintf("last_over_time(%s[1w]) > 0", metricHvacControl), "initHvacControl")
 	if err != nil {
@@ -223,10 +223,20 @@ var (
 	LastRunDesiredMinimalRoomTemperatures = map[string]float64{}
 	LastRunDesiredMaximalRoomTemperatures = map[string]float64{}
 	LastRunHvacControls                   = map[string]air_proto.Hvac_Control{}
+	HvacMatchers                          = map[string]func(model.LabelSet) bool{}
+	RoomMatchers                          = map[string]func(model.LabelSet) bool{}
 )
 
 func init() {
 	LastRunDesiredMaximalRoomTemperatures = getLastDesiredRoomTemperatures(metricRoomDesiredMax)
 	LastRunDesiredMinimalRoomTemperatures = getLastDesiredRoomTemperatures(metricRoomDesiredMin)
 	LastRunHvacControls = getLastHvacControls()
+}
+
+func promLabelsAsFilter(labels map[string]string) string {
+	promFilter := new(bytes.Buffer)
+	for key, value := range labels {
+		fmt.Fprintf(promFilter, "%s=\"%s\", ", key, value)
+	}
+	return promFilter.String()
 }

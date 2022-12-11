@@ -39,7 +39,7 @@ func newClient(clientID string) paho.Client {
 	opts.SetClientID(clientID + "-" + hostname)
 	opts.AddBroker(*server)
 	opts.OnConnectionLost = func(client paho.Client, err error) {
-		logger.Printf("Lost mqtt connection: %v", err)
+		logger.Fatalf("Lost mqtt connection: %v", err)
 	}
 	client := paho.NewClient(opts)
 	logger.Printf("Info| Connecting to Mqtt broker at %s\n", *server)

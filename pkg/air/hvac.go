@@ -2,7 +2,7 @@ package air
 
 import (
 	"strconv"
-	"sync"
+	"time"
 
 	"github.com/nanassito/home/pkg/air_proto"
 	"github.com/nanassito/home/pkg/mqtt"
@@ -40,9 +40,53 @@ var (
 	}
 )
 
-func NewHvac(name string, cfg *air_proto.AirConfig_Room_Hvac, mqttClient *mqtt.Mqtt) *air_proto.Hvac {
+func hvacTempRefresher(hvac *air_proto.Hvac) func(topic string, payload []byte) {
+	return func(topic string, payload []byte) {
+		temp, err := strconv.ParseFloat(string(payload), 64)
+		if err != nil {
+			logger.Printf("Fail| Can't parse temperature for %s (%v): %v\n", hvac.Name, string(payload), err)
+			return
+		}
+		if hvac.ReportedState.Temperature != temp {
+			logger.Printf("Info| %s reports a target of %.2f°C\n", hvac.Name, temp)
+		}
+		hvac.ReportedState.Temperature = temp
+	}
+}
+
+func hvacModeRefresher(hvac *air_proto.Hvac) func(topic string, payload []byte) {
+	return func(topic string, payload []byte) {
+		value := string(payload)
+		mode, ok := Str2Mode[value]
+		if !ok {
+			logger.Printf("Fail| %s reports unknown mode `%s`\n", hvac.Name, value)
+			return
+		}
+		if hvac.ReportedState.Mode != mode {
+			logger.Printf("Info| %s reports mode is %s\n", hvac.Name, mode.String())
+		}
+		hvac.ReportedState.Mode = mode
+	}
+}
+
+func hvacFanRefresher(hvac *air_proto.Hvac) func(topic string, payload []byte) {
+	return func(topic string, payload []byte) {
+		value := string(payload)
+		fan, ok := Str2Fan[value]
+		if !ok {
+			logger.Printf("Fail| %s reports unknown fan `%s`\n", hvac.Name, value)
+			return
+		}
+		if hvac.ReportedState.Fan != fan {
+			logger.Printf("Info| %s reports fan is %s\n", hvac.Name, fan.String())
+		}
+		hvac.ReportedState.Fan = fan
+	}
+}
+
+func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIface) *air_proto.Hvac {
 	hvac := air_proto.Hvac{
-		HvacName:      name,
+		Name:          name,
 		Control:       air_proto.Hvac_CONTROL_ROOM,
 		ReportedState: &air_proto.Hvac_State{},
 		DesiredState:  &air_proto.Hvac_State{},
@@ -52,58 +96,52 @@ func NewHvac(name string, cfg *air_proto.AirConfig_Room_Hvac, mqttClient *mqtt.M
 		hvac.Control = lastControl
 	}
 
-	initTemperature := sync.Once{}
-	err := mqttClient.Subscribe(cfg.ReportTemperatureMqttTopic, func(topic string, payload []byte) {
-		temp, err := strconv.ParseFloat(string(payload), 64)
-		if err != nil {
-			logger.Printf("Fail| Can't parse temperature for %s (%v): %v\n", name, string(payload), err)
-			return
-		}
-		if hvac.ReportedState.Temperature != temp {
-			logger.Printf("Info| %s reports %.2f°C\n", name, temp)
-		}
-		hvac.ReportedState.Temperature = temp
-		initTemperature.Do(func() { hvac.DesiredState.Temperature = temp })
-	})
+	err := mqttClient.Subscribe(cfg.ReportTemperatureMqttTopic, hvacTempRefresher(&hvac))
 	if err != nil {
 		panic(err)
 	}
 
-	initMode := sync.Once{}
-	err = mqttClient.Subscribe(cfg.ReportModeMqttTopic, func(topic string, payload []byte) {
-		value := string(payload)
-		mode, ok := Str2Mode[value]
-		if !ok {
-			logger.Printf("Fail| %s reports unknown mode `%s`\n", name, value)
-			return
-		}
-		if hvac.ReportedState.Mode != mode {
-			logger.Printf("Info| %s reports mode is %s\n", name, mode.String())
-		}
-		hvac.ReportedState.Mode = mode
-		initMode.Do(func() { hvac.DesiredState.Mode = mode })
-	})
+	err = mqttClient.Subscribe(cfg.ReportModeMqttTopic, hvacModeRefresher(&hvac))
 	if err != nil {
 		panic(err)
 	}
 
-	initFan := sync.Once{}
-	err = mqttClient.Subscribe(cfg.ReportFanMqttTopic, func(topic string, payload []byte) {
-		value := string(payload)
-		fan, ok := Str2Fan[value]
-		if !ok {
-			logger.Printf("Fail| %s reports unknown fan `%s`\n", name, value)
-			return
-		}
-		if hvac.ReportedState.Fan != fan {
-			logger.Printf("Info| %s reports fan is %s\n", name, fan.String())
-		}
-		hvac.ReportedState.Fan = fan
-		initFan.Do(func() { hvac.DesiredState.Fan = fan })
-	})
+	err = mqttClient.Subscribe(cfg.ReportFanMqttTopic, hvacFanRefresher(&hvac))
 	if err != nil {
 		panic(err)
 	}
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			HvacControl(&hvac, cfg, mqttClient)
+		}
+	}()
 
 	return &hvac
+}
+
+func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIface) {
+	if state.ReportedState.Mode != state.DesiredState.Mode && state.DesiredState.Mode != air_proto.Hvac_MODE_UNKNOWN {
+		logger.Printf("Info| Setting %s's mode to %s\n", state.Name, state.DesiredState.Mode.String()[5:])
+		if !*readonly {
+			mqttClient.PublishString(config.SetModeMqttTopic, state.DesiredState.Mode.String())
+		}
+		return
+	}
+	if state.ReportedState.Fan != state.DesiredState.Fan && state.DesiredState.Fan != air_proto.Hvac_FAN_UNKNOWN {
+		logger.Printf("Info| Setting %s's fan to %s\n", state.Name, state.DesiredState.Fan.String())
+		if !*readonly {
+			mqttClient.PublishString(config.SetFanMqttTopic, state.DesiredState.Fan.String()[4:])
+		}
+		return
+	}
+	desiredTemperature := state.DesiredState.Temperature + state.TemperatureOffset
+	if state.ReportedState.Temperature != desiredTemperature && desiredTemperature != 0 {
+		logger.Printf("Info| Setting %s's temperature to %2f+%2f=%2f\n", state.Name, state.DesiredState.Temperature, state.TemperatureOffset, desiredTemperature)
+		if !*readonly {
+			mqttClient.PublishString(config.SetTemperatureMqttTopic, strconv.FormatFloat(desiredTemperature, 'f', 2, 64))
+		}
+		return
+	}
 }

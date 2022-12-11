@@ -12,7 +12,7 @@ message TemperatureRange {
 }
 
 message Sensor {
-    string location = 1;
+    string name = 1;
     double temperature = 2;
     int64 lastReportedAtTs = 3;
 }
@@ -50,23 +50,24 @@ message Hvac {
         Fan fan = 3;
     }
 
-    string hvacName = 1;
+    string name = 1;
     Control control = 2;
     State reportedState = 3;
     State desiredState = 4;
-    int64 TemperatureOffset = 5;
+    double TemperatureOffset = 5;
 }
 
-message RoomState {
-    string roomName = 1;
-    TemperatureRange desiredTemperatureRange = 2;
-    Sensor sensor = 3;
-    map<string, Hvac> hvacs = 4;
+message Room {
+    string name = 1;
+    Sensor sensor = 2;
+
+    TemperatureRange desiredTemperatureRange = 4;
 }
 
 message ServerState {
-    map<string, RoomState> rooms = 1;
-    Sensor outsideSensor = 2;
+    Sensor outside = 1;
+    map<string, Room> rooms = 2;
+    map<string, Hvac> hvacs = 3;
 }
 
 message ReqGetAllStates {}
@@ -97,21 +98,18 @@ message AirConfig {
         map<string, string> prometheusLabels = 1;
         string mqttTopic = 2;
     }
-    message Room {
-        message Hvac {
-            string SetModeMqttTopic = 1;
-            string reportModeMqttTopic = 2;
-            string SetFanMqttTopic = 3;
-            string reportFanMqttTopic = 4;
-            string SetTemperatureMqttTopic = 5;
-            string reportTemperatureMqttTopic = 6;
-            map<string, string> prometheusLabels = 7;
-        }
-        
-        map<string, Hvac> hvacs = 1;
-        Sensor sensor = 5;
+    message Hvac {
+        string room = 1;
+        string setModeMqttTopic = 2;
+        string reportModeMqttTopic = 3;
+        string setFanMqttTopic = 4;
+        string reportFanMqttTopic = 5;
+        string setTemperatureMqttTopic = 6;
+        string reportTemperatureMqttTopic = 7;
+        map<string, string> prometheusLabels = 8;
     }
 
-    map<string, Room> rooms = 1;
-    Sensor outsideSensor = 2;
+    Sensor outside = 1;
+    map<string, Sensor> sensors = 2;
+    map<string, Hvac> hvacs = 3;
 }

@@ -72,30 +72,30 @@ sensors = {
     if device["prometheus"]["type"] == "air"
 }
 cfg = {
-    "rooms": defaultdict(dict),
-    "outsideSensor": sensors["backyard"]
+    "sensors": {},
+    "hvacs": {},
+    "outside": sensors["backyard"],
 }
 with open(REPO / "configs" / "inputs" / "rooms.json") as fd:
     specs = json.load(fd)
 for room, spec in specs.items():
-    hvacs = {}
+    hvacs = set()
     for hvac_file in spec["hvacs"]:
         with (REPO / hvac_file).open() as fd:
             raw = [l for l in fd.readlines() if "!secret" not in l]
-            hvac = yaml.load("".join(raw), yaml.Loader)
-            climate = hvac["climate"]
-            hvacs[climate["name"]]= {
-                "setModeMqttTopic": climate["mode_command_topic"],
-                "reportModeMqttTopic": climate["mode_state_topic"],
-                "setFanMqttTopic": climate["fan_mode_command_topic"],
-                "reportFanMqttTopic": climate["fan_mode_state_topic"],
-                "setTemperatureMqttTopic": climate["target_temperature_command_topic"],
-                "reportTemperatureMqttTopic": climate["target_temperature_state_topic"],
-                "prometheusLabels": {"type": "hvac", "location": climate["name"]},
-            }
-    cfg["rooms"][room] = {
-        "hvacs": hvacs,
-        "sensor": sensors[room],
-    }
+        hvac = yaml.load("".join(raw), yaml.Loader)
+        climate = hvac["climate"]
+        cfg["hvacs"][climate["name"]]= {
+            "room": room,
+            "setModeMqttTopic": climate["mode_command_topic"],
+            "reportModeMqttTopic": climate["mode_state_topic"],
+            "setFanMqttTopic": climate["fan_mode_command_topic"],
+            "reportFanMqttTopic": climate["fan_mode_state_topic"],
+            "setTemperatureMqttTopic": climate["target_temperature_low_command_topic"],
+            "reportTemperatureMqttTopic": climate["target_temperature_low_state_topic"],
+            "prometheusLabels": {"type": "hvac", "location": climate["name"]},
+        }
+        hvacs.add(climate["name"])
+    cfg["sensors"][room] = sensors[room]
 with (REPO / "configs" / "air.json").open("w") as fd:
     json.dump(cfg, fd, sort_keys=True, indent=4)

@@ -6,7 +6,8 @@ Requires=mosquitto.service
 [Service]
 ExecStart=/github/home/bin/air \
         -mqtt="127.0.0.1:1883" \
-        -config="/github/home/configs/air.json"
+        -config="/github/home/configs/air.json" \
+        -readonly
 StandardOutput=inherit
 StandardError=inherit
 Restart=always

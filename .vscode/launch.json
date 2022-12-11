@@ -24,7 +24,8 @@
             "args": [
                 // "-mqtt=tcp://127.0.0.1:1883",
                 "-config=${workspaceFolder}/configs/air.json",
-                "-interval=1m"
+                "-interval=1m",
+                "-readonly"
             ]
         },
         {

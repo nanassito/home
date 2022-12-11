@@ -23,6 +23,6 @@ func (s *Server) ConfigureRoom(ctx context.Context, req *air_proto.ReqConfigureR
 	// 	return s.State, status.Error(codes.InvalidArgument, "Min temperature must be less than max temperature.")
 	// }
 	// room.DesiredTemperatureRange = req.DesiredTemperatureRange
-	go s.Decide()
+	go s.Control()
 	return s.State, nil
 }
