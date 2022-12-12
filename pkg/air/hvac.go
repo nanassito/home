@@ -138,7 +138,7 @@ func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttCl
 	}
 	desiredTemperature := state.DesiredState.Temperature + state.TemperatureOffset
 	if state.ReportedState.Temperature != desiredTemperature && desiredTemperature != 0 {
-		logger.Printf("Info| Setting %s's temperature to %2f+%2f=%2f\n", state.Name, state.DesiredState.Temperature, state.TemperatureOffset, desiredTemperature)
+		logger.Printf("Info| Setting %s's temperature to %.2f+%.2f=%.2f\n", state.Name, state.DesiredState.Temperature, state.TemperatureOffset, desiredTemperature)
 		if !*readonly {
 			mqttClient.PublishString(config.SetTemperatureMqttTopic, strconv.FormatFloat(desiredTemperature, 'f', 2, 64))
 		}

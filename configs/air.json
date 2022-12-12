@@ -11,7 +11,7 @@
             "room": "livingroom",
             "setFanMqttTopic": "esphome/kitchen/fan_mode_command",
             "setModeMqttTopic": "esphome/kitchen/mode_command",
-            "setTemperatureMqttTopic": "esphome/kitchen/target_temperature_low_command"
+            "setTemperatureMqttTopic": "esphome/kitchen/target_temperature_command"
         },
         "living": {
             "prometheusLabels": {
@@ -24,46 +24,7 @@
             "room": "livingroom",
             "setFanMqttTopic": "esphome/living/fan_mode_command",
             "setModeMqttTopic": "esphome/living/mode_command",
-            "setTemperatureMqttTopic": "esphome/living/target_temperature_low_command"
-        },
-        "office": {
-            "prometheusLabels": {
-                "location": "office",
-                "type": "hvac"
-            },
-            "reportFanMqttTopic": "esphome/office/fan_mode_state",
-            "reportModeMqttTopic": "esphome/office/mode_state",
-            "reportTemperatureMqttTopic": "esphome/office/target_temperature_low_state",
-            "room": "office",
-            "setFanMqttTopic": "esphome/office/fan_mode_command",
-            "setModeMqttTopic": "esphome/office/mode_command",
-            "setTemperatureMqttTopic": "esphome/office/target_temperature_low_command"
-        },
-        "parent": {
-            "prometheusLabels": {
-                "location": "parent",
-                "type": "hvac"
-            },
-            "reportFanMqttTopic": "esphome/parent/fan_mode_state",
-            "reportModeMqttTopic": "esphome/parent/mode_state",
-            "reportTemperatureMqttTopic": "esphome/parent/target_temperature_low_state",
-            "room": "parent",
-            "setFanMqttTopic": "esphome/parent/fan_mode_command",
-            "setModeMqttTopic": "esphome/parent/mode_command",
-            "setTemperatureMqttTopic": "esphome/parent/target_temperature_low_command"
-        },
-        "zaya": {
-            "prometheusLabels": {
-                "location": "zaya",
-                "type": "hvac"
-            },
-            "reportFanMqttTopic": "esphome/zaya/fan_mode_state",
-            "reportModeMqttTopic": "esphome/zaya/mode_state",
-            "reportTemperatureMqttTopic": "esphome/zaya/target_temperature_low_state",
-            "room": "zaya",
-            "setFanMqttTopic": "esphome/zaya/fan_mode_command",
-            "setModeMqttTopic": "esphome/zaya/mode_command",
-            "setTemperatureMqttTopic": "esphome/zaya/target_temperature_low_command"
+            "setTemperatureMqttTopic": "esphome/living/target_temperature_command"
         }
     },
     "outside": {
@@ -78,27 +39,6 @@
             "mqttTopic": "zigbee2mqtt/server/device/livingroom/air",
             "prometheusLabels": {
                 "location": "livingroom",
-                "type": "air"
-            }
-        },
-        "office": {
-            "mqttTopic": "zigbee2mqtt/server/device/office/air",
-            "prometheusLabels": {
-                "location": "office",
-                "type": "air"
-            }
-        },
-        "parent": {
-            "mqttTopic": "zigbee2mqtt/server/device/parent/air",
-            "prometheusLabels": {
-                "location": "parent",
-                "type": "air"
-            }
-        },
-        "zaya": {
-            "mqttTopic": "zigbee2mqtt/raspi/device/zaya/air",
-            "prometheusLabels": {
-                "location": "zaya",
                 "type": "air"
             }
         }

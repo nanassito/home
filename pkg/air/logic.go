@@ -98,23 +98,24 @@ func DecideHeatUpFan(room *air_proto.Room, last30mHvacsTemp map[string]float64, 
 
 func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDeltas map[string]float64) (temperature float64, offset float64) {
 	offset = hvac.TemperatureOffset
+	temperature = room.DesiredTemperatureRange.Min
+	step := 0.5
+
 	if hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
 		// The desired temperature changed so we need to reset the offset
-		offset = 0
+		return temperature, 0
 	}
-	temperature = room.DesiredTemperatureRange.Min
 
 	if delta, ok := tempDeltas[room.Name]; ok {
 		if delta <= 0 && room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
-			offset += 1
+			offset += step
 		}
 		if delta >= 0 && room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
-			offset -= 1
+			offset -= step
 		}
 	} else {
 		logger.Printf("Fail| Got no historical temperature data for room %s\n", room.Name)
 	}
-
 	return temperature, offset
 }
 

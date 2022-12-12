@@ -79,6 +79,8 @@ cfg = {
 with open(REPO / "configs" / "inputs" / "rooms.json") as fd:
     specs = json.load(fd)
 for room, spec in specs.items():
+    if room != "livingroom":
+        continue  # Until air is ready for prime time.
     hvacs = set()
     for hvac_file in spec["hvacs"]:
         with (REPO / hvac_file).open() as fd:
@@ -91,7 +93,7 @@ for room, spec in specs.items():
             "reportModeMqttTopic": climate["mode_state_topic"],
             "setFanMqttTopic": climate["fan_mode_command_topic"],
             "reportFanMqttTopic": climate["fan_mode_state_topic"],
-            "setTemperatureMqttTopic": climate["target_temperature_low_command_topic"],
+            "setTemperatureMqttTopic": climate["target_temperature_command_topic"],
             "reportTemperatureMqttTopic": climate["target_temperature_low_state_topic"],
             "prometheusLabels": {"type": "hvac", "location": climate["name"]},
         }
