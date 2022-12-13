@@ -99,5 +99,12 @@ for room, spec in specs.items():
         }
         hvacs.add(climate["name"])
     cfg["sensors"][room] = sensors[room]
+cfg["schedules"] = {}
+with open(REPO / "configs" / "inputs" / "schedule.json") as fd:
+    for scheduleName, schedule in json.load(fd).items():
+        if scheduleName not in cfg["sensors"]:
+            continue
+        schedule["roomName"] = scheduleName
+        cfg["schedules"][scheduleName] = schedule
 with (REPO / "configs" / "air.json").open("w") as fd:
     json.dump(cfg, fd, sort_keys=True, indent=4)

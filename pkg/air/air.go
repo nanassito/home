@@ -51,6 +51,12 @@ func NewServer() *Server {
 			server.Control()
 		}
 	}()
+	go func() {
+		for {
+			server.ApplySchedules()
+			time.Sleep(1 * time.Minute)
+		}
+	}()
 	return &server
 }
 
@@ -64,8 +70,9 @@ func (s *Server) initState() {
 		hvacs[hvacName] = NewHvac(hvacName, hvacCfg, s.Mqtt)
 	}
 	s.State = &air_proto.ServerState{
-		Outside: NewSensor("outside", s.Config.Outside, s.Mqtt),
-		Rooms:   rooms,
-		Hvacs:   hvacs,
+		Outside:   NewSensor("outside", s.Config.Outside, s.Mqtt),
+		Rooms:     rooms,
+		Hvacs:     hvacs,
+		Schedules: s.Config.Schedules,
 	}
 }

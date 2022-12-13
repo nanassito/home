@@ -36,6 +36,7 @@ func (s *Server) ConfigureRoom(ctx context.Context, req *air_proto.ReqConfigureR
 	}
 	room.DesiredTemperatureRange.Min = setMin
 	room.DesiredTemperatureRange.Max = setMax
+
 	go s.Control()
 	return s.State, nil
 }

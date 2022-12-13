@@ -64,16 +64,34 @@ message Room {
     TemperatureRange desiredTemperatureRange = 4;
 }
 
+message Schedule {
+    message Window {
+        string start = 1;
+        string end = 2;
+        TemperatureRange settings = 3;
+    }
+
+    bool isActive = 1;
+    string roomName = 2;
+    repeated Window weekday = 3;
+    repeated Window weekend = 4;
+}
+
 message ServerState {
     Sensor outside = 1;
     map<string, Room> rooms = 2;
     map<string, Hvac> hvacs = 3;
+    map<string, Schedule> schedules = 4;
 }
 
 message ReqGetAllStates {}
 message ReqConfigureRoom {
     string room = 1;
     TemperatureRange desiredTemperatureRange = 2;
+}
+message ReqConfigureSchedule {
+    string id = 1;
+    Schedule schedule = 2;
 }
 
 
@@ -87,6 +105,12 @@ service AirSvc {
     rpc ConfigureRoom(ReqConfigureRoom) returns (ServerState) {
         option (google.api.http) = {
             post: "/configure/room"
+        };
+    }
+
+    rpc ConfigureSchedule(ReqConfigureSchedule) returns (ServerState) {
+        option (google.api.http) = {
+            post: "/configure/schedule"
         };
     }
 }
@@ -112,4 +136,5 @@ message AirConfig {
     Sensor outside = 1;
     map<string, Sensor> sensors = 2;
     map<string, Hvac> hvacs = 3;
+    map<string, Schedule> schedules = 4;
 }
