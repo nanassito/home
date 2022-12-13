@@ -6,7 +6,12 @@ import (
 )
 
 func (s *Server) ApplySchedules() {
-	now := fmt.Sprintf("%2d:%2d", time.Now().Hour(), time.Now().Minute())
+	tz, err := time.LoadLocation("America/Los_Angeles")
+	if err != nil {
+		logger.Fatalf("Can't load timezone %v", err)
+	}
+	timenow := time.Now().In(tz)
+	now := fmt.Sprintf("%2d:%2d", timenow.Hour(), timenow.Minute())
 	for name, weekSchedule := range s.State.Schedules {
 		schedule := weekSchedule.Weekday
 		if time.Now().Weekday() == time.Saturday || time.Now().Weekday() == time.Sunday {
