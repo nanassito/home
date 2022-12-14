@@ -18,7 +18,7 @@ func (s *Server) ApplySchedules() {
 			schedule = weekSchedule.Weekend
 		}
 		for _, window := range schedule {
-			if window.Start >= now && now < window.End {
+			if window.Start <= now && now < window.End {
 				room := s.State.Rooms[weekSchedule.RoomName]
 				if room.DesiredTemperatureRange != window.Settings {
 					logger.Printf("Schedule %s changed Room %s to %v\n", name, room.Name, window.Settings)
