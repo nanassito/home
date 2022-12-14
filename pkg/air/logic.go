@@ -99,7 +99,7 @@ func DecideHeatUpFan(room *air_proto.Room, last30mHvacsTemp map[string]float64, 
 func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDeltas map[string]float64) (temperature float64, offset float64) {
 	offset = hvac.TemperatureOffset
 	temperature = room.DesiredTemperatureRange.Min
-	step := 0.5
+	step := 0.2
 
 	if hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
 		// The desired temperature changed so we need to reset the offset
