@@ -11,7 +11,7 @@ func (s *Server) ApplySchedules() {
 		logger.Fatalf("Can't load timezone %v", err)
 	}
 	timenow := time.Now().In(tz)
-	now := fmt.Sprintf("%2d:%2d", timenow.Hour(), timenow.Minute())
+	now := fmt.Sprintf("%02d:%02d", timenow.Hour(), timenow.Minute())
 	for name, weekSchedule := range s.State.Schedules {
 		schedule := weekSchedule.Weekday
 		if time.Now().Weekday() == time.Saturday || time.Now().Weekday() == time.Sunday {
