@@ -1,6 +1,7 @@
 package air
 
 import (
+	"math"
 	"strconv"
 	"time"
 
@@ -136,7 +137,7 @@ func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttCl
 		}
 		return
 	}
-	desiredTemperature := state.DesiredState.Temperature + state.TemperatureOffset
+	desiredTemperature := math.Round(state.DesiredState.Temperature+state.TemperatureOffset*2) / 2
 	if state.ReportedState.Temperature != desiredTemperature && desiredTemperature != 0 {
 		logger.Printf("Info| Setting %s's temperature to %.2f+%.2f=%.2f\n", state.Name, state.DesiredState.Temperature, state.TemperatureOffset, desiredTemperature)
 		if !*readonly {
