@@ -1,6 +1,8 @@
 package air
 
 import (
+	"math"
+
 	"github.com/nanassito/home/pkg/air_proto"
 )
 
@@ -121,6 +123,14 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDel
 	}
 	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
 		offset -= step
+	}
+
+	// Speed up when we are too far off target
+	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min-3 {
+		offset = math.Max(offset, room.DesiredTemperatureRange.Min-room.Sensor.Temperature)
+	}
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+3 {
+		offset = math.Min(offset, 0)
 	}
 
 	return temperature, offset
