@@ -131,6 +131,9 @@ func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttCl
 		}
 		return
 	}
+	if state.ReportedState.Mode == air_proto.Hvac_MODE_OFF {
+		return
+	}
 	if state.ReportedState.Fan != state.DesiredState.Fan && state.DesiredState.Fan != air_proto.Hvac_FAN_UNKNOWN {
 		fan := state.DesiredState.Fan.String()[4:]
 		logger.Printf("Info| Setting %s's fan to %s\n", state.Name, fan)
