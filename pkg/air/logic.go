@@ -119,25 +119,25 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac) (temper
 	}
 
 	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
-		logger.Printf("Info| %s: Room is below min, increasing the offset.", hvac.Name)
 		offset += step
+		logger.Printf("Info| %s: Room is below min, increasing the offset (%.2f).", hvac.Name, offset)
 	}
-	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min {
-		logger.Printf("Info| %s: Room is above min, lowering the offset.", hvac.Name)
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
 		offset -= step
+		logger.Printf("Info| %s: Room is above min, lowering the offset (%.2f).", hvac.Name, offset)
 	}
 
 	// Speed up when we are too far off target (aka. fastRamp)
 	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min-3 {
-		logger.Printf("Info| %s: (fastRamp) Dramatically increasing the offset to catch up on heating.", hvac.Name)
-		offset = math.Max(offset, room.DesiredTemperatureRange.Min-room.Sensor.Temperature)
 		fastRamp = true
+		offset = math.Max(offset, room.DesiredTemperatureRange.Min-room.Sensor.Temperature)
+		logger.Printf("Info| %s: (fastRamp) Dramatically increasing the offset to catch up on heating (%.2f).", hvac.Name, offset)
 	}
 
 	// We've heat up way too much, cancel any positive offset.
 	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+3 {
-		logger.Printf("Info| %s: We heat up way too much, resetting the offset.", hvac.Name)
 		offset = math.Min(offset, 0)
+		logger.Printf("Info| %s: We heat up way too much, Cancelling positive the offset (%.2f).", hvac.Name, offset)
 	}
 
 	// Prevent trying to apply a temperature that is below the minimal accepted value by the hvac.
