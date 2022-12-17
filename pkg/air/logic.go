@@ -118,10 +118,10 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDel
 		logger.Printf("Fail| Got no historical temperature data for room %s\n", room.Name)
 	}
 
-	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min-1 {
+	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
 		offset += step
 	}
-	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min {
 		offset -= step
 	}
 
