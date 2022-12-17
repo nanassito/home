@@ -121,7 +121,7 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDel
 	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
 		offset += step
 	}
-	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min {
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
 		offset -= step
 	}
 
