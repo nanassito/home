@@ -25,9 +25,6 @@ type Server struct {
 	Mqtt   mqtt.MqttIface
 	State  *air_proto.ServerState
 	Config *air_proto.AirConfig
-
-	// GetLast30mHvacsTemperature  func() (map[string]float64, error)
-	// Get30mRoomTemperatureDeltas func() (map[string]float64, error)
 }
 
 func NewServer() *Server {
@@ -43,7 +40,6 @@ func NewServer() *Server {
 	}
 	server.initState()
 	server.initHvacMatchers()
-	server.initRoomMatchers()
 
 	go func() {
 		for {

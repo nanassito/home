@@ -162,39 +162,6 @@ func (s *Server) GetLast30mHvacTemperatures() (map[string]float64, error) {
 	return resp, nil
 }
 
-func (s *Server) initRoomMatchers() {
-	RoomMatchers = make(map[string]func(model.LabelSet) bool, len(s.State.Rooms))
-	for roomName, roomCfg := range s.Config.Sensors {
-		RoomMatchers[roomName] = func(labels model.LabelSet) bool {
-			for k, v := range roomCfg.PrometheusLabels {
-				if labels[model.LabelName(k)] != model.LabelValue(v) {
-					return false
-				}
-			}
-			return true
-		}
-	}
-}
-
-func (s *Server) Get30mRoomTemperatureDeltas() (map[string]float64, error) {
-	resp := make(map[string]float64, len(RoomMatchers))
-
-	results, err := prom.Query("delta(mqtt_temperature[30m])", "30mTempDeltas")
-	if err != nil {
-		return resp, err
-	}
-
-	rows := results.(model.Vector)
-	for _, row := range rows {
-		for hvacName, matcher := range RoomMatchers {
-			if matcher(model.LabelSet(row.Metric)) {
-				resp[hvacName] = float64(row.Value)
-			}
-		}
-	}
-	return resp, nil
-}
-
 func getLastDesiredRoomTemperatures(metric string) map[string]float64 {
 	resp := map[string]float64{}
 
