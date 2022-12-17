@@ -104,10 +104,11 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDel
 	temperature = math.Max(hvacMinimalHeatTemperature, room.DesiredTemperatureRange.Min)
 	step := 0.2 // Note that the hvac can only step by 0.5°C
 
-	if hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
+	if !*readonly && hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
 		// The desired temperature changed so we need to reset the offset
 		return temperature, 0
 	}
+	offset = hvac.TemperatureOffset
 
 	if delta, ok := tempDeltas[room.Name]; ok {
 		if delta <= 0 && room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
