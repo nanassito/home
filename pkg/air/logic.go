@@ -6,6 +6,8 @@ import (
 	"github.com/nanassito/home/pkg/air_proto"
 )
 
+const hvacMinimalHeatTemperature = 17
+
 func (s *Server) InferGeneralHvacMode() air_proto.Hvac_Mode {
 	// If an HVAC is under direct control (control = hvac or none) and is turned on (mode != off)
 	// Then that mode should be used for all Hvacs.
@@ -99,7 +101,7 @@ func DecideHeatUpFan(room *air_proto.Room, last30mHvacsTemp map[string]float64, 
 }
 
 func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, tempDeltas map[string]float64) (temperature float64, offset float64) {
-	temperature = room.DesiredTemperatureRange.Min
+	temperature = math.Max(hvacMinimalHeatTemperature, room.DesiredTemperatureRange.Min)
 	step := 0.2 // Note that the hvac can only step by 0.5°C
 
 	if hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
