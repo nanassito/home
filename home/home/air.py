@@ -157,15 +157,20 @@ class Room:
             f'mqtt_temperature{{location="{self.prom_location}", type="air"}}'
         )
 
-
+MIGRATED_ROOMS = [
+    Room("Salon", "livingroom", [Hvac("living"), Hvac("kitchen")]),
+]
 ALL_ROOMS = [
     Room("Zaya", "zaya", [Hvac("zaya")]),
     Room("Parent", "parent", [Hvac("parent")]),
-    Room("Salon", "livingroom", [Hvac("living"), Hvac("kitchen")]),
     Room("Office", "office", [Hvac("office")]),
     Room("Outside", "backyard", []),
-]
+] + MIGRATED_ROOMS
 
+
+for room in MIGRATED_ROOMS:
+    for hvac in room.hvacs:
+        hvac.control = HvacControl.REMOTE
 
 async def infer_general_mode():
     desired_temp_delta = 0
