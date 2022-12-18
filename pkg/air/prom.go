@@ -129,39 +129,6 @@ func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (s *Server) initHvacMatchers() {
-	HvacMatchers = make(map[string]func(model.LabelSet) bool, 5)
-	for hvacName, hvacCfg := range s.Config.Hvacs {
-		HvacMatchers[hvacName] = func(labels model.LabelSet) bool {
-			for k, v := range hvacCfg.PrometheusLabels {
-				if labels[model.LabelName(k)] != model.LabelValue(v) {
-					return false
-				}
-			}
-			return true
-		}
-	}
-}
-
-func (s *Server) GetLast30mHvacTemperatures() (map[string]float64, error) {
-	resp := make(map[string]float64, len(HvacMatchers))
-
-	results, err := prom.Query("avg_over_time(mqtt_current_temperature_state[30m])", "last30mHvacsTemps")
-	if err != nil {
-		return resp, err
-	}
-
-	rows := results.(model.Vector)
-	for _, row := range rows {
-		for hvacName, matcher := range HvacMatchers {
-			if matcher(model.LabelSet(row.Metric)) {
-				resp[hvacName] = float64(row.Value)
-			}
-		}
-	}
-	return resp, nil
-}
-
 func getLastDesiredRoomTemperatures(metric string) map[string]float64 {
 	resp := map[string]float64{}
 
@@ -198,8 +165,6 @@ var (
 	LastRunDesiredMinimalRoomTemperatures = map[string]float64{}
 	LastRunDesiredMaximalRoomTemperatures = map[string]float64{}
 	LastRunHvacControls                   = map[string]air_proto.Hvac_Control{}
-	HvacMatchers                          = map[string]func(model.LabelSet) bool{}
-	RoomMatchers                          = map[string]func(model.LabelSet) bool{}
 )
 
 func init() {

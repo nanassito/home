@@ -39,7 +39,6 @@ func NewServer() *Server {
 		Config: cfg,
 	}
 	server.initState()
-	server.initHvacMatchers()
 
 	go func() {
 		for {
