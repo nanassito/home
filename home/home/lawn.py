@@ -85,7 +85,7 @@ class Irrigation:
                 while water_time < timedelta(minutes=3):
                     water_time *= 2
                     num_days *= 2
-                hours = num_days * 24 - 6
+                hours = min(num_days, 30) * 24 - 6
                 promql = f"sum(sum_over_time({valve.prom_query}[{hours}h]))"
                 runtime = timedelta(minutes=await prom_query_one(promql))
                 self.LOG.debug(
