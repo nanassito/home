@@ -40,7 +40,7 @@
             "roomName": "livingroom",
             "weekday": [
                 {
-                    "end": "07:00",
+                    "end": "06:00",
                     "settings": {
                         "max": 33,
                         "min": 15
@@ -53,7 +53,7 @@
                         "max": 29,
                         "min": 19
                     },
-                    "start": "07:00"
+                    "start": "06:00"
                 },
                 {
                     "end": "22:00",
@@ -82,7 +82,7 @@
             ],
             "weekend": [
                 {
-                    "end": "07:00",
+                    "end": "06:00",
                     "settings": {
                         "max": 33,
                         "min": 15
@@ -95,7 +95,7 @@
                         "max": 29,
                         "min": 19
                     },
-                    "start": "07:00"
+                    "start": "06:00"
                 },
                 {
                     "end": "22:00",
