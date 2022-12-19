@@ -35,8 +35,9 @@ var (
 		[]string{"room", "hvac"},
 		nil,
 	)
+	metricHvacOffset   = "air_hvac_offset_temperature"
 	promHvacOffsetTemp = prometheus.NewDesc(
-		"air_hvac_offset_temperature",
+		metricHvacOffset,
 		"Offset to apply to target temperature for the Hvac unit.",
 		[]string{"room", "hvac"},
 		nil,
@@ -159,6 +160,21 @@ func getLastHvacControls() map[string]air_proto.Hvac_Control {
 		resp[string(row.Metric["hvac"])] = air_proto.Hvac_Control(air_proto.Hvac_Control_value["CONTROL_"+string(row.Metric["control"])])
 	}
 	return resp
+}
+
+func (s *Server) GetHvac30mΔOffset() (map[string]float64, error) {
+	resp := make(map[string]float64, len(s.State.Hvacs))
+
+	results, err := prom.Query(fmt.Sprintf("delta(%s[30m])", metricHvacOffset), "GetHvac30mΔOffset")
+	if err != nil {
+		return resp, err
+	}
+
+	rows := results.(model.Vector)
+	for _, row := range rows {
+		resp[string(row.Metric["hvac"])] = float64(row.Value)
+	}
+	return resp, nil
 }
 
 var (

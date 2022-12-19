@@ -84,12 +84,15 @@ func DecideHeatUpMode(room *air_proto.Room, outside *air_proto.Sensor, hvacName 
 	return air_proto.Hvac_MODE_HEAT
 }
 
-func DecideHeatUpFan(nextOffset float64, hvacName string) air_proto.Hvac_Fan {
-	if math.Abs(nextOffset) > 2 {
-		return air_proto.Hvac_FAN_HIGH
-	}
-	if math.Abs(nextOffset) > 1 {
-		return air_proto.Hvac_FAN_MEDIUM
+func DecideHeatUpFan(nextOffset float64, last30mΔOffset map[string]float64, hvacName string) air_proto.Hvac_Fan {
+	offsetΔ, ok := last30mΔOffset[hvacName]
+	if !ok || offsetΔ != 0 {
+		if math.Abs(nextOffset) > 2 {
+			return air_proto.Hvac_FAN_HIGH
+		}
+		if math.Abs(nextOffset) > 1 {
+			return air_proto.Hvac_FAN_MEDIUM
+		}
 	}
 	return air_proto.Hvac_FAN_AUTO
 }
@@ -147,6 +150,11 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac) (temper
 }
 
 func (s *Server) HeatUp() {
+	last30mΔOffset, err := s.GetHvac30mΔOffset()
+	if err != nil {
+		logger.Printf("Fail| Error querying Prometheus (GetHvac30mΔOffset): %v\n", err)
+	}
+
 	for _, hvac := range s.State.Hvacs {
 		roomName := s.Config.Hvacs[hvac.Name].Room
 
@@ -162,7 +170,7 @@ func (s *Server) HeatUp() {
 
 		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], s.State.Outside, hvac.Name)
 		hvac.DesiredState.Temperature, *hvac.TemperatureOffset, *hvac.FastRamp = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac)
-		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, hvac.Name)
+		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, last30mΔOffset, hvac.Name)
 	}
 }
 
