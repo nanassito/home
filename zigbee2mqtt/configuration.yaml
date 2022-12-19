@@ -42,7 +42,7 @@ devices:
   '0x00158d0008071da3':
     friendly_name: device/livingroom/air
   '0x54ef4410001a07aa':
-    friendly_name: device/adhoc/air
+    friendly_name: device/toilettes/air
   '0x847127fffe90de4a':
     friendly_name: device/backyard/valve
   '0xa4c1382cfb825490':
