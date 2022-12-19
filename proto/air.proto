@@ -54,8 +54,8 @@ message Hvac {
     Control control = 2;
     State reportedState = 3;
     State desiredState = 4;
-    double temperatureOffset = 5;
-    bool fastRamp = 6;
+    optional double temperatureOffset = 5;
+    optional bool fastRamp = 6;
 }
 
 message Room {
@@ -72,7 +72,7 @@ message Schedule {
         TemperatureRange settings = 3;
     }
 
-    bool isActive = 1;
+    optional bool isActive = 1;
     string roomName = 2;
     repeated Window weekday = 3;
     repeated Window weekend = 4;
@@ -85,33 +85,18 @@ message ServerState {
     map<string, Schedule> schedules = 4;
 }
 
-message ReqGetAllStates {}
-message ReqConfigureRoom {
-    string room = 1;
-    TemperatureRange desiredTemperatureRange = 2;
-}
-message ReqConfigureSchedule {
-    string id = 1;
-    Schedule schedule = 2;
-}
+message ReqGetState {}
 
 
 service AirSvc {
-    rpc GetAllStates(ReqGetAllStates) returns (ServerState) {
+    rpc GetState(ReqGetState) returns (ServerState) {
         option (google.api.http) = {
-            get: "/states"
+            get: "/state"
         };
     }
-
-    rpc ConfigureRoom(ReqConfigureRoom) returns (ServerState) {
+    rpc SetState(ServerState) returns (ServerState) {
         option (google.api.http) = {
-            post: "/configure/room"
-        };
-    }
-
-    rpc ConfigureSchedule(ReqConfigureSchedule) returns (ServerState) {
-        option (google.api.http) = {
-            post: "/configure/schedule"
+            post: "/state"
         };
     }
 }

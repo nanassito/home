@@ -3,77 +3,54 @@ package air
 import (
 	"context"
 	"fmt"
-	"regexp"
 
 	"github.com/nanassito/home/pkg/air_proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-var timeRx = regexp.MustCompile("^[0-9]{2}:[0-9]{2}$")
+// var timeRx = regexp.MustCompile("^[0-9]{2}:[0-9]{2}$")
 
-func (s *Server) GetAllStates(ctx context.Context, req *air_proto.ReqGetAllStates) (*air_proto.ServerState, error) {
+func (s *Server) GetState(ctx context.Context, req *air_proto.ReqGetState) (*air_proto.ServerState, error) {
 	return s.State, nil
 }
 
-func (s *Server) ConfigureRoom(ctx context.Context, req *air_proto.ReqConfigureRoom) (*air_proto.ServerState, error) {
-	room, ok := s.State.Rooms[req.GetRoom()]
-	if !ok {
-		return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("Unknown room `%s`", req.GetRoom()))
-	}
-	if req.DesiredTemperatureRange == nil {
-		return s.State, status.Error(codes.InvalidArgument, "Got an empty request.")
-	}
-
-	setMin := room.DesiredTemperatureRange.Min
-	setMax := room.DesiredTemperatureRange.Max
-	if req.DesiredTemperatureRange.Min != 0 {
-		setMin = req.DesiredTemperatureRange.Min
-	}
-	if req.DesiredTemperatureRange.Max != 0 {
-		setMax = req.DesiredTemperatureRange.Max
-	}
-
-	if setMin >= setMax {
-		return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("Min (%2f) temperature must be less than max (%2f) temperature.", setMin, setMax))
-	}
-	room.DesiredTemperatureRange.Min = setMin
-	room.DesiredTemperatureRange.Max = setMax
-
-	go s.Control()
-	return s.State, nil
-}
-
-func (s *Server) ConfigureSchedule(ctx context.Context, req *air_proto.ReqConfigureSchedule) (*air_proto.ServerState, error) {
-	if req.GetId() == "" {
-		return s.State, status.Error(codes.InvalidArgument, "schedule ID is required.")
-	}
-
-	if req.Schedule == nil {
-		if _, ok := s.State.Schedules[req.GetId()]; !ok {
-			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No schedule with id `%s`", req.GetId()))
+func (s *Server) SetAllStates(ctx context.Context, req *air_proto.ServerState) (*air_proto.ServerState, error) {
+	for roomId, room := range req.Rooms {
+		state, ok := s.State.Rooms[roomId]
+		if !ok {
+			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No room with ID `%s`", roomId))
 		}
-		logger.Printf("Deleting schedule %s", req.Id)
-		delete(s.State.Schedules, req.GetId())
+		if room.DesiredTemperatureRange != nil {
+			logger.Printf("Info| API: changing room %s desired temperature range.\n", state.Name)
+			state.DesiredTemperatureRange = room.DesiredTemperatureRange
+		}
+	}
 
-	} else {
-		roomName := req.Schedule.GetRoomName()
-		if _, ok := s.State.Rooms[roomName]; !ok {
-			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No room with id `%s`", roomName))
+	for scheduleId, schedule := range req.Schedules {
+		state, ok := s.State.Schedules[scheduleId]
+		if !ok {
+			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No schedule with ID `%s`", scheduleId))
 		}
-		for _, spec := range req.Schedule.Weekday {
-			if !timeRx.MatchString(spec.GetStart()) {
-				return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("Invalid start time `%s`", spec.GetStart()))
+		if schedule.IsActive != nil {
+			if *schedule.IsActive {
+				logger.Printf("Info| API: Enabling schedule %s.\n", scheduleId)
+			} else {
+				logger.Printf("Info| API: Disabling schedule %s.\n", scheduleId)
 			}
-			if !timeRx.MatchString(spec.GetEnd()) {
-				return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("Invalid end time `%s`", spec.GetEnd()))
-			}
-			if spec.Settings == nil {
-				return s.State, status.Error(codes.InvalidArgument, "Must specify a temperature range")
-			}
-			// TODO enforce absolute min/max
+			state.IsActive = schedule.IsActive
 		}
-		s.State.Schedules[req.GetId()] = req.Schedule
+	}
+
+	for hvacId, hvac := range req.Hvacs {
+		state, ok := s.State.Hvacs[hvacId]
+		if !ok {
+			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No hvac with ID `%s`", hvacId))
+		}
+		if hvac.Control != air_proto.Hvac_CONTROL_UNKNOWN {
+			logger.Printf("Info| API: changing hvac control............... %s desired temperature range.\n", state.Name)
+			state.Control = hvac.Control
+		}
 	}
 	return s.State, nil
 }

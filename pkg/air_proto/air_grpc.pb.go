@@ -22,9 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AirSvcClient interface {
-	GetAllStates(ctx context.Context, in *ReqGetAllStates, opts ...grpc.CallOption) (*ServerState, error)
-	ConfigureRoom(ctx context.Context, in *ReqConfigureRoom, opts ...grpc.CallOption) (*ServerState, error)
-	ConfigureSchedule(ctx context.Context, in *ReqConfigureSchedule, opts ...grpc.CallOption) (*ServerState, error)
+	GetState(ctx context.Context, in *ReqGetState, opts ...grpc.CallOption) (*ServerState, error)
+	SetState(ctx context.Context, in *ServerState, opts ...grpc.CallOption) (*ServerState, error)
 }
 
 type airSvcClient struct {
@@ -35,27 +34,18 @@ func NewAirSvcClient(cc grpc.ClientConnInterface) AirSvcClient {
 	return &airSvcClient{cc}
 }
 
-func (c *airSvcClient) GetAllStates(ctx context.Context, in *ReqGetAllStates, opts ...grpc.CallOption) (*ServerState, error) {
+func (c *airSvcClient) GetState(ctx context.Context, in *ReqGetState, opts ...grpc.CallOption) (*ServerState, error) {
 	out := new(ServerState)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/GetAllStates", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/air.service.AirSvc/GetState", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *airSvcClient) ConfigureRoom(ctx context.Context, in *ReqConfigureRoom, opts ...grpc.CallOption) (*ServerState, error) {
+func (c *airSvcClient) SetState(ctx context.Context, in *ServerState, opts ...grpc.CallOption) (*ServerState, error) {
 	out := new(ServerState)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ConfigureRoom", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *airSvcClient) ConfigureSchedule(ctx context.Context, in *ReqConfigureSchedule, opts ...grpc.CallOption) (*ServerState, error) {
-	out := new(ServerState)
-	err := c.cc.Invoke(ctx, "/air.service.AirSvc/ConfigureSchedule", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/air.service.AirSvc/SetState", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +56,8 @@ func (c *airSvcClient) ConfigureSchedule(ctx context.Context, in *ReqConfigureSc
 // All implementations must embed UnimplementedAirSvcServer
 // for forward compatibility
 type AirSvcServer interface {
-	GetAllStates(context.Context, *ReqGetAllStates) (*ServerState, error)
-	ConfigureRoom(context.Context, *ReqConfigureRoom) (*ServerState, error)
-	ConfigureSchedule(context.Context, *ReqConfigureSchedule) (*ServerState, error)
+	GetState(context.Context, *ReqGetState) (*ServerState, error)
+	SetState(context.Context, *ServerState) (*ServerState, error)
 	mustEmbedUnimplementedAirSvcServer()
 }
 
@@ -76,14 +65,11 @@ type AirSvcServer interface {
 type UnimplementedAirSvcServer struct {
 }
 
-func (UnimplementedAirSvcServer) GetAllStates(context.Context, *ReqGetAllStates) (*ServerState, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllStates not implemented")
+func (UnimplementedAirSvcServer) GetState(context.Context, *ReqGetState) (*ServerState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetState not implemented")
 }
-func (UnimplementedAirSvcServer) ConfigureRoom(context.Context, *ReqConfigureRoom) (*ServerState, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConfigureRoom not implemented")
-}
-func (UnimplementedAirSvcServer) ConfigureSchedule(context.Context, *ReqConfigureSchedule) (*ServerState, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConfigureSchedule not implemented")
+func (UnimplementedAirSvcServer) SetState(context.Context, *ServerState) (*ServerState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetState not implemented")
 }
 func (UnimplementedAirSvcServer) mustEmbedUnimplementedAirSvcServer() {}
 
@@ -98,56 +84,38 @@ func RegisterAirSvcServer(s grpc.ServiceRegistrar, srv AirSvcServer) {
 	s.RegisterService(&AirSvc_ServiceDesc, srv)
 }
 
-func _AirSvc_GetAllStates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqGetAllStates)
+func _AirSvc_GetState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReqGetState)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AirSvcServer).GetAllStates(ctx, in)
+		return srv.(AirSvcServer).GetState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/air.service.AirSvc/GetAllStates",
+		FullMethod: "/air.service.AirSvc/GetState",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).GetAllStates(ctx, req.(*ReqGetAllStates))
+		return srv.(AirSvcServer).GetState(ctx, req.(*ReqGetState))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AirSvc_ConfigureRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqConfigureRoom)
+func _AirSvc_SetState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServerState)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AirSvcServer).ConfigureRoom(ctx, in)
+		return srv.(AirSvcServer).SetState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/air.service.AirSvc/ConfigureRoom",
+		FullMethod: "/air.service.AirSvc/SetState",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).ConfigureRoom(ctx, req.(*ReqConfigureRoom))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AirSvc_ConfigureSchedule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqConfigureSchedule)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AirSvcServer).ConfigureSchedule(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/air.service.AirSvc/ConfigureSchedule",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AirSvcServer).ConfigureSchedule(ctx, req.(*ReqConfigureSchedule))
+		return srv.(AirSvcServer).SetState(ctx, req.(*ServerState))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -160,16 +128,12 @@ var AirSvc_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AirSvcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetAllStates",
-			Handler:    _AirSvc_GetAllStates_Handler,
+			MethodName: "GetState",
+			Handler:    _AirSvc_GetState_Handler,
 		},
 		{
-			MethodName: "ConfigureRoom",
-			Handler:    _AirSvc_ConfigureRoom_Handler,
-		},
-		{
-			MethodName: "ConfigureSchedule",
-			Handler:    _AirSvc_ConfigureSchedule_Handler,
+			MethodName: "SetState",
+			Handler:    _AirSvc_SetState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

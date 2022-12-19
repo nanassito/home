@@ -96,8 +96,8 @@ func DecideHeatUpFan(nextOffset float64, hvacName string) air_proto.Hvac_Fan {
 
 func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac) (temperature float64, offset float64, fastRamp bool) {
 	temperature = room.DesiredTemperatureRange.Min
-	offset = hvac.TemperatureOffset
-	fastRamp = hvac.FastRamp
+	offset = *hvac.TemperatureOffset
+	fastRamp = *hvac.FastRamp
 	step := 0.2 // Note that the hvac can only step by 0.5°C
 
 	// if !*readonly && hvac.DesiredState.Temperature != room.DesiredTemperatureRange.Min {
@@ -106,7 +106,7 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac) (temper
 	// 	return math.Max(hvacMinimalHeatTemperature, temperature), 0, fastRamp
 	// }
 
-	if hvac.FastRamp && room.Sensor.Temperature > room.DesiredTemperatureRange.Min {
+	if fastRamp && room.Sensor.Temperature > room.DesiredTemperatureRange.Min {
 		logger.Printf("Info| %s: fastRamp is complete, resetting the offset.", hvac.Name)
 		offset = math.Min(offset, 0)
 		fastRamp = false
@@ -161,8 +161,8 @@ func (s *Server) HeatUp() {
 		}
 
 		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], s.State.Outside, hvac.Name)
-		hvac.DesiredState.Temperature, hvac.TemperatureOffset, hvac.FastRamp = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac)
-		hvac.DesiredState.Fan = DecideHeatUpFan(hvac.TemperatureOffset, hvac.Name)
+		hvac.DesiredState.Temperature, *hvac.TemperatureOffset, *hvac.FastRamp = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac)
+		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, hvac.Name)
 	}
 }
 

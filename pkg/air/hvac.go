@@ -87,10 +87,12 @@ func hvacFanRefresher(hvac *air_proto.Hvac) func(topic string, payload []byte) {
 
 func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIface) *air_proto.Hvac {
 	hvac := air_proto.Hvac{
-		Name:          name,
-		Control:       air_proto.Hvac_CONTROL_ROOM,
-		ReportedState: &air_proto.Hvac_State{},
-		DesiredState:  &air_proto.Hvac_State{},
+		Name:              name,
+		Control:           air_proto.Hvac_CONTROL_ROOM,
+		ReportedState:     &air_proto.Hvac_State{},
+		DesiredState:      &air_proto.Hvac_State{},
+		TemperatureOffset: new(float64),
+		FastRamp:          new(bool),
 	}
 
 	if lastControl, ok := LastRunHvacControls[name]; ok && *initFromProm {
@@ -125,8 +127,8 @@ func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIfa
 func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIface) {
 	if state.ReportedState.Mode != state.DesiredState.Mode && state.DesiredState.Mode != air_proto.Hvac_MODE_UNKNOWN {
 		mode := state.DesiredState.Mode.String()[5:]
-		logger.Printf("Info| Setting %s's mode to %s\n", state.Name, mode)
 		if !*readonly {
+			logger.Printf("Info| Setting %s's mode to %s\n", state.Name, mode)
 			mqttClient.PublishString(config.SetModeMqttTopic, mode)
 		}
 		return
@@ -136,17 +138,17 @@ func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttCl
 	}
 	if state.ReportedState.Fan != state.DesiredState.Fan && state.DesiredState.Fan != air_proto.Hvac_FAN_UNKNOWN {
 		fan := state.DesiredState.Fan.String()[4:]
-		logger.Printf("Info| Setting %s's fan to %s\n", state.Name, fan)
 		if !*readonly {
+			logger.Printf("Info| Setting %s's fan to %s\n", state.Name, fan)
 			mqttClient.PublishString(config.SetFanMqttTopic, fan)
 		}
 		return
 	}
-	desiredTemperature := math.Round((state.DesiredState.Temperature+state.TemperatureOffset)*2) / 2
+	desiredTemperature := math.Round((state.DesiredState.Temperature+*state.TemperatureOffset)*2) / 2
 	if state.ReportedState.Temperature != desiredTemperature && desiredTemperature != 0 {
 		temp := strconv.FormatFloat(desiredTemperature, 'f', 2, 64)
-		logger.Printf("Info| Setting %s's temperature to %.2f+%.2f=%s\n", state.Name, state.DesiredState.Temperature, state.TemperatureOffset, temp)
 		if !*readonly {
+			logger.Printf("Info| Setting %s's temperature to %.2f+%.2f=%s\n", state.Name, state.DesiredState.Temperature, *state.TemperatureOffset, temp)
 			mqttClient.PublishString(config.SetTemperatureMqttTopic, temp)
 		}
 		return

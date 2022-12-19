@@ -13,7 +13,7 @@ func (s *Server) ApplySchedules() {
 	timenow := time.Now().In(tz)
 	now := fmt.Sprintf("%02d:%02d", timenow.Hour(), timenow.Minute())
 	for name, weekSchedule := range s.State.Schedules {
-		if !weekSchedule.IsActive {
+		if !*weekSchedule.IsActive {
 			continue
 		}
 		schedule := weekSchedule.Weekday

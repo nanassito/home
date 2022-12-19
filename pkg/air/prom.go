@@ -113,7 +113,7 @@ func (p *PromCollector) Collect(ch chan<- prometheus.Metric) {
 		roomName := hvacCfg.Room
 
 		ch <- prometheus.MustNewConstMetric(promHvacDesiredTemp, prometheus.GaugeValue, hvac.DesiredState.Temperature, roomName, hvac.Name)
-		ch <- prometheus.MustNewConstMetric(promHvacOffsetTemp, prometheus.GaugeValue, hvac.TemperatureOffset, roomName, hvac.Name)
+		ch <- prometheus.MustNewConstMetric(promHvacOffsetTemp, prometheus.GaugeValue, *hvac.TemperatureOffset, roomName, hvac.Name)
 		ch <- prometheus.MustNewConstMetric(promHvacReportedTemp, prometheus.GaugeValue, hvac.ReportedState.Temperature, roomName, hvac.Name)
 		for _, mode := range air_proto.Hvac_Mode_name {
 			ch <- prometheus.MustNewConstMetric(promHvacDesiredMode, prometheus.GaugeValue, b2f(mode == hvac.DesiredState.Mode.String()), roomName, hvac.Name, mode[5:])
