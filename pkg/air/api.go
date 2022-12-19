@@ -15,7 +15,7 @@ func (s *Server) GetState(ctx context.Context, req *air_proto.ReqGetState) (*air
 	return s.State, nil
 }
 
-func (s *Server) SetAllStates(ctx context.Context, req *air_proto.ServerState) (*air_proto.ServerState, error) {
+func (s *Server) SetState(ctx context.Context, req *air_proto.ServerState) (*air_proto.ServerState, error) {
 	for roomId, room := range req.Rooms {
 		state, ok := s.State.Rooms[roomId]
 		if !ok {
@@ -48,8 +48,12 @@ func (s *Server) SetAllStates(ctx context.Context, req *air_proto.ServerState) (
 			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No hvac with ID `%s`", hvacId))
 		}
 		if hvac.Control != air_proto.Hvac_CONTROL_UNKNOWN {
-			logger.Printf("Info| API: changing hvac control............... %s desired temperature range.\n", state.Name)
+			logger.Printf("Info| API: changing hvac %s control to %v.\n", state.Name, hvac.Control)
 			state.Control = hvac.Control
+		}
+		if hvac.TemperatureOffset != nil {
+			logger.Printf("Info| API: changing hvac %s offset to %.2f\n", state.Name, *hvac.TemperatureOffset)
+			state.TemperatureOffset = hvac.TemperatureOffset
 		}
 	}
 	return s.State, nil
