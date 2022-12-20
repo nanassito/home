@@ -1,0 +1,18 @@
+[Unit]
+Description=zigbee2mqtt
+After=network.target
+Requires=mosquitto.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 3000:3000 \
+        --mount source=grafana,target=/var/lib/grafana \
+        grafana/grafana-oss:latest
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
