@@ -25,6 +25,45 @@
             "setFanMqttTopic": "esphome/living/fan_mode_command",
             "setModeMqttTopic": "esphome/living/mode_command",
             "setTemperatureMqttTopic": "esphome/living/target_temperature_command"
+        },
+        "office": {
+            "prometheusLabels": {
+                "location": "office",
+                "type": "hvac"
+            },
+            "reportFanMqttTopic": "esphome/office/fan_mode_state",
+            "reportModeMqttTopic": "esphome/office/mode_state",
+            "reportTemperatureMqttTopic": "esphome/office/target_temperature_low_state",
+            "room": "office",
+            "setFanMqttTopic": "esphome/office/fan_mode_command",
+            "setModeMqttTopic": "esphome/office/mode_command",
+            "setTemperatureMqttTopic": "esphome/office/target_temperature_command"
+        },
+        "parent": {
+            "prometheusLabels": {
+                "location": "parent",
+                "type": "hvac"
+            },
+            "reportFanMqttTopic": "esphome/parent/fan_mode_state",
+            "reportModeMqttTopic": "esphome/parent/mode_state",
+            "reportTemperatureMqttTopic": "esphome/parent/target_temperature_low_state",
+            "room": "parent",
+            "setFanMqttTopic": "esphome/parent/fan_mode_command",
+            "setModeMqttTopic": "esphome/parent/mode_command",
+            "setTemperatureMqttTopic": "esphome/parent/target_temperature_command"
+        },
+        "zaya": {
+            "prometheusLabels": {
+                "location": "zaya",
+                "type": "hvac"
+            },
+            "reportFanMqttTopic": "esphome/zaya/fan_mode_state",
+            "reportModeMqttTopic": "esphome/zaya/mode_state",
+            "reportTemperatureMqttTopic": "esphome/zaya/target_temperature_low_state",
+            "room": "zaya",
+            "setFanMqttTopic": "esphome/zaya/fan_mode_command",
+            "setModeMqttTopic": "esphome/zaya/mode_command",
+            "setTemperatureMqttTopic": "esphome/zaya/target_temperature_command"
         }
     },
     "outside": {
@@ -122,6 +161,158 @@
                     "start": "23:00"
                 }
             ]
+        },
+        "office": {
+            "isActive": false,
+            "roomName": "office",
+            "weekday": [
+                {
+                    "end": "07:00",
+                    "settings": {
+                        "max": 33,
+                        "min": 15
+                    },
+                    "start": "00:00"
+                },
+                {
+                    "end": "17:00",
+                    "settings": {
+                        "max": 29,
+                        "min": 20
+                    },
+                    "start": "07:00"
+                },
+                {
+                    "end": "24:00",
+                    "settings": {
+                        "max": 33,
+                        "min": 15
+                    },
+                    "start": "17:00"
+                }
+            ],
+            "weekend": [
+                {
+                    "end": "24:00",
+                    "settings": {
+                        "max": 33,
+                        "min": 15
+                    },
+                    "start": "00:00"
+                }
+            ]
+        },
+        "zaya": {
+            "isActive": true,
+            "roomName": "zaya",
+            "weekday": [
+                {
+                    "end": "08:00",
+                    "settings": {
+                        "max": 23,
+                        "min": 19
+                    },
+                    "start": "00:00"
+                },
+                {
+                    "end": "16:00",
+                    "settings": {
+                        "max": 33,
+                        "min": 19
+                    },
+                    "start": "08:00"
+                },
+                {
+                    "end": "18:00",
+                    "settings": {
+                        "max": 29,
+                        "min": 20
+                    },
+                    "start": "16:00"
+                },
+                {
+                    "end": "19:00",
+                    "settings": {
+                        "max": 26,
+                        "min": 20
+                    },
+                    "start": "18:00"
+                },
+                {
+                    "end": "24:00",
+                    "settings": {
+                        "max": 23,
+                        "min": 19
+                    },
+                    "start": "19:00"
+                }
+            ],
+            "weekend": [
+                {
+                    "end": "08:00",
+                    "settings": {
+                        "max": 23,
+                        "min": 19
+                    },
+                    "start": "00:00"
+                },
+                {
+                    "end": "11:00",
+                    "settings": {
+                        "max": 29,
+                        "min": 19
+                    },
+                    "start": "08:00"
+                },
+                {
+                    "end": "12:00",
+                    "settings": {
+                        "max": 26,
+                        "min": 19
+                    },
+                    "start": "11:00"
+                },
+                {
+                    "end": "14:00",
+                    "settings": {
+                        "max": 23,
+                        "min": 19
+                    },
+                    "start": "12:00"
+                },
+                {
+                    "end": "16:00",
+                    "settings": {
+                        "max": 29,
+                        "min": 19
+                    },
+                    "start": "14:00"
+                },
+                {
+                    "end": "18:00",
+                    "settings": {
+                        "max": 29,
+                        "min": 20
+                    },
+                    "start": "16:00"
+                },
+                {
+                    "end": "19:00",
+                    "settings": {
+                        "max": 26,
+                        "min": 20
+                    },
+                    "start": "18:00"
+                },
+                {
+                    "end": "24:00",
+                    "settings": {
+                        "max": 23,
+                        "min": 19
+                    },
+                    "start": "19:00"
+                }
+            ]
         }
     },
     "sensors": {
@@ -129,6 +320,27 @@
             "mqttTopic": "zigbee2mqtt/server/device/livingroom/air",
             "prometheusLabels": {
                 "location": "livingroom",
+                "type": "air"
+            }
+        },
+        "office": {
+            "mqttTopic": "zigbee2mqtt/server/device/office/air",
+            "prometheusLabels": {
+                "location": "office",
+                "type": "air"
+            }
+        },
+        "parent": {
+            "mqttTopic": "zigbee2mqtt/server/device/parent/air",
+            "prometheusLabels": {
+                "location": "parent",
+                "type": "air"
+            }
+        },
+        "zaya": {
+            "mqttTopic": "zigbee2mqtt/raspi/device/zaya/air",
+            "prometheusLabels": {
+                "location": "zaya",
                 "type": "air"
             }
         }

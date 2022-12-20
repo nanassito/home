@@ -79,8 +79,6 @@ cfg = {
 with open(REPO / "configs" / "inputs" / "rooms.json") as fd:
     specs = json.load(fd)
 for room, spec in specs.items():
-    if room != "livingroom":
-        continue  # Until air is ready for prime time.
     hvacs = set()
     for hvac_file in spec["hvacs"]:
         with (REPO / hvac_file).open() as fd:

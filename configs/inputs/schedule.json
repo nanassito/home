@@ -35,7 +35,7 @@
         ]
     },
     "office": {
-        "isActive": true,
+        "isActive": false,
         "weekday": [
             {"start": "00:00", "end": "07:00", "settings": {"min": 15, "max": 33}},
             {"start": "07:00", "end": "17:00", "settings": {"min": 20, "max": 29}},
