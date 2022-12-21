@@ -162,6 +162,22 @@ func getLastHvacControls() map[string]air_proto.Hvac_Control {
 	return resp
 }
 
+func getLastHvacOffsets() map[string]float64 {
+	resp := map[string]float64{}
+
+	results, err := prom.Query(fmt.Sprintf("last_over_time(%s[1w])", metricHvacOffset), "initHvacOffset")
+	if err != nil {
+		logger.Printf("Fail| Failed to initialize Hvac offsets: %v", err)
+		return resp
+	}
+
+	rows := results.(model.Vector)
+	for _, row := range rows {
+		resp[string(row.Metric["hvac"])] = float64(row.Value)
+	}
+	return resp
+}
+
 func (s *Server) GetHvac30mΔOffset() (map[string]float64, error) {
 	resp := make(map[string]float64, len(s.State.Hvacs))
 
@@ -181,12 +197,14 @@ var (
 	LastRunDesiredMinimalRoomTemperatures = map[string]float64{}
 	LastRunDesiredMaximalRoomTemperatures = map[string]float64{}
 	LastRunHvacControls                   = map[string]air_proto.Hvac_Control{}
+	LastRunHvacOffsets                    = map[string]float64{}
 )
 
 func init() {
 	LastRunDesiredMaximalRoomTemperatures = getLastDesiredRoomTemperatures(metricRoomDesiredMax)
 	LastRunDesiredMinimalRoomTemperatures = getLastDesiredRoomTemperatures(metricRoomDesiredMin)
 	LastRunHvacControls = getLastHvacControls()
+	LastRunHvacOffsets = getLastHvacOffsets()
 }
 
 func promLabelsAsFilter(labels map[string]string) string {

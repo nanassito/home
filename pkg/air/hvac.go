@@ -97,6 +97,9 @@ func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIfa
 	if lastControl, ok := LastRunHvacControls[name]; ok && *initFromProm {
 		hvac.Control = lastControl
 	}
+	if lastOffset, ok := LastRunHvacOffsets[name]; ok && *initFromProm {
+		hvac.TemperatureOffset = &lastOffset
+	}
 
 	err := mqttClient.Subscribe(cfg.ReportTemperatureMqttTopic, hvacTempRefresher(&hvac))
 	if err != nil {
