@@ -92,7 +92,6 @@ func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIfa
 		ReportedState:     &air_proto.Hvac_State{},
 		DesiredState:      &air_proto.Hvac_State{},
 		TemperatureOffset: new(float64),
-		FastRamp:          new(bool),
 	}
 
 	if lastControl, ok := LastRunHvacControls[name]; ok && *initFromProm {

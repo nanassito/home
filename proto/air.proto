@@ -55,7 +55,6 @@ message Hvac {
     State reportedState = 3;
     State desiredState = 4;
     optional double temperatureOffset = 5;
-    optional bool fastRamp = 6;
 }
 
 message Room {
