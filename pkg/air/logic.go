@@ -137,7 +137,7 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, last30m
 	}
 	if temperature+offset < hvacMinimalHeatTemperature {
 		logger.Printf("Info| %s: Triming the offset because it would result in a too low heating target.\n", hvac.Name)
-		return temperature, math.Max(0, hvacMinimalHeatTemperature-temperature)
+		return temperature, hvacMinimalHeatTemperature - temperature
 	}
 	return temperature, offset
 }
