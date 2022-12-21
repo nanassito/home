@@ -97,7 +97,7 @@ func DecideHeatUpFan(nextOffset float64, last30mΔOffset map[string]float64, hva
 	return air_proto.Hvac_FAN_AUTO
 }
 
-func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac) (temperature float64, offset float64) {
+func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, last30mΔOffset map[string]float64) (temperature float64, offset float64) {
 	temperature = room.DesiredTemperatureRange.Min
 	offset = *hvac.TemperatureOffset
 	step := 0.2 // Note that the hvac can only step by 0.5°C
@@ -109,6 +109,13 @@ func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac) (temper
 	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
 		offset -= step
 		logger.Printf("Info| %s: Room is above min, lowering the offset (%.2f).", hvac.Name, offset)
+	}
+
+	// We have been stable for a while with a high positive offset, let's try to bring it back down
+	offsetΔ, ok := last30mΔOffset[hvac.Name]
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min && offset > 2 && ok && offsetΔ == 0 {
+		offset -= step
+		logger.Printf("Info| %s: Offset has been stable for a while above min, lowering the offset (%.2f).", hvac.Name, offset)
 	}
 
 	// Speed up when we are too far off target
@@ -155,7 +162,7 @@ func (s *Server) HeatUp() {
 		}
 
 		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], s.State.Outside, hvac.Name)
-		hvac.DesiredState.Temperature, *hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac)
+		hvac.DesiredState.Temperature, *hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac, last30mΔOffset)
 		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, last30mΔOffset, hvac.Name)
 	}
 }
