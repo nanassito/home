@@ -89,7 +89,7 @@
                 {
                     "end": "17:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "06:00"
@@ -97,7 +97,7 @@
                 {
                     "end": "22:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 20
                     },
                     "start": "17:00"
@@ -105,7 +105,7 @@
                 {
                     "end": "23:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "22:00"
@@ -131,7 +131,7 @@
                 {
                     "end": "17:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "06:00"
@@ -139,7 +139,7 @@
                 {
                     "end": "22:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 20
                     },
                     "start": "17:00"
@@ -147,7 +147,7 @@
                 {
                     "end": "23:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "22:00"
@@ -177,7 +177,7 @@
                 {
                     "end": "17:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 20
                     },
                     "start": "07:00"
@@ -209,39 +209,23 @@
                 {
                     "end": "08:00",
                     "settings": {
-                        "max": 23,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "00:00"
                 },
                 {
-                    "end": "16:00",
+                    "end": "19:00",
                     "settings": {
                         "max": 33,
-                        "min": 19
+                        "min": 20
                     },
                     "start": "08:00"
                 },
                 {
-                    "end": "18:00",
-                    "settings": {
-                        "max": 29,
-                        "min": 20
-                    },
-                    "start": "16:00"
-                },
-                {
-                    "end": "19:00",
-                    "settings": {
-                        "max": 26,
-                        "min": 20
-                    },
-                    "start": "18:00"
-                },
-                {
                     "end": "24:00",
                     "settings": {
-                        "max": 23,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "19:00"
@@ -249,65 +233,41 @@
             ],
             "weekend": [
                 {
-                    "end": "08:00",
+                    "end": "11:00",
                     "settings": {
-                        "max": 23,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "00:00"
                 },
                 {
-                    "end": "11:00",
+                    "end": "14:00",
                     "settings": {
-                        "max": 29,
-                        "min": 19
-                    },
-                    "start": "08:00"
-                },
-                {
-                    "end": "12:00",
-                    "settings": {
-                        "max": 26,
-                        "min": 19
+                        "max": 33,
+                        "min": 20
                     },
                     "start": "11:00"
                 },
                 {
-                    "end": "14:00",
-                    "settings": {
-                        "max": 23,
-                        "min": 19
-                    },
-                    "start": "12:00"
-                },
-                {
                     "end": "16:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "14:00"
                 },
                 {
-                    "end": "18:00",
+                    "end": "19:00",
                     "settings": {
-                        "max": 29,
+                        "max": 33,
                         "min": 20
                     },
                     "start": "16:00"
                 },
                 {
-                    "end": "19:00",
-                    "settings": {
-                        "max": 26,
-                        "min": 20
-                    },
-                    "start": "18:00"
-                },
-                {
                     "end": "24:00",
                     "settings": {
-                        "max": 23,
+                        "max": 33,
                         "min": 19
                     },
                     "start": "19:00"
