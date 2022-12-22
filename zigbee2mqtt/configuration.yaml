@@ -19,6 +19,8 @@ devices:
     friendly_name: device/parent/window/left/contact
   '0x00124b0024456fa1':
     friendly_name: device/livingroom/window/side/contact
+  '0x00124b0025178126':
+    friendly_name: device/office/window/right/contact
   '0x00124b0025195d6e':
     friendly_name: device/office/window/left/contact
   '0x00124b0025906bb7':

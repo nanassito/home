@@ -241,6 +241,16 @@
                 ],
                 "type": "contact"
             }
+        },
+        "0x00124b0025178126": {
+            "prometheus": {
+                "location": [
+                    "office",
+                    "window",
+                    "right"
+                ],
+                "type": "contact"
+            }
         }
     },
     "raspi": {
