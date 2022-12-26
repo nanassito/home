@@ -207,20 +207,12 @@
             "roomName": "parent",
             "weekday": [
                 {
-                    "end": "08:00",
+                    "end": "21:00",
                     "settings": {
                         "max": 33,
                         "min": 19
                     },
                     "start": "00:00"
-                },
-                {
-                    "end": "21:00",
-                    "settings": {
-                        "max": 33,
-                        "min": 15
-                    },
-                    "start": "08:00"
                 },
                 {
                     "end": "23:00",
