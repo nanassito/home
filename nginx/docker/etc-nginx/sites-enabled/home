@@ -37,6 +37,6 @@ server {
 
 
     location / {
-        proxy_pass http://192.168.1.1:8000;
+        proxy_pass http://192.168.1.1:7008;
     }
 }

@@ -1,0 +1,14 @@
+[Unit]
+Description=app
+After=network.target
+Requires=air.service
+
+[Service]
+ExecStart=/github/home/bin/app
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
