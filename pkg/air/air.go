@@ -58,16 +58,15 @@ func NewServer() *Server {
 func (s *Server) initState() {
 	rooms := map[string]*air_proto.Room{}
 	for roomName, roomCfg := range s.Config.Sensors {
-		rooms[roomName] = NewRoom(roomName, roomCfg, s.Mqtt)
+		rooms[roomName] = NewRoom(roomName, roomCfg, s.Mqtt, s.Config.Schedules[roomName])
 	}
 	hvacs := map[string]*air_proto.Hvac{}
 	for hvacName, hvacCfg := range s.Config.Hvacs {
 		hvacs[hvacName] = NewHvac(hvacName, hvacCfg, s.Mqtt)
 	}
 	s.State = &air_proto.ServerState{
-		Outside:   NewSensor("outside", s.Config.Outside, s.Mqtt),
-		Rooms:     rooms,
-		Hvacs:     hvacs,
-		Schedules: s.Config.Schedules,
+		Outside: NewSensor("outside", s.Config.Outside, s.Mqtt),
+		Rooms:   rooms,
+		Hvacs:   hvacs,
 	}
 }

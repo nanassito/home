@@ -57,13 +57,6 @@ message Hvac {
     optional double temperatureOffset = 5;
 }
 
-message Room {
-    string name = 1;
-    Sensor sensor = 2;
-
-    TemperatureRange desiredTemperatureRange = 4;
-}
-
 message Schedule {
     message Window {
         string start = 1;
@@ -72,16 +65,22 @@ message Schedule {
     }
 
     optional bool isActive = 1;
-    string roomName = 2;
     repeated Window weekday = 3;
     repeated Window weekend = 4;
+}
+
+message Room {
+    string name = 1;
+    Sensor sensor = 2;
+
+    TemperatureRange desiredTemperatureRange = 4;
+    Schedule schedule = 5;
 }
 
 message ServerState {
     Sensor outside = 1;
     map<string, Room> rooms = 2;
     map<string, Hvac> hvacs = 3;
-    map<string, Schedule> schedules = 4;
 }
 
 message ReqGetState {}

@@ -23,14 +23,15 @@ def promLabels(device):
 
 
 print("Update `devices` in the Zigbee2mqtt configurations")
-ZIGBEE2MQTT = (REPO / "zigbee2mqtt" / "configuration.yaml")
+ZIGBEE2MQTT = (REPO / "zigbee2mqtt" / "server.yaml")
 with ZIGBEE2MQTT.open() as fd:
     cfg = yaml.load(fd, yaml.Loader)
 cfg["devices"] = {
     address: {
         "friendly_name": mqtt(device)
     }
-    for address, device in zigbee["server"].items()
+    for _, server in zigbee.items()
+    for address, device in server.items()
 }
 with ZIGBEE2MQTT.open("w") as fd:
     yaml.dump(cfg, fd)
@@ -102,7 +103,6 @@ with open(REPO / "configs" / "inputs" / "schedule.json") as fd:
     for scheduleName, schedule in json.load(fd).items():
         if scheduleName not in cfg["sensors"]:
             continue
-        schedule["roomName"] = scheduleName
         cfg["schedules"][scheduleName] = schedule
 with (REPO / "configs" / "air.json").open("w") as fd:
     json.dump(cfg, fd, sort_keys=True, indent=4)

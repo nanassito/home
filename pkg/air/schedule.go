@@ -12,8 +12,9 @@ func (s *Server) ApplySchedules() {
 	}
 	timenow := time.Now().In(tz)
 	now := fmt.Sprintf("%02d:%02d", timenow.Hour(), timenow.Minute())
-	for name, weekSchedule := range s.State.Schedules {
-		if !*weekSchedule.IsActive {
+	for name, room := range s.State.Rooms {
+		weekSchedule := room.Schedule
+		if weekSchedule == nil || !*weekSchedule.IsActive {
 			continue
 		}
 		schedule := weekSchedule.Weekday
@@ -22,7 +23,6 @@ func (s *Server) ApplySchedules() {
 		}
 		for _, window := range schedule {
 			if window.Start <= now && now < window.End {
-				room := s.State.Rooms[weekSchedule.RoomName]
 				if room.DesiredTemperatureRange != window.Settings {
 					logger.Printf("Schedule %s changed Room %s to %v\n", name, room.Name, window.Settings)
 					room.DesiredTemperatureRange = window.Settings

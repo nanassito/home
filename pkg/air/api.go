@@ -25,20 +25,16 @@ func (s *Server) SetState(ctx context.Context, req *air_proto.ServerState) (*air
 			logger.Printf("Info| API: changing room %s desired temperature range.\n", state.Name)
 			state.DesiredTemperatureRange = room.DesiredTemperatureRange
 		}
-	}
 
-	for scheduleId, schedule := range req.Schedules {
-		state, ok := s.State.Schedules[scheduleId]
-		if !ok {
-			return s.State, status.Error(codes.InvalidArgument, fmt.Sprintf("No schedule with ID `%s`", scheduleId))
-		}
-		if schedule.IsActive != nil {
-			if *schedule.IsActive {
-				logger.Printf("Info| API: Enabling schedule %s.\n", scheduleId)
-			} else {
-				logger.Printf("Info| API: Disabling schedule %s.\n", scheduleId)
+		if room.Schedule != nil {
+			if room.Schedule.IsActive != nil {
+				if *room.Schedule.IsActive {
+					logger.Printf("Info| API: Enabling schedule for room %s.\n", state.Name)
+				} else {
+					logger.Printf("Info| API: Disabling schedule for room %s.\n", state.Name)
+				}
+				state.Schedule.IsActive = room.Schedule.IsActive
 			}
-			state.IsActive = schedule.IsActive
 		}
 	}
 

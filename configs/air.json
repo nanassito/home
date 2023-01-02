@@ -76,7 +76,6 @@
     "schedules": {
         "livingroom": {
             "isActive": true,
-            "roomName": "livingroom",
             "weekday": [
                 {
                     "end": "06:00",
@@ -164,7 +163,6 @@
         },
         "office": {
             "isActive": false,
-            "roomName": "office",
             "weekday": [
                 {
                     "end": "07:00",
@@ -204,7 +202,6 @@
         },
         "parent": {
             "isActive": true,
-            "roomName": "parent",
             "weekday": [
                 {
                     "end": "21:00",
@@ -260,7 +257,6 @@
         },
         "zaya": {
             "isActive": true,
-            "roomName": "zaya",
             "weekday": [
                 {
                     "end": "08:00",

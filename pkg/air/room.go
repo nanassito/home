@@ -5,7 +5,7 @@ import (
 	"github.com/nanassito/home/pkg/mqtt"
 )
 
-func NewRoom(name string, cfg *air_proto.AirConfig_Sensor, mqttClient mqtt.MqttIface) *air_proto.Room {
+func NewRoom(name string, cfg *air_proto.AirConfig_Sensor, mqttClient mqtt.MqttIface, schedule *air_proto.Schedule) *air_proto.Room {
 	desiredMin := float64(19)
 	if last, ok := LastRunDesiredMinimalRoomTemperatures[name]; ok && *initFromProm {
 		desiredMin = last
@@ -15,6 +15,14 @@ func NewRoom(name string, cfg *air_proto.AirConfig_Sensor, mqttClient mqtt.MqttI
 		desiredMax = last
 	}
 
+	if schedule == nil {
+		schedule = &air_proto.Schedule{
+			IsActive: new(bool),
+			Weekday:  []*air_proto.Schedule_Window{},
+			Weekend:  []*air_proto.Schedule_Window{},
+		}
+	}
+
 	room := air_proto.Room{
 		Name:   name,
 		Sensor: NewSensor(name, cfg, mqttClient),
@@ -22,6 +30,7 @@ func NewRoom(name string, cfg *air_proto.AirConfig_Sensor, mqttClient mqtt.MqttI
 			Min: desiredMin,
 			Max: desiredMax,
 		},
+		Schedule: schedule,
 	}
 
 	return &room
