@@ -26,6 +26,7 @@ ZIGBEE2MQTT_GIT_PREV=$(git_version zigbee2mqtt)
 SWITCHES_GIT_PREV=$(git_version bin/switches)
 NETSCAN_GIT_PREV=$(git_version bin/netscan)
 AIR_GIT_PREV=$(git_version bin/air)
+APP_GIT_PREV=$(git_version pkg/app)
 
 
 git pull -s recursive -X theirs
@@ -72,6 +73,12 @@ fi
 
 
 if [ "${AIR_GIT_PREV}" != "$(git_version bin/air)" ]; then
+    systemctl daemon-reload
+    systemctl restart air
+fi
+
+
+if [ "${APP_GIT_PREV}" != "$(git_version pkg/app)" ]; then
     systemctl daemon-reload
     systemctl restart air
 fi
