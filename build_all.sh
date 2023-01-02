@@ -1,7 +1,7 @@
 set -eux
 
 
-for app in switches air ;
+for app in air ;
 do
     target_dir="./pkg/${app}_proto"
     mkdir -p ${target_dir}
@@ -21,7 +21,7 @@ done
 
 GOOS="linux"
 GOARCH="amd64"
-for app in switches netscan air;
+for app in netscan air app;
 do
-    go build -o ./bin/${app} ./cmd/${app}/${app}.go
+    go build -o ./bin/${app} ./cmd/${app}/${app}.go || go build -o ./bin/${app} ./cmd/${app}/main.go
 done

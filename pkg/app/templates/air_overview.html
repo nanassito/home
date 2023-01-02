@@ -1,0 +1,57 @@
+{{define "title"}}Air{{end}}
+
+{{define "temp_card"}}
+<div class="card-body text-center">
+    <div>
+        <h1>{{.Now}}</h1>
+    </div>
+    <div>
+        <span style="color: var(--bs-blue);">{{.Min}}</span>
+        <span> - </span>
+        <span style="color: var(--bs-red);">{{.Max}}</span>
+    </div>
+</div>
+{{end}}
+
+{{define "room_card"}}
+<div class="card" onclick="location.href='/air/room/{{.Name}}'">
+    <div class="card-header text-center">
+        {{.Name}}
+    </div>
+    {{template "temp_card" .Temp}}
+</div>
+{{end}}
+
+{{define "body"}}
+<section class="container" style="background: linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9);">
+    <div class="row">
+        <div class="col-12 gy-4">
+            {{template "room_card" .Livingroom}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6 gy-4">
+            {{template "room_card" .Office}}
+        </div>
+        
+        <div class="col-6 gy-4">
+            <div class="card">
+                <div class="card-header text-center">Toilettes</div>
+                {{template "temp_card" .Toilettes}}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6 gy-4">
+            {{template "room_card" .Zaya}}
+        </div>
+        <div class="col-6 gy-4">
+            {{template "room_card" .Parent}}
+        </div>
+    </div>
+    <div class="row text-center">
+        <span class="gy-4"></span>
+        {{template "temp_card" .Outside}}
+    </div>
+</section>
+{{end}}

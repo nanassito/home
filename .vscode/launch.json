@@ -29,6 +29,17 @@
             ]
         },
         {
+            "name": "App",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "cmd/app/main.go",
+            "args": [
+                "-template-root=${workspaceFolder}/pkg/app/templates",
+                "-live-templates"
+            ]
+        },
+        {
             "name": "Netscan",
             "type": "go",
             "request": "launch",

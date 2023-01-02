@@ -52,6 +52,7 @@ func QueryOne(promql string, logID string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	// TODO: Shouldn't this be switch result.Type() case ... ?
 	switch {
 	case result.Type() == model.ValScalar:
 		return float64(result.(*model.Scalar).Value), nil

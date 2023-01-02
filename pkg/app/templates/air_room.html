@@ -1,0 +1,24 @@
+{{define "title"}}Air - {{.Name}}{{end}}
+
+{{define "body"}}
+<section class="container">
+    <div class="card mt-2">
+        <div class="card-body">
+            <h1>{{.Name}}</h1>
+            <form action="/air/room/{{.Name}}" method="POST" class="row">
+                <div class="col-12 mb-5 mt-3">
+                    <label class="form-label">Desired temperature range:</label>
+                    {{template "slider" .TempSlider}}
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Email address</label>
+                    <input type="text" class="form-control" id="exampleFormControlInput1" name="foo">
+                  </div>
+                <div class="col-12">
+                    <button class="btn btn-primary" type="submit">Apply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{{end}}
