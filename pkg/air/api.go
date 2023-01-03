@@ -26,15 +26,13 @@ func (s *Server) SetState(ctx context.Context, req *air_proto.ServerState) (*air
 			state.DesiredTemperatureRange = room.DesiredTemperatureRange
 		}
 
-		if room.Schedule != nil {
-			if room.Schedule.IsActive != nil {
-				if *room.Schedule.IsActive {
-					logger.Printf("Info| API: Enabling schedule for room %s.\n", state.Name)
-				} else {
-					logger.Printf("Info| API: Disabling schedule for room %s.\n", state.Name)
-				}
-				state.Schedule.IsActive = room.Schedule.IsActive
+		if room.Schedule != nil && room.Schedule.IsActive != nil {
+			if *room.Schedule.IsActive {
+				logger.Printf("Info| API: Enabling schedule for room %s.\n", state.Name)
+			} else {
+				logger.Printf("Info| API: Disabling schedule for room %s.\n", state.Name)
 			}
+			state.Schedule.IsActive = room.Schedule.IsActive
 		}
 	}
 

@@ -242,7 +242,9 @@ func (s *Server) PostRoom() func(w http.ResponseWriter, r *http.Request, params 
 		update := &air_proto.ServerState{
 			Outside: &air_proto.Sensor{},
 			Rooms: map[string]*air_proto.Room{
-				roomID: {},
+				roomID: {
+					Schedule: &air_proto.Schedule{},
+				},
 			},
 			Hvacs: map[string]*air_proto.Hvac{},
 		}
@@ -250,14 +252,11 @@ func (s *Server) PostRoom() func(w http.ResponseWriter, r *http.Request, params 
 		canSpecifyTempRange := true
 		switch strings.ToLower(r.PostForm.Get("isScheduleActive")) {
 		case "on":
-			update.Rooms[roomID].Schedule = update.Rooms[roomID].GetSchedule()
 			t := true
 			update.Rooms[roomID].Schedule.IsActive = &t
 			canSpecifyTempRange = false
 		case "": // checkboxes don't send anything when unchecked :(
-			update.Rooms[roomID].Schedule = update.Rooms[roomID].GetSchedule()
-			f := false
-			update.Rooms[roomID].Schedule.IsActive = &f
+			update.Rooms[roomID].Schedule.IsActive = new(bool)
 		default:
 			issues = append(issues, "unknown value for isScheduleActive")
 		}
