@@ -49,6 +49,12 @@ func (s *Server) SetState(ctx context.Context, req *air_proto.ServerState) (*air
 			logger.Printf("Info| API: changing hvac %s offset to %.2f\n", state.Name, *hvac.TemperatureOffset)
 			state.TemperatureOffset = hvac.TemperatureOffset
 		}
+		if hvac.DesiredState != nil {
+			if hvac.DesiredState.Mode != air_proto.Hvac_MODE_UNKNOWN {
+				logger.Printf("Info| API: changing hvac %s mode to %v\n", state.Name, hvac.DesiredState.Mode)
+				state.DesiredState.Mode = hvac.DesiredState.Mode
+			}
+		}
 	}
 	return s.State, nil
 }
