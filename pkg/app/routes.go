@@ -204,7 +204,7 @@ func renderRoom(w http.ResponseWriter, roomID string, serverState *air_proto.Ser
 		Issues: issues,
 		Name:   strings.ToUpper(roomID[0:1]) + roomID[1:],
 		TempSlider: Slider{
-			Enabled: false,
+			Enabled: !*roomState.Schedule.IsActive,
 			Min:     17,
 			Low:     int(roomState.GetDesiredTemperatureRange().GetMin()),
 			High:    int(roomState.GetDesiredTemperatureRange().GetMax()),
