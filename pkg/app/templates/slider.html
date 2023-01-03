@@ -175,7 +175,7 @@
 {{end}}
 
 {{define "slider"}}
-<div slider>
+<div slider {{if eq .Enabled false}}style="display:none;"{{end}}>
     <div>
         <div inverse-left style="width:90%;"></div>
         <div inverse-right style="width:90%;"></div>

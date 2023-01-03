@@ -31,10 +31,11 @@ func init() {
 }
 
 type Slider struct {
-	Min  int
-	Low  int
-	High int
-	Max  int
+	Enabled bool
+	Min     int
+	Low     int
+	High    int
+	Max     int
 }
 
 func (s Slider) AsPct(v int) int           { return 100 * (v - s.Min) / (s.Max - s.Min) }
@@ -185,10 +186,9 @@ func renderRoom(w http.ResponseWriter, roomID string, serverState *air_proto.Ser
 	if serverState == nil {
 		issues = append(issues, "No data from the Air service.")
 		serverState = &air_proto.ServerState{
-			Outside:   &air_proto.Sensor{},
-			Rooms:     map[string]*air_proto.Room{},
-			Hvacs:     map[string]*air_proto.Hvac{},
-			Schedules: map[string]*air_proto.Schedule{},
+			Outside: &air_proto.Sensor{},
+			Rooms:   map[string]*air_proto.Room{},
+			Hvacs:   map[string]*air_proto.Hvac{},
 		}
 	}
 	roomState, ok := serverState.Rooms[roomID]
@@ -204,10 +204,11 @@ func renderRoom(w http.ResponseWriter, roomID string, serverState *air_proto.Ser
 		Issues: issues,
 		Name:   strings.ToUpper(roomID[0:1]) + roomID[1:],
 		TempSlider: Slider{
-			Min:  17,
-			Low:  int(roomState.GetDesiredTemperatureRange().GetMin()),
-			High: int(roomState.GetDesiredTemperatureRange().GetMax()),
-			Max:  35,
+			Enabled: false,
+			Min:     17,
+			Low:     int(roomState.GetDesiredTemperatureRange().GetMin()),
+			High:    int(roomState.GetDesiredTemperatureRange().GetMax()),
+			Max:     35,
 		},
 	})
 }
@@ -227,29 +228,53 @@ func (s *Server) PostRoom() func(w http.ResponseWriter, r *http.Request, params 
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		issues := []string{}
 		roomID := strings.ToLower(params.ByName("roomID"))
-		update := &air_proto.ServerState{
-			Outside:   &air_proto.Sensor{},
-			Rooms:     map[string]*air_proto.Room{},
-			Hvacs:     map[string]*air_proto.Hvac{},
-			Schedules: map[string]*air_proto.Schedule{},
-		}
+
 		err := r.ParseForm()
-		if err == nil {
+		if err != nil {
+			issues = append(issues, fmt.Sprintf("Can't parse submitted settings: %v", err))
+			resp, err := s.AirSvc.GetState(context.Background(), &air_proto.ReqGetState{})
+			if err != nil {
+				issues = append(issues, fmt.Sprintf("Error taking to Air: %v", err))
+			}
+			renderRoom(w, strings.ToLower(params.ByName("roomID")), resp, issues)
+		}
+
+		update := &air_proto.ServerState{
+			Outside: &air_proto.Sensor{},
+			Rooms: map[string]*air_proto.Room{
+				roomID: {},
+			},
+			Hvacs: map[string]*air_proto.Hvac{},
+		}
+
+		canSpecifyTempRange := true
+		switch strings.ToLower(r.PostForm.Get("isScheduleActive")) {
+		case "on":
+			update.Rooms[roomID].Schedule = update.Rooms[roomID].GetSchedule()
+			t := true
+			update.Rooms[roomID].Schedule.IsActive = &t
+			canSpecifyTempRange = false
+		case "": // checkboxes don't send anything when unchecked :(
+			update.Rooms[roomID].Schedule = update.Rooms[roomID].GetSchedule()
+			f := false
+			update.Rooms[roomID].Schedule.IsActive = &f
+		default:
+			issues = append(issues, "unknown value for isScheduleActive")
+		}
+
+		if canSpecifyTempRange {
 			low, errLow := strconv.ParseFloat(r.PostForm.Get("low"), 64)
 			high, errHigh := strconv.ParseFloat(r.PostForm.Get("high"), 64)
-			if errLow == nil && errHigh == nil {
-				update.Rooms[roomID] = &air_proto.Room{
-					DesiredTemperatureRange: &air_proto.TemperatureRange{
-						Min: low,
-						Max: high,
-					},
-				}
-			} else {
+			if errLow != nil || errHigh != nil {
 				issues = append(issues, fmt.Sprintf("Failed to parse `low`(%v) or `high`(%v)", errLow, errHigh))
+			} else {
+				update.Rooms[roomID].DesiredTemperatureRange = &air_proto.TemperatureRange{
+					Min: low,
+					Max: high,
+				}
 			}
-		} else {
-			issues = append(issues, fmt.Sprintf("Can't parse submitted settings: %v", err))
 		}
+
 		resp, err := s.AirSvc.SetState(context.Background(), update)
 		if err != nil {
 			issues = append(issues, fmt.Sprintf("Error taking to Air: %v", err))
