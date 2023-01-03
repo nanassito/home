@@ -37,29 +37,29 @@ with ZIGBEE2MQTT.open("w") as fd:
     yaml.dump(cfg, fd)
 
 
-print("Update switches configurations")
-cfg = {
-    nickname: {
-        "Mqtt": {
-            "GetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}",
-            "GetRegex": f'.*"{switch["line"]}": ?"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)".*',
-            "SetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}/set",
-            "MsgActive": json.dumps({switch["line"]: "ON" if switch["default_open"] else "OFF"}),
-            "MsgRest": json.dumps({switch["line"]: "OFF" if switch["default_open"] else "ON"}),
-        },
-        "Prometheus": {
-            "Metric": f"mqtt_{switch['line']}",
-            "Labels": promLabels(device),
-            "ValueActive": 1 if switch["default_open"] else 0,
-            "ValueRest": 0 if switch["default_open"] else 1,
-        }
-    }
-    for network, devices in zigbee.items()
-    for device in devices.values()
-    for nickname, switch in device.get("switches", {}).items()
-}
-with (REPO / "configs" / "switches.json").open("w") as fd:
-    json.dump(cfg, fd, sort_keys=True, indent=4)
+# print("Update switches configurations")
+# cfg = {
+#     nickname: {
+#         "Mqtt": {
+#             "GetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}",
+#             "GetRegex": f'.*"{switch["line"]}": ?"(?P<State>(?P<Active>ON)?(?P<AtRest>OFF)?)".*',
+#             "SetTopic": f"zigbee2mqtt/{network}/{mqtt(device)}/set",
+#             "MsgActive": json.dumps({switch["line"]: "ON" if switch["default_open"] else "OFF"}),
+#             "MsgRest": json.dumps({switch["line"]: "OFF" if switch["default_open"] else "ON"}),
+#         },
+#         "Prometheus": {
+#             "Metric": f"mqtt_{switch['line']}",
+#             "Labels": promLabels(device),
+#             "ValueActive": 1 if switch["default_open"] else 0,
+#             "ValueRest": 0 if switch["default_open"] else 1,
+#         }
+#     }
+#     for network, devices in zigbee.items()
+#     for device in devices.values()
+#     for nickname, switch in device.get("switches", {}).items()
+# }
+# with (REPO / "configs" / "switches.json").open("w") as fd:
+#     json.dump(cfg, fd, sort_keys=True, indent=4)
 
 
 print("Update air/HVAC configuration")

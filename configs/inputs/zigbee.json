@@ -107,6 +107,22 @@
                 "type": "air"
             }
         },
+        "0x00124b00291e678c": {
+            "prometheus": {
+                "location": [
+                    "living"
+                ],
+                "type": "followme"
+            }
+        },
+        "0x00124b00291e69f4": {
+            "prometheus": {
+                "location": [
+                    "kitchen"
+                ],
+                "type": "followme"
+            }
+        },
         "0x00124b0024452373": {
             "prometheus": {
                 "location": [
@@ -193,6 +209,14 @@
                     "parent"
                 ],
                 "type": "air"
+            }
+        },
+        "0x00124b002920b09a": {
+            "prometheus": {
+                "location": [
+                    "parent"
+                ],
+                "type": "followme"
             }
         },
         "0x00158d0007d11ff1": {
@@ -297,6 +321,14 @@
                 "type": "air"
             }
         },
+        "0x00124b00291e6797": {
+            "prometheus": {
+                "location": [
+                    "zaya"
+                ],
+                "type": "followme"
+            }
+        },
         "0x00124b0025175d24": {
             "prometheus": {
                 "location": [
@@ -315,7 +347,7 @@
                 "type": "motion"
             }
         },
-        "0x00124b00244555a0": {
+        "0x00124b0024455704": {
             "prometheus": {
                 "location": [
                     "backyard",

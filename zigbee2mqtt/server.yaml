@@ -15,20 +15,38 @@ devices:
     friendly_name: device/kitchen/window/front/contact
   '0x00124b00244556db':
     friendly_name: device/kitchen/window/side/contact
+  '0x00124b0024455704':
+    friendly_name: device/backyard/mower/contact
   '0x00124b00244557c9':
     friendly_name: device/parent/window/left/contact
   '0x00124b0024456fa1':
     friendly_name: device/livingroom/window/side/contact
+  '0x00124b0025175d24':
+    friendly_name: device/frontyard/gate/contact
   '0x00124b0025178126':
     friendly_name: device/office/window/right/contact
   '0x00124b0025195d6e':
     friendly_name: device/office/window/left/contact
+  '0x00124b0025195e9e':
+    friendly_name: device/trash/gate/contact
   '0x00124b0025906bb7':
     friendly_name: device/adhoc/repeater
+  '0x00124b00291e678c':
+    friendly_name: device/living/followme
+  '0x00124b00291e6797':
+    friendly_name: device/zaya/followme
+  '0x00124b00291e69f4':
+    friendly_name: device/kitchen/followme
+  '0x00124b002920b09a':
+    friendly_name: device/parent/followme
+  '0x00158d0002ab2f3a':
+    friendly_name: device/garage/washer/power
   '0x00158d0006f101ce':
     friendly_name: device/backyard/side/motion
   '0x00158d0006f1316c':
     friendly_name: device/backyard/back/motion
+  '0x00158d0006f7e96e':
+    friendly_name: device/zaya/air
   '0x00158d0006fb03c4':
     friendly_name: device/adhoc/leak
   '0x00158d000706885d':
@@ -39,8 +57,14 @@ devices:
     friendly_name: device/parent/door/contact
   '0x00158d0007d4c500':
     friendly_name: device/backyard/fence/motion
+  '0x00158d0007dcbfa7':
+    friendly_name: device/frontyard/planter/motion
   '0x00158d0007e1137a':
     friendly_name: device/livingroom/door/back/contact
+  '0x00158d000800b65b':
+    friendly_name: device/garage/door/contact
+  '0x00158d00080688a0':
+    friendly_name: device/frontyard/mower/contact
   '0x00158d0008071da3':
     friendly_name: device/livingroom/air
   '0x54ef4410001a07aa':
@@ -49,7 +73,9 @@ devices:
     friendly_name: device/backyard/valve
   '0xa4c1382cfb825490':
     friendly_name: device/backyard/air
-homeassistant: false
+  '0xa4c138cb26b19b8a':
+    friendly_name: device/frontyard/valve
+homeassistant: true
 mqtt:
   base_topic: zigbee2mqtt/server
   server: mqtt://192.168.1.1

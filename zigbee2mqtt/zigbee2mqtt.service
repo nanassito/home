@@ -8,7 +8,7 @@ ExecStart=\
         docker run \
         --device /dev/ttyUSB0 \
         --mount source=zigbee2mqtt,target=/app/data \
-        --mount type=bind,source=/github/home/zigbee2mqtt/configuration.yaml,target=/app/data/configuration.yaml \
+        --mount type=bind,source=/github/home/zigbee2mqtt/server.yaml,target=/app/data/configuration.yaml \
         koenkk/zigbee2mqtt:latest
 WorkingDirectory=/github/home/zigbee2mqtt
 StandardOutput=inherit
