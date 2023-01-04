@@ -20,7 +20,7 @@ groups:
       - alert: "Fuite d'eau"
         expr: mqtt_water_leak > 0.5
       - alert: Un capteur a planté
-        expr: (rate(mqtt_message_total{type="air"}[1h])) <= 0 and on() oncall
+        expr: (sum by (location)(rate(mqtt_message_total{type="air"}[1h]))) <= 0 and on() oncall
         for: 1h
       - alert: Plusieurs valves fonctionnent en même temps
         expr: 'sum({type="valve", __name__=~"mqtt_state.*"}) > 1 and on() oncall'
