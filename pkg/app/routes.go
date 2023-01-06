@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -224,6 +225,34 @@ func (s *Server) GetRoom() func(w http.ResponseWriter, r *http.Request, params h
 	}
 }
 
+func prepareUpdateForControlledByRoom(inputs url.Values, roomID string, update *air_proto.ServerState) (issues []string) {
+	canSpecifyTempRange := true
+	switch strings.ToLower(inputs.Get("isScheduleActive")) {
+	case "on":
+		t := true
+		update.Rooms[roomID].Schedule.IsActive = &t
+		canSpecifyTempRange = false
+	case "": // checkboxes don't send anything when unchecked :(
+		update.Rooms[roomID].Schedule.IsActive = new(bool)
+	default:
+		issues = append(issues, "unknown value for isScheduleActive")
+	}
+
+	if canSpecifyTempRange {
+		low, errLow := strconv.ParseFloat(inputs.Get("low"), 64)
+		high, errHigh := strconv.ParseFloat(inputs.Get("high"), 64)
+		if errLow != nil || errHigh != nil {
+			issues = append(issues, fmt.Sprintf("Failed to parse `low`(%v) or `high`(%v)", errLow, errHigh))
+		} else {
+			update.Rooms[roomID].DesiredTemperatureRange = &air_proto.TemperatureRange{
+				Min: low,
+				Max: high,
+			}
+		}
+	}
+	return issues
+}
+
 func (s *Server) PostRoom() func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		issues := []string{}
@@ -240,7 +269,6 @@ func (s *Server) PostRoom() func(w http.ResponseWriter, r *http.Request, params 
 		}
 
 		update := &air_proto.ServerState{
-			Outside: &air_proto.Sensor{},
 			Rooms: map[string]*air_proto.Room{
 				roomID: {
 					Schedule: &air_proto.Schedule{},
@@ -249,29 +277,13 @@ func (s *Server) PostRoom() func(w http.ResponseWriter, r *http.Request, params 
 			Hvacs: map[string]*air_proto.Hvac{},
 		}
 
-		canSpecifyTempRange := true
-		switch strings.ToLower(r.PostForm.Get("isScheduleActive")) {
-		case "on":
-			t := true
-			update.Rooms[roomID].Schedule.IsActive = &t
-			canSpecifyTempRange = false
-		case "": // checkboxes don't send anything when unchecked :(
-			update.Rooms[roomID].Schedule.IsActive = new(bool)
+		inputs := r.PostForm
+		control := strings.ToLower(inputs.Get("control"))
+		switch control {
+		case "room":
+			issues = append(issues, prepareUpdateForControlledByRoom(inputs, roomID, update)...)
 		default:
-			issues = append(issues, "unknown value for isScheduleActive")
-		}
-
-		if canSpecifyTempRange {
-			low, errLow := strconv.ParseFloat(r.PostForm.Get("low"), 64)
-			high, errHigh := strconv.ParseFloat(r.PostForm.Get("high"), 64)
-			if errLow != nil || errHigh != nil {
-				issues = append(issues, fmt.Sprintf("Failed to parse `low`(%v) or `high`(%v)", errLow, errHigh))
-			} else {
-				update.Rooms[roomID].DesiredTemperatureRange = &air_proto.TemperatureRange{
-					Min: low,
-					Max: high,
-				}
-			}
+			issues = append(issues, "Unknown control `%v`", control)
 		}
 
 		resp, err := s.AirSvc.SetState(context.Background(), update)

@@ -6,7 +6,8 @@
         <div class="card-body">
             <h1>{{.Name}}</h1>
             <form action="/air/room/{{.Name}}" method="POST">
-                <div class="row mb-5 mt-3">
+                <div class="row mb-5 mt-3" id="control-room">
+                    <input type="hidden" name="control" value="room"/>
                     <label class="form-label col-6">Desired temperature range:</label>
                     <div class="form-check form-switch form-check-reverse col-5">
                         <input class="form-check-input" type="checkbox" id="isScheduleActive" name="isScheduleActive"
