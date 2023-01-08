@@ -20,6 +20,10 @@ logger:
 mqtt:
   broker: 192.168.1.1
 
+remote_transmitter:
+  pin: GPIO13
+  carrier_duty_percent: 100% 
+
 uart:
   tx_pin: 1
   rx_pin: 3
@@ -30,6 +34,10 @@ climate:
   name: parent
   autoconf: true
   beeper: false
+  supported_swing_modes:
+    - VERTICAL
+    - HORIZONTAL
+    - BOTH
   action_state_topic: esphome/parent/action_state
   away_state_topic: esphome/parent/away_state
   away_command_topic: esphome/parent/away_command

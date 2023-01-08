@@ -34,6 +34,10 @@ climate:
   name: office
   autoconf: true
   beeper: false
+  supported_swing_modes:
+    - VERTICAL
+    - HORIZONTAL
+    - BOTH
   action_state_topic: esphome/office/action_state
   away_state_topic: esphome/office/away_state
   away_command_topic: esphome/office/away_command
