@@ -27,6 +27,7 @@ SWITCHES_GIT_PREV=$(git_version bin/switches)
 NETSCAN_GIT_PREV=$(git_version bin/netscan)
 AIR_GIT_PREV=$(git_version bin/air)
 APP_GIT_PREV=$(git_version pkg/app)
+MQTTJSON2STR_GIT_PREV=$(git_version bin/mqtt_json_2_str)
 
 
 git pull -s recursive -X theirs
@@ -81,4 +82,10 @@ fi
 if [ "${APP_GIT_PREV}" != "$(git_version pkg/app)" ]; then
     systemctl daemon-reload
     systemctl restart air
+fi
+
+
+if [ "${MQTTJSON2STR_GIT_PREV}" != "$(git_version bin/mqtt_json_2_str)" ]; then
+    systemctl daemon-reload
+    systemctl restart mqtt_json_2_str
 fi

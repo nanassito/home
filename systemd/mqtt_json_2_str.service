@@ -1,0 +1,14 @@
+[Unit]
+Description=mqtt_json_2_str
+After=network.target
+Requires=air.service
+
+[Service]
+ExecStart=/github/home/bin/mqtt_json_2_str
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target

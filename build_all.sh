@@ -21,7 +21,7 @@ done
 
 GOOS="linux"
 GOARCH="amd64"
-for app in netscan air app;
+for app in netscan air app mqtt_json_2_str;
 do
     go build -o ./bin/${app} ./cmd/${app}/${app}.go || go build -o ./bin/${app} ./cmd/${app}/main.go
 done

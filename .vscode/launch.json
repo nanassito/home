@@ -40,6 +40,13 @@
             ]
         },
         {
+            "name": "MqttJson2Str",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "cmd/mqtt_json_2_str/main.go",
+        },
+        {
             "name": "Netscan",
             "type": "go",
             "request": "launch",
