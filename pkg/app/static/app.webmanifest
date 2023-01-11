@@ -1,0 +1,12 @@
+{
+    "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+    "name": "Home",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/static/icon.svg",
+            "sizes": "20x20",
+            "type": "image/svg"
+        }
+    ]
+}

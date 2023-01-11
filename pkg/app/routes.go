@@ -27,10 +27,6 @@ var (
 	promTimeRx    = regexp.MustCompile("^[0-9]{1,2}[hd]$")
 )
 
-func init() {
-	flag.Parse()
-}
-
 type Slider struct {
 	Enabled bool
 	Min     int

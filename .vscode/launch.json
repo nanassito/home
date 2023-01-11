@@ -36,6 +36,7 @@
             "program": "cmd/app/main.go",
             "args": [
                 "-template-root=${workspaceFolder}/pkg/app/templates",
+                "-static-root=${workspaceFolder}/pkg/app/static",
                 "-live-templates"
             ]
         },
