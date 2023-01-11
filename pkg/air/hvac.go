@@ -160,4 +160,5 @@ func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttCl
 		}
 		return
 	}
+	// BUG: 20.0+2.6=22.5 doesn't apply properly
 }

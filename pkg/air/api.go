@@ -54,6 +54,14 @@ func (s *Server) SetState(ctx context.Context, req *air_proto.ServerState) (*air
 				logger.Printf("Info| API: changing hvac %s mode to %v\n", state.Name, hvac.DesiredState.Mode)
 				state.DesiredState.Mode = hvac.DesiredState.Mode
 			}
+			if hvac.DesiredState.Fan != air_proto.Hvac_FAN_UNKNOWN {
+				logger.Printf("Info| API: changing hvac %s fan to %v\n", state.Name, hvac.DesiredState.Fan)
+				state.DesiredState.Fan = hvac.DesiredState.Fan
+			}
+			if hvac.DesiredState.Temperature > 17 { // TODO: also limit the upper bound
+				logger.Printf("Info| API: changing hvac %s temperature to %v\n", state.Name, hvac.DesiredState.Temperature)
+				state.DesiredState.Temperature = hvac.DesiredState.Temperature
+			}
 		}
 	}
 	return s.State, nil
