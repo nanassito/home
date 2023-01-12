@@ -14,6 +14,11 @@
         <title>Home - {{block "title" .}}{{end}}</title>
     </head>
     <body>
+        <nav class="navbar" data-bs-theme="dark" style="background: linear-gradient(to top right, #695bb8, #b85f7d);">
+            <div class="container">
+                <h1><a href="/air" class="bi bi-thermometer-half navbar-brand"> {{block "title" .}}???{{end}}</a></h1>
+            </div>
+        </nav>
         {{block "body" .}}{{end}}
         {{if .Issues}}
         <section id="issues" class="container">

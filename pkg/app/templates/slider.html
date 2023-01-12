@@ -175,7 +175,7 @@
 {{end}}
 
 {{define "slider"}}
-<div slider {{if eq .Enabled false}}style="display:none;"{{end}}>
+<div slider class="mb-4" {{if eq .Enabled false}}style="display:none;"{{end}}>
     <div>
         <div inverse-left style="width:90%;"></div>
         <div inverse-right style="width:90%;"></div>
@@ -208,5 +208,5 @@
         this.parentNode.querySelector('[thumb-right]').style.left = pct+'%';
         this.parentNode.querySelector('[sign-right]').style.left = pct+'%';
         this.parentNode.querySelector('[sign-right] > span').innerHTML = this.value;" />
-  </div>
+</div>
 {{end}}

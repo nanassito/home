@@ -2,28 +2,83 @@
 
 {{define "body"}}
 <section class="container">
-    <div class="card mt-2">
-        <div class="card-body">
-            <h1>{{.Name}}</h1>
-            <form action="/air/room/{{.Name}}" method="POST">
-                <div class="row mb-5 mt-3" id="control-room">
-                    <input type="hidden" name="control" value="room"/>
-                    <label class="form-label col-6">Desired temperature range:</label>
-                    <div class="form-check form-switch form-check-reverse col-5">
-                        <input class="form-check-input" type="checkbox" id="isScheduleActive" name="isScheduleActive"
-                            {{if eq .TempSlider.Enabled false}}checked{{end}}
-                            oninput="
-                                this.parentNode.parentNode.querySelector('[slider]').style.display = this.checked? 'none' : ''
-                            ">
-                        <label class="form-check-label" for="isScheduleActive">Auto</label>
-                      </div>
-                    {{template "slider" .TempSlider}}
-                </div>
-                <div class="row">
-                    <button class="btn btn-primary" type="submit">Apply</button>
-                </div>
-            </form>
-        </div>
+    <div class="btn-group d-flex mt-3" role="group" aria-label="control authority" id="control-authority">
+        <button type="button" class="btn btn-primary active" data-value="room">Room</button>
+        <button type="button" class="btn btn-primary" data-value="hvac">Hvac</button>
+        <button type="button" class="btn btn-primary" data-value="none">None</button>
     </div>
+    <form action="/air/room/{{.Name}}" method="POST" class="mt-3">
+        <input type="hidden" name="control" value="room" id="form-room-control"/>
+        
+        <div class="row" id="control-room">
+            <h5 class="form-label col-6">Temperature:</h5>
+            <div class="form-check form-switch form-check-reverse col-5">
+                <input class="form-check-input" type="checkbox" id="isScheduleActive" name="isScheduleActive"
+                    {{if eq .TempSlider.Enabled false}}checked{{end}}
+                    oninput="
+                        this.parentNode.parentNode.querySelector('[slider]').style.display = this.checked? 'none' : ''
+                    ">
+                <label class="form-check-label" for="isScheduleActive">Auto</label>
+            </div>
+            {{template "slider" .TempSlider}}
+        </div>
+
+        <div class="row" id="control-hvac">
+            <h5>Mode</h5>
+            <div class="btn-group">
+                <input type="radio" class="btn-check" name="mode" id="mode-off" autocomplete="off" checked>
+                <label class="btn btn-secondary btn-block" for="mode-off"><i class="bi bi-power"></i></label>
+
+                <input type="radio" class="btn-check" name="mode" id="mode-heat" autocomplete="off">
+                <label class="btn btn-secondary btn-block" for="mode-heat"><i class="bi bi-fire"></i></label>
+
+                <input type="radio" class="btn-check" name="mode" id="mode-cool" autocomplete="off">
+                <label class="btn btn-secondary btn-block" for="mode-cool"><i class="bi bi-snow"></i></label>
+
+                <input type="radio" class="btn-check" name="mode" id="mode-fan" autocomplete="off">
+                <label class="btn btn-secondary btn-block" for="mode-fan"><i class="bi bi-fan"></i></label>
+            </div>
+
+            <h5 class="mt-3">Fan</h5>
+            <div class="btn-group">
+                <input type="radio" class="btn-check" name="fan" id="fan-auto" autocomplete="off" checked>
+                <label class="btn btn-secondary btn-block" for="fan-auto">Auto</i></label>
+
+                <input type="radio" class="btn-check" name="fan" id="fan-slow" autocomplete="off">
+                <label class="btn btn-secondary btn-block" for="fan-slow">Slow</i></label>
+
+                <input type="radio" class="btn-check" name="fan" id="fan-medium" autocomplete="off">
+                <label class="btn btn-secondary btn-block" for="fan-medium">Medium</i></label>
+
+                <input type="radio" class="btn-check" name="fan" id="fan-high" autocomplete="off">
+                <label class="btn btn-secondary btn-block" for="fan-high">High</i></label>
+            </div>
+        </div>
+        
+        <div class="row" id="control-none">
+            <p>Use the remote to control the unit.</p>
+        </div>
+        <div class="mt-3">
+            <button class="btn btn-primary" type="submit">Apply</button>
+        </div>
+    </form>
 </section>
+<script>
+    document.querySelectorAll("#control-authority button").forEach(function(btn) {
+        active_cls = "active"
+        btn.addEventListener("click", async function() {
+            document.querySelectorAll("#control-authority button").forEach(function(b){
+                b.classList.remove(active_cls)
+            })
+            btn.classList.add(active_cls)
+            document.getElementById("form-room-control").value = btn.dataset.value
+        })
+    })
+</script>
+<style>
+    #control-room, #control-hvac, #control-none {display:none}
+    [value="room"] ~ #control-room {display:flex}
+    [value="hvac"] ~ #control-hvac {display:flex}
+    [value="none"] ~ #control-none {display:flex}
+</style>
 {{end}}
