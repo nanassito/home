@@ -44,7 +44,7 @@ func NewSensor(name string, cfg *air_proto.AirConfig_Sensor, mqttClient mqtt.Mqt
 	var err error
 	sensor := air_proto.Sensor{Name: name}
 	sensor.Temperature, err = prom.QueryOne(
-		fmt.Sprintf("last_over_time(mqtt_temperature{%s}[1w])", promLabelsAsFilter(cfg.PrometheusLabels)),
+		fmt.Sprintf("last_over_time(mqtt_temperature{%s}[1h])", promLabelsAsFilter(cfg.PrometheusLabels)),
 		"init-sensor-temp-"+name,
 	)
 	if err != nil {

@@ -151,6 +151,7 @@ func (s *Server) HeatUp() {
 	if err != nil {
 		logger.Printf("Fail| Error querying Prometheus (GetHvac30mΔOffset): %v\n", err)
 	}
+	logger.Printf("Info| last30mΔOffset: %v\n", last30mΔOffset)
 
 	for _, hvac := range s.State.Hvacs {
 		roomName := s.Config.Hvacs[hvac.Name].Room
