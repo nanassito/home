@@ -25,6 +25,8 @@ func main() {
 		"zigbee2mqtt/server/device/parent/followme":  "espjsonsensor/parent/followme/temperature",
 		"zigbee2mqtt/server/device/zaya/followme":    "espjsonsensor/zaya/followme/temperature",
 	} {
+		src := src // Fuck golang for not having value closure on for loops
+		dst := dst
 		client.Subscribe(src, func(topic string, payload []byte) {
 			decoded := &JsonWithTemperature{}
 			json.Unmarshal(payload, decoded)
