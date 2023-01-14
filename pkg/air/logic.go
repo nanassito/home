@@ -88,15 +88,12 @@ func DecideHeatUpMode(room *air_proto.Room, outside *air_proto.Sensor, targetTem
 	return air_proto.Hvac_MODE_HEAT
 }
 
-func DecideHeatUpFan(nextOffset float64, last30mΔOffset map[string]float64, hvacName string) air_proto.Hvac_Fan {
-	offsetΔ, ok := last30mΔOffset[hvacName]
-	if !ok || offsetΔ != 0 {
-		if math.Abs(nextOffset) > 2 {
-			return air_proto.Hvac_FAN_HIGH
-		}
-		if math.Abs(nextOffset) > 1 {
-			return air_proto.Hvac_FAN_MEDIUM
-		}
+func DecideHeatUpFan(nextOffset float64, hvacName string) air_proto.Hvac_Fan {
+	if math.Abs(nextOffset) > 2 {
+		return air_proto.Hvac_FAN_HIGH
+	}
+	if math.Abs(nextOffset) > 1 {
+		return air_proto.Hvac_FAN_MEDIUM
 	}
 	return air_proto.Hvac_FAN_AUTO
 }
@@ -167,7 +164,7 @@ func (s *Server) HeatUp() {
 		}
 
 		hvac.DesiredState.Temperature, *hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac, last30mΔOffset)
-		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, last30mΔOffset, hvac.Name)
+		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, hvac.Name)
 		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], s.State.Outside, hvac.DesiredState.Temperature+*hvac.TemperatureOffset, hvac.Name)
 	}
 }
