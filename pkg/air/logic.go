@@ -97,10 +97,10 @@ func DecideHeatUpMode(room *air_proto.Room, hvac *air_proto.Hvac, outside *air_p
 }
 
 func DecideHeatUpFan(nextOffset float64, hvacName string) air_proto.Hvac_Fan {
-	if math.Abs(nextOffset) > 2 {
+	if nextOffset > 2 {
 		return air_proto.Hvac_FAN_HIGH
 	}
-	if math.Abs(nextOffset) > 1 {
+	if nextOffset > 1 {
 		return air_proto.Hvac_FAN_MEDIUM
 	}
 	return air_proto.Hvac_FAN_AUTO
