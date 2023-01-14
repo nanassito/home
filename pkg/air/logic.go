@@ -67,23 +67,31 @@ func (s *Server) Control() {
 	}
 }
 
-func DecideHeatUpMode(room *air_proto.Room, outside *air_proto.Sensor, targetTemp float64, hvacName string) air_proto.Hvac_Mode {
+func DecideHeatUpMode(room *air_proto.Room, hvac *air_proto.Hvac, outside *air_proto.Sensor, targetTemp float64) air_proto.Hvac_Mode {
 	roomWillWarmUp := false
 	if IsSensorAlive(outside) {
 		roomWillWarmUp = outside.Temperature > room.DesiredTemperatureRange.Min
 	}
 
-	if targetTemp <= hvacMinimalHeatTemperature && room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
-		logger.Printf("Info| Hvac %s is at its minimal heating temperature, shutting down.", hvacName)
-		return air_proto.Hvac_MODE_OFF
-	}
-	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+2 {
-		logger.Printf("Info| Room %s is more than hot enough, shutting hvac %s down.\n", room.Name, hvacName)
-		return air_proto.Hvac_MODE_OFF
-	}
-	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min && roomWillWarmUp {
-		logger.Printf("Info| Room %s will continue to warm up, shutting hvac %s down.\n", room.Name, hvacName)
-		return air_proto.Hvac_MODE_OFF
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min {
+		if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
+			if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+2 {
+				logger.Printf("Info| Room %s is more than hot enough, shutting hvac %s down.\n", room.Name, hvac.Name)
+				return air_proto.Hvac_MODE_OFF
+			}
+			if targetTemp <= hvacMinimalHeatTemperature {
+				logger.Printf("Info| Hvac %s is at its minimal heating temperature, shutting down.", hvac.Name)
+				return air_proto.Hvac_MODE_OFF
+			}
+			if targetTemp <= hvacMinimalHeatTemperature+1 {
+				logger.Printf("Info| Hvac %s is shut down, waiting for the targetTemp to be higher to start back up.", hvac.Name)
+				return air_proto.Hvac_MODE_OFF
+			}
+		}
+		if roomWillWarmUp {
+			logger.Printf("Info| Room %s will continue to warm up, shutting hvac %s down.\n", room.Name, hvac.Name)
+			return air_proto.Hvac_MODE_OFF
+		}
 	}
 	return air_proto.Hvac_MODE_HEAT
 }
@@ -165,7 +173,7 @@ func (s *Server) HeatUp() {
 
 		hvac.DesiredState.Temperature, *hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac, last30mΔOffset)
 		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, hvac.Name)
-		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], s.State.Outside, hvac.DesiredState.Temperature+*hvac.TemperatureOffset, hvac.Name)
+		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], hvac, s.State.Outside, hvac.DesiredState.Temperature+*hvac.TemperatureOffset)
 	}
 }
 
