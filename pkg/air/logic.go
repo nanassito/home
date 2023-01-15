@@ -83,7 +83,7 @@ func DecideHeatUpMode(room *air_proto.Room, hvac *air_proto.Hvac, outside *air_p
 				logger.Printf("Info| Hvac %s is at its minimal heating temperature, shutting down.", hvac.Name)
 				return air_proto.Hvac_MODE_OFF
 			}
-			if targetTemp <= hvacMinimalHeatTemperature+1 {
+			if hvac.DesiredState.Mode == air_proto.Hvac_MODE_OFF && targetTemp <= hvacMinimalHeatTemperature+1 {
 				logger.Printf("Info| Hvac %s is shut down, waiting for the targetTemp to be higher to start back up.", hvac.Name)
 				return air_proto.Hvac_MODE_OFF
 			}
