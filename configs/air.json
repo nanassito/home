@@ -285,44 +285,12 @@
             ],
             "weekend": [
                 {
-                    "end": "11:00",
-                    "settings": {
-                        "max": 33,
-                        "min": 19
-                    },
-                    "start": "00:00"
-                },
-                {
-                    "end": "14:00",
-                    "settings": {
-                        "max": 33,
-                        "min": 20
-                    },
-                    "start": "11:00"
-                },
-                {
-                    "end": "16:00",
-                    "settings": {
-                        "max": 33,
-                        "min": 19
-                    },
-                    "start": "14:00"
-                },
-                {
-                    "end": "19:00",
-                    "settings": {
-                        "max": 33,
-                        "min": 20
-                    },
-                    "start": "16:00"
-                },
-                {
                     "end": "24:00",
                     "settings": {
                         "max": 33,
                         "min": 19
                     },
-                    "start": "19:00"
+                    "start": "00:00"
                 }
             ]
         }
