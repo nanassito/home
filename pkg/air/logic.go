@@ -103,7 +103,7 @@ func DecideHeatUpFan(nextOffset float64, hvacName string) air_proto.Hvac_Fan {
 	if nextOffset > 1 {
 		return air_proto.Hvac_FAN_MEDIUM
 	}
-	return air_proto.Hvac_FAN_AUTO
+	return air_proto.Hvac_FAN_LOW
 }
 
 func DecideHeatUpTemperature(room *air_proto.Room, hvac *air_proto.Hvac, last30mΔOffset map[string]float64) (temperature float64, offset float64) {
@@ -171,10 +171,67 @@ func (s *Server) HeatUp() {
 			continue
 		}
 
-		hvac.DesiredState.Temperature, *hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac, last30mΔOffset)
-		hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, hvac.Name)
-		hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], hvac, s.State.Outside, hvac.DesiredState.Temperature+*hvac.TemperatureOffset)
+		if hvac.Name == "kitchen" || hvac.Name == "living" {
+			hvac.DesiredState, *hvac.TemperatureOffset = DecideHeatUp(s.State.Rooms[roomName], hvac)
+		} else {
+			hvac.DesiredState.Temperature, *hvac.TemperatureOffset = DecideHeatUpTemperature(s.State.Rooms[roomName], hvac, last30mΔOffset)
+			hvac.DesiredState.Fan = DecideHeatUpFan(*hvac.TemperatureOffset, hvac.Name)
+			hvac.DesiredState.Mode = DecideHeatUpMode(s.State.Rooms[roomName], hvac, s.State.Outside, hvac.DesiredState.Temperature+*hvac.TemperatureOffset)
+		}
 	}
+}
+
+func DecideHeatUp(room *air_proto.Room, hvac *air_proto.Hvac) (*air_proto.Hvac_State, float64) {
+	desiredState := &air_proto.Hvac_State{
+		Temperature: hvac.DesiredState.Temperature,
+		Mode:        hvac.DesiredState.Mode,
+		Fan:         hvac.DesiredState.Fan,
+	}
+	offset := *hvac.TemperatureOffset
+	step := 0.1
+
+	if room.Sensor.Temperature < room.DesiredTemperatureRange.Min {
+		// Too cold, need to warm up
+		offset += step
+		desiredState.Mode = air_proto.Hvac_MODE_HEAT
+		// Speed up when we are too far off target
+		if room.Sensor.Temperature < room.DesiredTemperatureRange.Min-3 {
+			offset = math.Max(offset, room.DesiredTemperatureRange.Min-room.Sensor.Temperature)
+			logger.Printf("Info| %s: Dramatically increasing the offset to catch up on heating (%.2f).", hvac.Name, offset)
+		}
+	}
+
+	if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+1 {
+		// Too warm, we can save some energy
+		offset -= step
+		// We've heat up way too much, cancel any positive offset.
+		if room.Sensor.Temperature > room.DesiredTemperatureRange.Min+3 {
+			offset = math.Min(offset, 0)
+			logger.Printf("Info| %s: We heat up way too much, Cancelling positive the offset (%.2f) and shutting down.", hvac.Name, offset)
+			desiredState.Mode = air_proto.Hvac_MODE_OFF
+		}
+	}
+
+	// Prevent trying to apply a temperature that is below the minimal accepted value by the hvac.
+	if desiredState.Temperature < hvacMinimalHeatTemperature {
+		logger.Printf("Info| %s: Triming the temperature to be above the minimal heating temperature.\n", hvac.Name)
+		desiredState.Temperature = hvacMinimalHeatTemperature
+		offset = math.Max(0, offset)
+	}
+	if desiredState.Temperature+offset < hvacMinimalHeatTemperature {
+		logger.Printf("Info| %s: Triming the offset because it would result in a too low heating target.\n", hvac.Name)
+		offset = hvacMinimalHeatTemperature - desiredState.Temperature
+	}
+
+	desiredState.Fan = air_proto.Hvac_FAN_LOW
+	if offset > 1 {
+		desiredState.Fan = air_proto.Hvac_FAN_MEDIUM
+	}
+	if offset > 2 {
+		desiredState.Fan = air_proto.Hvac_FAN_HIGH
+	}
+
+	return desiredState, offset
 }
 
 func (s *Server) DecideCoolDown() {
