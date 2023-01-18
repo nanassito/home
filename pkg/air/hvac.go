@@ -132,6 +132,9 @@ func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIfa
 }
 
 func HvacControl(state *air_proto.Hvac, config *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIface) {
+	if state.Control == air_proto.Hvac_CONTROL_NONE || state.Control == air_proto.Hvac_CONTROL_UNKNOWN {
+		return
+	}
 	if state.ReportedState.Mode != state.DesiredState.Mode && state.DesiredState.Mode != air_proto.Hvac_MODE_UNKNOWN {
 		mode := state.DesiredState.Mode.String()[5:]
 		if !*readonly {
