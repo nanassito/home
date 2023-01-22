@@ -1,6 +1,7 @@
 package air
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"time"
@@ -38,6 +39,19 @@ var (
 		air_proto.Hvac_FAN_LOW:    "low",
 		air_proto.Hvac_FAN_MEDIUM: "medium",
 		air_proto.Hvac_FAN_HIGH:   "high",
+	}
+
+	Str2Control = map[string]air_proto.Hvac_Control{
+		"UNKNOWN": air_proto.Hvac_CONTROL_UNKNOWN,
+		"ROOM":    air_proto.Hvac_CONTROL_ROOM,
+		"HVAC":    air_proto.Hvac_CONTROL_HVAC,
+		"NONE":    air_proto.Hvac_CONTROL_NONE,
+	}
+	Control2Str = map[air_proto.Hvac_Control]string{
+		air_proto.Hvac_CONTROL_UNKNOWN: "UNKNOWN",
+		air_proto.Hvac_CONTROL_ROOM:    "ROOM",
+		air_proto.Hvac_CONTROL_HVAC:    "HVAC",
+		air_proto.Hvac_CONTROL_NONE:    "NONE",
 	}
 )
 
@@ -85,6 +99,22 @@ func hvacFanRefresher(hvac *air_proto.Hvac) func(topic string, payload []byte) {
 	}
 }
 
+func hvacControlRefresher(hvac *air_proto.Hvac, mqttClient mqtt.MqttIface) func(topic string, payload []byte) {
+	return func(topic string, payload []byte) {
+		value := string(payload)
+		control, ok := Str2Control[value]
+		if !ok {
+			logger.Printf("Fail| %s unknown control `%s`\n", hvac.Name, value)
+			return
+		}
+		if hvac.Control != control {
+			logger.Printf("Info| %s now controlled by %s\n", hvac.Name, control.String())
+			mqttClient.PublishString(fmt.Sprintf("code/air/hvac_control/%s/state", hvac.Name), value)
+		}
+		hvac.Control = control
+	}
+}
+
 func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIface) *air_proto.Hvac {
 	hvac := air_proto.Hvac{
 		Name:              name,
@@ -117,6 +147,11 @@ func NewHvac(name string, cfg *air_proto.AirConfig_Hvac, mqttClient mqtt.MqttIfa
 	}
 
 	err = mqttClient.Subscribe(cfg.ReportFanMqttTopic, hvacFanRefresher(&hvac))
+	if err != nil {
+		panic(err)
+	}
+
+	err = mqttClient.Subscribe(fmt.Sprintf("code/air/hvac_control/%s/command", hvac.Name), hvacControlRefresher(&hvac, mqttClient))
 	if err != nil {
 		panic(err)
 	}
