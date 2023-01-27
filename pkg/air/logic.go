@@ -162,6 +162,7 @@ func (s *Server) HeatUp() {
 		roomName := s.Config.Hvacs[hvac.Name].Room
 
 		if hvac.Control != air_proto.Hvac_CONTROL_ROOM {
+			hvac.TemperatureOffset = new(float64)
 			logger.Printf("Info| Hvac %s is not controlled by the room. Skipping\n", hvac.Name)
 			continue
 		}
