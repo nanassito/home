@@ -1,0 +1,16 @@
+[Unit]
+Description=hass
+After=network.target
+
+[Service]
+ExecStart=docker run \
+        --mount type=bind,source=/github/hass,target=/config \
+        --network=host \
+        ghcr.io/home-assistant/home-assistant:stable
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=dorian
+
+[Install]
+WantedBy=multi-user.target
