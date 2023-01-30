@@ -10,6 +10,8 @@ require (
 	google.golang.org/protobuf v1.28.1
 )
 
+require golang.org/x/time v0.3.0 // indirect
+
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect

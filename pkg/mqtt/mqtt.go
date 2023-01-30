@@ -59,7 +59,7 @@ func (m *Mqtt) Reset() {
 }
 
 func (m *Mqtt) PublishString(topic string, message string) error {
-	t := m.client.Publish(topic, 0, false, message)
+	t := m.client.Publish(topic, 0, true, message)
 	<-t.Done()
 	return t.Error()
 }
