@@ -46,6 +46,7 @@ type Float64Range struct {
 }
 
 type Hvac struct {
+	Name               string
 	ModeState          *MqttString
 	TemperatureState   *MqttFloat64
 	TemperatureCommand string
@@ -199,12 +200,7 @@ func (room *Room) GetCallback() func(topic string, payload []byte) {
 		room.Mutex.Lock()
 		defer room.Mutex.Unlock()
 
-		for _, h := range room.Hvacs {
-			hvac := h
-			if hvac.ModeState.Value == "heat" {
-				room.TuneHeat()
-			}
-		}
+		room.TuneHeat()
 	}
 }
 
@@ -220,7 +216,12 @@ func (room *Room) TuneHeat() {
 	if sensorMax < targetTemp {
 		logger.Printf("Info| %s is too cold\n", room.Name)
 		for _, h := range room.Hvacs {
-			h.Limiter.Wait(context.Background())
+			if h.ModeState.Value != "heat" {
+				continue
+			}
+			if !h.Limiter.Allow() {
+				continue
+			}
 			oldTemp := h.TemperatureState.Value
 			newTemp := oldTemp + 0.5
 			// Only change when we are increasing the temperature
@@ -231,11 +232,17 @@ func (room *Room) TuneHeat() {
 				mqttClient.RateLimitedPublishString(h.FanCommand, "HIGH")
 			}
 			mqttClient.RateLimitedPublishString(h.TemperatureCommand, strconv.FormatFloat(newTemp, 'f', 1, 64))
+
 		}
 	} else if sensorMin > targetTemp {
 		logger.Printf("Info| %s is too warm\n", room.Name)
 		for _, h := range room.Hvacs {
-			h.Limiter.Wait(context.Background())
+			if h.ModeState.Value != "heat" {
+				continue
+			}
+			if !h.Limiter.Allow() {
+				continue
+			}
 			oldTemp := h.TemperatureState.Value
 			newTemp := oldTemp - 0.5
 			// Only change when we are increasing the temperature
@@ -246,6 +253,7 @@ func (room *Room) TuneHeat() {
 				mqttClient.PublishString(h.FanCommand, "MEDIUM")
 			}
 			mqttClient.PublishString(h.TemperatureCommand, strconv.FormatFloat(newTemp, 'f', 1, 64))
+
 		}
 	} else {
 		logger.Printf("Info| %s is at a good temperature\n", room.Name)
@@ -262,6 +270,7 @@ var cfg = []*Room{
 	// 	},
 	// 	Hvacs: []*Hvac{
 	// 		{
+	//          Name: "Zaya",
 	// 			ModeState: &MqttString{
 	// 				CommandTopic: "esphome/zaya/mode_state",
 	// 				Value:        "",
@@ -307,6 +316,7 @@ var cfg = []*Room{
 	// 	},
 	// 	Hvacs: []*Hvac{
 	// 		{
+	//          Name: "Parent",
 	// 			ModeState: &MqttString{
 	// 				CommandTopic: "esphome/parent/mode_state",
 	// 				Value:        "",
@@ -352,6 +362,7 @@ var cfg = []*Room{
 		},
 		Hvacs: []*Hvac{
 			{
+				Name: "Office",
 				ModeState: &MqttString{
 					CommandTopic: "esphome/office/mode_state",
 					Value:        "",
@@ -397,6 +408,7 @@ var cfg = []*Room{
 		},
 		Hvacs: []*Hvac{
 			{
+				Name: "Living",
 				ModeState: &MqttString{
 					CommandTopic: "esphome/living/mode_state",
 					Value:        "",
@@ -410,6 +422,7 @@ var cfg = []*Room{
 				Limiter:            rate.NewLimiter(rate.Every(5*time.Minute), 1),
 			},
 			{
+				Name: "Kitchen",
 				ModeState: &MqttString{
 					CommandTopic: "esphome/kitchen/mode_state",
 					Value:        "",

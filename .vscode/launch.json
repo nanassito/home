@@ -29,6 +29,16 @@
             ]
         },
         {
+            "name": "Air2",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "cmd/air2/main.go",
+            "args": [
+                // "-mqtt=tcp://127.0.0.1:1883",
+            ]
+        },
+        {
             "name": "App",
             "type": "go",
             "request": "launch",
