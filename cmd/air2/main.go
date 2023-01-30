@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"math"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -14,7 +15,8 @@ import (
 )
 
 var (
-	quit = make(chan struct{})
+	quit   = make(chan struct{})
+	logger = log.New(os.Stderr, "", log.Lshortfile)
 )
 
 type MqttBool struct {
@@ -63,7 +65,7 @@ func (m *SerialMqtt) RateLimitedPublishString(topic string, payload string) {
 }
 
 func (m *SerialMqtt) PublishString(topic string, payload string) {
-	fmt.Printf("INFO | Sending `%s` on mqtt://`%s`\n", payload, topic)
+	logger.Printf("Info| Sending `%s` on mqtt://`%s`\n", payload, topic)
 	m.Client.PublishString(topic, payload)
 }
 
@@ -122,7 +124,7 @@ func (room *Room) UpdateState(topic string, payload []byte) {
 				mqttClient.PublishString(room.Enabled.StateTopic, strconv.FormatBool(room.Enabled.Value))
 			}
 		} else {
-			fmt.Printf("ERROR | Can't parse message from mqtt://%s: %v\n", topic, err)
+			logger.Printf("Fail| Can't parse message from mqtt://%s: %v\n", topic, err)
 		}
 	case room.AcceptableTemperatures.Min.CommandTopic:
 		value, err := strconv.ParseFloat(string(payload), 64)
@@ -133,7 +135,7 @@ func (room *Room) UpdateState(topic string, payload []byte) {
 				mqttClient.PublishString(room.AcceptableTemperatures.Min.StateTopic, strconv.FormatFloat(room.AcceptableTemperatures.Min.Value, 'f', 1, 64))
 			}
 		} else {
-			fmt.Printf("ERROR | Can't parse message from mqtt://%s: %v\n", topic, err)
+			logger.Printf("Fail| Can't parse message from mqtt://%s: %v\n", topic, err)
 		}
 	case room.AcceptableTemperatures.Max.CommandTopic:
 		value, err := strconv.ParseFloat(string(payload), 64)
@@ -144,7 +146,7 @@ func (room *Room) UpdateState(topic string, payload []byte) {
 				mqttClient.PublishString(room.AcceptableTemperatures.Max.StateTopic, strconv.FormatFloat(room.AcceptableTemperatures.Max.Value, 'f', 1, 64))
 			}
 		} else {
-			fmt.Printf("ERROR | Can't parse message from mqtt://%s: %v\n", topic, err)
+			logger.Printf("Fail| Can't parse message from mqtt://%s: %v\n", topic, err)
 		}
 	}
 	for _, h := range room.Hvacs {
@@ -158,7 +160,7 @@ func (room *Room) UpdateState(topic string, payload []byte) {
 				h.TemperatureState.Value = value
 				h.TemperatureState.IsInit = true
 			} else {
-				fmt.Printf("ERROR | Can't parse message from mqtt://%s: %v\n", topic, err)
+				logger.Printf("Fail| Can't parse message from mqtt://%s: %v\n", topic, err)
 			}
 		}
 	}
@@ -176,7 +178,7 @@ func (room *Room) UpdateState(topic string, payload []byte) {
 				s.Value = value
 				s.IsInit = true
 			} else {
-				fmt.Printf("ERROR | Can't parse message from mqtt://%s: %v\n", topic, err)
+				logger.Printf("Fail| Can't parse message from mqtt://%s: %v\n", topic, err)
 			}
 		}
 	}
@@ -187,7 +189,7 @@ func (room *Room) GetCallback() func(topic string, payload []byte) {
 		room.UpdateState(topic, payload)
 
 		if ok, missing := room.IsInit(); !ok {
-			fmt.Printf("WARN | Waiting for first message from mqtt://%s\n", missing)
+			logger.Printf("Warn| Waiting for first message from mqtt://%s\n", missing)
 			return
 		}
 		if !room.Enabled.Value {
@@ -216,6 +218,7 @@ func (room *Room) TuneHeat() {
 	}
 
 	if sensorMax < targetTemp {
+		logger.Printf("Info| %s is too cold\n", room.Name)
 		for _, h := range room.Hvacs {
 			h.Limiter.Wait(context.Background())
 			oldTemp := h.TemperatureState.Value
@@ -229,9 +232,8 @@ func (room *Room) TuneHeat() {
 			}
 			mqttClient.RateLimitedPublishString(h.TemperatureCommand, strconv.FormatFloat(newTemp, 'f', 1, 64))
 		}
-	}
-
-	if sensorMin > targetTemp {
+	} else if sensorMin > targetTemp {
+		logger.Printf("Info| %s is too warm\n", room.Name)
 		for _, h := range room.Hvacs {
 			h.Limiter.Wait(context.Background())
 			oldTemp := h.TemperatureState.Value
@@ -245,6 +247,8 @@ func (room *Room) TuneHeat() {
 			}
 			mqttClient.PublishString(h.TemperatureCommand, strconv.FormatFloat(newTemp, 'f', 1, 64))
 		}
+	} else {
+		logger.Printf("Info| %s is at a good temperature\n", room.Name)
 	}
 }
 
