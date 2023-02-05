@@ -9,7 +9,8 @@ ExecStart=\
         -p 443:443 \
         --mount source=letsencrypt_etc,target=/etc/letsencrypt,readonly \
         --mount type=bind,source=/home/dorian/static,target=/static,readonly \
-        --mount type=bind,source=/github/home/nginx,target=/etc/nginx/conf.d,readonly \
+        --mount type=bind,source=/github/home/nginx/conf.d,target=/etc/nginx/conf.d,readonly \
+        --mount type=bind,source=/github/home/nginx/nginx.conf,target=/etc/nginx/nginx.conf,readonly \
         --mount type=bind,source=/home/dorian/openssl-ca/ca.crt,target=/etc/nginx/client_certs/ca.crt,readonly \
         nginx
 StandardOutput=inherit
