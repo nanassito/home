@@ -30,8 +30,6 @@ groups:
       - alert: Le controle d'une valve a été perdu
         expr: switch_desired_state != switch_reported_state
         for: 10m
-      - alert: La machine est terminée
-        expr: max_over_time(mqtt_power{location=~".*washer.*", type="power"}[10m]) < 1 and max_over_time(mqtt_power[1h]) > 100 and on() oncall
       - alert: Le robot tondeuse est coincé
         expr: max_over_time(mqtt_contact{location=~".*mower.*", type="contact"}[2h15m]) < 1 and on() oncall
       - alert: Component downtime
