@@ -30,8 +30,6 @@ groups:
       - alert: Le controle d'une valve a été perdu
         expr: switch_desired_state != switch_reported_state
         for: 10m
-      - alert: Le robot tondeuse est coincé
-        expr: max_over_time(mqtt_contact{location=~".*mower.*", type="contact"}[2h15m]) < 1 and on() oncall
       - alert: Component downtime
         expr: systemd_unit_state{state="active", name=~"(home|mosquitto|air|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
       - alert: Component crash loop
