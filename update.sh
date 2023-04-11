@@ -29,6 +29,7 @@ AIR_GIT_PREV=$(git_version bin/air)
 APP_GIT_PREV=$(git_version pkg/app)
 MQTTJSON2STR_GIT_PREV=$(git_version bin/mqtt_json_2_str)
 AIR2_GIT_PREV=$(git_version bin/air2)
+MQTTCRASHCORRECTOR_GIT_PREV=$(git_version bin/mqtt_crash_corrector)
 
 
 git pull -s recursive -X theirs
@@ -63,19 +64,16 @@ fi
 
 
 if [ "${SWITCHES_GIT_PREV}" != "$(git_version bin/switches)" ]; then
-    systemctl daemon-reload
     systemctl restart switches
 fi
 
 
 if [ "${NETSCAN_GIT_PREV}" != "$(git_version bin/netscan)" ]; then
-    systemctl daemon-reload
     systemctl restart netscan
 fi
 
 
 if [ "${AIR_GIT_PREV}" != "$(git_version bin/air)" ]; then
-    systemctl daemon-reload
     systemctl restart air
 fi
 
@@ -87,12 +85,15 @@ fi
 
 
 if [ "${MQTTJSON2STR_GIT_PREV}" != "$(git_version bin/mqtt_json_2_str)" ]; then
-    systemctl daemon-reload
     systemctl restart mqtt_json_2_str
 fi
 
 
 if [ "${AIR2_GIT_PREV}" != "$(git_version bin/air2)" ]; then
-    systemctl daemon-reload
     systemctl restart air2
+fi
+
+
+if [ "${MQTTCRASHCORRECTOR_GIT_PREV}" != "$(git_version bin/mqtt_crash_corrector)" ]; then
+    systemctl restart mqtt_crash_corrector
 fi

@@ -31,7 +31,7 @@ groups:
         expr: switch_desired_state != switch_reported_state
         for: 10m
       - alert: Component downtime
-        expr: systemd_unit_state{state="active", name=~"(home|mosquitto|air|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
+        expr: systemd_unit_state{state="active", name=~"(hass|mosquitto|air3|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"} == 0
       - alert: Component crash loop
-        expr: rate(systemd_unit_start_time_seconds{name=~"(home|mosquitto|air|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"}[2m]) > 0
+        expr: rate(systemd_unit_start_time_seconds{name=~"(hass|mosquitto|air3|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"}[2m]) > 0
         for: 5m
