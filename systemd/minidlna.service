@@ -1,0 +1,17 @@
+[Unit]
+Description=Docker
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=\
+        docker run \
+        -p 8200:8200 \
+        --mount type=bind,source=/home/dorian/static,target=/opt,readonly \
+        geekduck/minidlna
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
