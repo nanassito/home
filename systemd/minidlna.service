@@ -6,7 +6,7 @@ Requires=docker.service
 [Service]
 ExecStart=\
         docker run \
-        -p 8200:8200 \
+        --network=host \
         --mount type=bind,source=/home/dorian/static,target=/opt,readonly \
         geekduck/minidlna
 StandardOutput=inherit
