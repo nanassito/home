@@ -7,7 +7,7 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   ap:
-    ssid: "fallbackSSID"
+    ssid: "hvacoffice"
     password: "fallbackPASSWORD"
 
 captive_portal:
@@ -34,10 +34,10 @@ climate:
   name: office
   autoconf: true
   beeper: false
-  supported_swing_modes:
-    - VERTICAL
-    - HORIZONTAL
-    - BOTH
+  supported_modes:
+    - FAN_ONLY
+    - COOL
+    - HEAT
   action_state_topic: esphome/office/action_state
   away_state_topic: esphome/office/away_state
   away_command_topic: esphome/office/away_command

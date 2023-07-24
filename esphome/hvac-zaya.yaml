@@ -7,7 +7,7 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   ap:
-    ssid: "fallbackSSID"
+    ssid: "hvaczaya"
     password: "fallbackPASSWORD"
 
 captive_portal:
@@ -38,6 +38,10 @@ climate:
     - VERTICAL
     - HORIZONTAL
     - BOTH
+  supported_modes:
+    - FAN_ONLY
+    - COOL
+    - HEAT
   action_state_topic: esphome/zaya/action_state
   away_state_topic: esphome/zaya/away_state
   away_command_topic: esphome/zaya/away_command
