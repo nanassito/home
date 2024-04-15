@@ -7,6 +7,7 @@ Requires=mosquitto.service
 ExecStart=\
         docker run \
         --device /dev/ttyUSB0 \
+        -p 8080:8080 \
         --mount source=zigbee2mqtt,target=/app/data \
         --mount type=bind,source=/github/home/zigbee2mqtt/server.yaml,target=/app/data/configuration.yaml \
         koenkk/zigbee2mqtt:latest
