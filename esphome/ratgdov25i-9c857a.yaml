@@ -1,0 +1,23 @@
+substitutions:
+  name: ratgdov25i-9c857a
+  friendly_name: ratgdov2.5i 9c857a
+packages:
+  ratgdo.esphome: github://ratgdo/esphome-ratgdo/v25iboard.yaml@main
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+
+
+wifi:
+  ssid: !secret cactus_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "ratgdov25i"
+    password: "fallbackPASSWORD"
+  manual_ip:
+    static_ip: 192.168.0.116
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+  power_save_mode: none

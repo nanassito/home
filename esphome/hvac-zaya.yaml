@@ -4,14 +4,18 @@ esphome:
   board: esp12e
 
 wifi:
-  ssid: !secret wifi_ssid
+  ssid: !secret cactus_ssid
   password: !secret wifi_password
   ap:
     ssid: "hvaczaya"
     password: "fallbackPASSWORD"
+  power_save_mode: none
+  manual_ip:
+    static_ip: 192.168.0.113
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
 
-captive_portal:
-
+web_server:
 ota:
 
 logger:
