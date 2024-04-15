@@ -56,7 +56,7 @@ devices:
   '0x00158d0007d11ff1':
     friendly_name: device/parent/door/contact
   '0x00158d0007d4c500':
-    friendly_name: device/backyard/fence/motion
+    friendly_name: device/unused/motion
   '0x00158d0007dcbfa7':
     friendly_name: device/frontyard/planter/motion
   '0x00158d0007e1137a':
@@ -71,10 +71,12 @@ devices:
     friendly_name: device/toilettes/air
   '0x847127fffe90de4a':
     friendly_name: device/backyard/valve
-  '0xa4c1382cfb825490':
-    friendly_name: device/backyard/air
   '0xa4c138cb26b19b8a':
     friendly_name: device/frontyard/valve
+  '0x0017880106468d30':
+    friendly_name: '0x0017880106468d30'
+  '0xa4c138c445453c05':
+    friendly_name: '0xa4c138c445453c05'
 homeassistant: true
 mqtt:
   base_topic: zigbee2mqtt/server
