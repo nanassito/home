@@ -35,3 +35,6 @@ groups:
       - alert: Component crash loop
         expr: rate(systemd_unit_start_time_seconds{name=~"(hass|mosquitto|air3|netscan|switches|wg-quick@wg0|zigbee2mqtt).service"}[2m]) > 0
         for: 5m
+      - alert: Garage stayed open
+        expr: hass_cover_state{entity=~".*ratgdo.*", state="closed"} != 1
+        for: 10m
