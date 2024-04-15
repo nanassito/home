@@ -24,9 +24,13 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.1.96:9558']
 
-  - job_name: 'home'
+  - job_name: 'hass'
+    scrape_interval: 60s
+    metrics_path: /api/prometheus
+    authorization:
+      credentials: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1Y2QwNWY0NzMzNGI0OGZkYTdhM2Y4ODc0ZGE5NDRmNyIsImlhdCI6MTcwNzkyMzI5NSwiZXhwIjoyMDIzMjgzMjk1fQ._Bf4ruBpgBUm2jLEivzi2c0HjxJeNtadmVC4LI_Gseg"
     static_configs:
-      - targets: ['192.168.1.1:8000']
+      - targets: ['192.168.1.1:8123']
 
   - job_name: mqtt-exporter
     metrics_path: '/'
@@ -86,7 +90,3 @@ scrape_configs:
   - job_name: netscan
     static_configs:
       - targets: ['192.168.1.1:7004']
-
-  - job_name: air
-    static_configs:
-      - targets: ['192.168.1.1:7005']
