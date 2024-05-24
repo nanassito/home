@@ -26,7 +26,7 @@ groups:
         expr: 'sum({type="valve", __name__=~"mqtt_state.*"}) > 1 and on() oncall'
       - alert: L arrosage fonctionne depuis trop longtemps
         expr: '{type="valve", __name__=~"mqtt_state.*"} >= 1'
-        for: 30m
+        for: 1h
       - alert: Le controle d'une valve a été perdu
         expr: switch_desired_state != switch_reported_state
         for: 10m
